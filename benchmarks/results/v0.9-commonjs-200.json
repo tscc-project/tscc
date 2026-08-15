@@ -1,0 +1,32 @@
+[
+  {
+    "label": "tscc commonjs-200",
+    "median_ms": 8.983124,
+    "mean_ms": 9.031579,
+    "samples_ms": [
+      9.35361,
+      8.983124,
+      8.758003
+    ]
+  },
+  {
+    "label": "tsc --noCheck commonjs-200",
+    "median_ms": 667.426691,
+    "mean_ms": 648.4521803333333,
+    "samples_ms": [
+      685.05848,
+      592.87137,
+      667.426691
+    ]
+  },
+  {
+    "label": "tsc full commonjs-200",
+    "median_ms": 618.347464,
+    "mean_ms": 613.258437,
+    "samples_ms": [
+      618.347464,
+      602.873155,
+      618.554692
+    ]
+  }
+]

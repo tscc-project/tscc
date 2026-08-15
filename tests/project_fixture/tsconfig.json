@@ -1,0 +1,11 @@
+{
+  // JSONC comments are intentional
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "target": "es2022",
+    "module": "esnext",
+    "removeComments": true,
+  },
+  "files": ["src/main.ts"]
+}

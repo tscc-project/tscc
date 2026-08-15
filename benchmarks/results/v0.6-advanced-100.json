@@ -1,0 +1,38 @@
+[
+  {
+    "label": "tscc advanced-100",
+    "runs": 2,
+    "median_ms": 8.5199945,
+    "mean_ms": 8.5199945,
+    "min_ms": 8.425694,
+    "max_ms": 8.614295,
+    "samples_ms": [
+      8.425694,
+      8.614295
+    ]
+  },
+  {
+    "label": "tsc --noCheck advanced-100",
+    "runs": 2,
+    "median_ms": 545.821418,
+    "mean_ms": 545.821418,
+    "min_ms": 539.306872,
+    "max_ms": 552.335964,
+    "samples_ms": [
+      552.335964,
+      539.306872
+    ]
+  },
+  {
+    "label": "tsc full advanced-100",
+    "runs": 2,
+    "median_ms": 606.1383115,
+    "mean_ms": 606.1383115,
+    "min_ms": 601.851905,
+    "max_ms": 610.424718,
+    "samples_ms": [
+      601.851905,
+      610.424718
+    ]
+  }
+]

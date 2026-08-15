@@ -1,0 +1,110 @@
+[
+  {
+    "label": "tscc small",
+    "runs": 2,
+    "median_ms": 1.199652,
+    "mean_ms": 1.199652,
+    "min_ms": 1.145709,
+    "max_ms": 1.253595,
+    "samples_ms": [
+      1.253595,
+      1.145709
+    ]
+  },
+  {
+    "label": "tsc --noCheck small",
+    "runs": 2,
+    "median_ms": 310.0736005,
+    "mean_ms": 310.0736005,
+    "min_ms": 307.67529,
+    "max_ms": 312.471911,
+    "samples_ms": [
+      312.471911,
+      307.67529
+    ]
+  },
+  {
+    "label": "tsc full small",
+    "runs": 2,
+    "median_ms": 372.0635515,
+    "mean_ms": 372.0635515,
+    "min_ms": 353.624536,
+    "max_ms": 390.502567,
+    "samples_ms": [
+      353.624536,
+      390.502567
+    ]
+  },
+  {
+    "label": "tscc many-100",
+    "runs": 2,
+    "median_ms": 4.964790499999999,
+    "mean_ms": 4.964790499999999,
+    "min_ms": 4.596147,
+    "max_ms": 5.333434,
+    "samples_ms": [
+      5.333434,
+      4.596147
+    ]
+  },
+  {
+    "label": "tsc --noCheck many-100",
+    "runs": 2,
+    "median_ms": 422.105187,
+    "mean_ms": 422.105187,
+    "min_ms": 419.411698,
+    "max_ms": 424.798676,
+    "samples_ms": [
+      419.411698,
+      424.798676
+    ]
+  },
+  {
+    "label": "tsc full many-100",
+    "runs": 2,
+    "median_ms": 455.684671,
+    "mean_ms": 455.684671,
+    "min_ms": 443.368176,
+    "max_ms": 468.001166,
+    "samples_ms": [
+      468.001166,
+      443.368176
+    ]
+  },
+  {
+    "label": "tscc features-100",
+    "runs": 2,
+    "median_ms": 6.852935,
+    "mean_ms": 6.852935,
+    "min_ms": 6.836781,
+    "max_ms": 6.869089,
+    "samples_ms": [
+      6.836781,
+      6.869089
+    ]
+  },
+  {
+    "label": "tsc --noCheck features-100",
+    "runs": 2,
+    "median_ms": 546.6530195,
+    "mean_ms": 546.6530195,
+    "min_ms": 537.741011,
+    "max_ms": 555.565028,
+    "samples_ms": [
+      555.565028,
+      537.741011
+    ]
+  },
+  {
+    "label": "tsc full features-100",
+    "runs": 2,
+    "median_ms": 562.1513030000001,
+    "mean_ms": 562.1513030000001,
+    "min_ms": 539.351298,
+    "max_ms": 584.951308,
+    "samples_ms": [
+      539.351298,
+      584.951308
+    ]
+  }
+]

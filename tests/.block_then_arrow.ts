@@ -1,0 +1,1 @@
+ { const q=1; } const f=(x:number)=>x; console.log(f(1));

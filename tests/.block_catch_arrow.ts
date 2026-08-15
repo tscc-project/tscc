@@ -1,0 +1,1 @@
+ {const x=2;} try{throw 1}catch(x){} const f=(x:number)=>x; console.log(f(1));

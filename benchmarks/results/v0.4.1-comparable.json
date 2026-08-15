@@ -1,0 +1,107 @@
+[
+  {
+    "label": "tscc small",
+    "runs": 2,
+    "median_ms": 2.17129,
+    "mean_ms": 2.17129,
+    "min_ms": 1.321015,
+    "max_ms": 3.021565,
+    "samples_ms": [
+      1.321015,
+      3.021565
+    ]
+  },
+  {
+    "label": "tsc --noCheck small",
+    "runs": 2,
+    "median_ms": 341.8269905,
+    "mean_ms": 341.8269905,
+    "min_ms": 337.874922,
+    "max_ms": 345.779059,
+    "samples_ms": [
+      337.874922,
+      345.779059
+    ]
+  },
+  {
+    "label": "tsc full small",
+    "runs": 2,
+    "median_ms": 362.7303345,
+    "mean_ms": 362.7303345,
+    "min_ms": 357.468324,
+    "max_ms": 367.992345,
+    "samples_ms": [
+      367.992345,
+      357.468324
+    ]
+  },
+  {
+    "label": "tscc many-100",
+    "runs": 2,
+    "median_ms": 4.6324915,
+    "mean_ms": 4.6324915,
+    "min_ms": 4.500114,
+    "max_ms": 4.764869,
+    "samples_ms": [
+      4.500114,
+      4.764869
+    ]
+  },
+  {
+    "label": "tsc --noCheck many-100",
+    "runs": 2,
+    "median_ms": 446.5674795,
+    "mean_ms": 446.5674795,
+    "min_ms": 424.181167,
+    "max_ms": 468.953792,
+    "samples_ms": [
+      468.953792,
+      424.181167
+    ]
+  },
+  {
+    "label": "tsc full many-100",
+    "runs": 2,
+    "median_ms": 469.0464455,
+    "mean_ms": 469.0464455,
+    "min_ms": 440.837782,
+    "max_ms": 497.255109,
+    "samples_ms": [
+      497.255109,
+      440.837782
+    ]
+  },
+  {
+    "label": "tscc features-100",
+    "runs": 1,
+    "median_ms": 7.442152,
+    "mean_ms": 7.442152,
+    "min_ms": 7.442152,
+    "max_ms": 7.442152,
+    "samples_ms": [
+      7.442152
+    ]
+  },
+  {
+    "label": "tsc --noCheck features-100",
+    "runs": 1,
+    "median_ms": 549.533826,
+    "mean_ms": 549.533826,
+    "min_ms": 549.533826,
+    "max_ms": 549.533826,
+    "samples_ms": [
+      549.533826
+    ]
+  },
+  {
+    "label": "tsc full features-100",
+    "runs": 1,
+    "median_ms": 595.264851,
+    "mean_ms": 595.264851,
+    "min_ms": 595.264851,
+    "max_ms": 595.264851,
+    "samples_ms": [
+      595.264851
+    ]
+  }
+]

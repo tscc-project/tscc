@@ -1,0 +1,38 @@
+[
+  {
+    "label": "tscc small",
+    "runs": 2,
+    "median_ms": 6.506337,
+    "mean_ms": 6.506337,
+    "min_ms": 6.260318,
+    "max_ms": 6.752356,
+    "samples_ms": [
+      6.752356,
+      6.260318
+    ]
+  },
+  {
+    "label": "tsc --noCheck small",
+    "runs": 2,
+    "median_ms": 844.640173,
+    "mean_ms": 844.640173,
+    "min_ms": 839.839472,
+    "max_ms": 849.440874,
+    "samples_ms": [
+      839.839472,
+      849.440874
+    ]
+  },
+  {
+    "label": "tsc full small",
+    "runs": 2,
+    "median_ms": 803.3094815,
+    "mean_ms": 803.3094815,
+    "min_ms": 779.363222,
+    "max_ms": 827.255741,
+    "samples_ms": [
+      779.363222,
+      827.255741
+    ]
+  }
+]

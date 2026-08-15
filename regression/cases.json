@@ -1,0 +1,4119 @@
+[
+  {
+    "name": "basic-variable",
+    "kind": "runtime",
+    "src": "const x: number = 3; console.log(x);",
+    "expect": "3"
+  },
+  {
+    "name": "function-annotations",
+    "kind": "runtime",
+    "src": "function f(x:number):string{return String(x+1)} console.log(f(2));",
+    "expect": "3"
+  },
+  {
+    "name": "interface-erasure",
+    "kind": "runtime",
+    "src": "interface X {a:number} const x:X={a:4}; console.log(x.a);",
+    "expect": "4"
+  },
+  {
+    "name": "type-alias-erasure",
+    "kind": "runtime",
+    "src": "type X=number|string; const x:X=5; console.log(x);",
+    "expect": "5"
+  },
+  {
+    "name": "as-assertion",
+    "kind": "runtime",
+    "src": "const x=(3 as number)+1; console.log(x);",
+    "expect": "4"
+  },
+  {
+    "name": "non-null-property",
+    "kind": "runtime",
+    "src": "const x:{a:number}|null={a:7}; console.log(x!.a);",
+    "expect": "7"
+  },
+  {
+    "name": "non-null-call",
+    "kind": "runtime",
+    "src": "const f: (()=>number)|null=()=>8; console.log(f!());",
+    "expect": "8"
+  },
+  {
+    "name": "object-literal-colon",
+    "kind": "runtime",
+    "src": "const x:{name:string}={name:\"Ada\"}; console.log(x.name);",
+    "expect": "Ada"
+  },
+  {
+    "name": "object-method-param",
+    "kind": "runtime",
+    "src": "const x={f(a:number){return a+1}}; console.log(x.f(2));",
+    "expect": "3"
+  },
+  {
+    "name": "object-method-return",
+    "kind": "runtime",
+    "src": "const x={f():number{return 4}}; console.log(x.f());",
+    "expect": "4"
+  },
+  {
+    "name": "object-method-both",
+    "kind": "runtime",
+    "src": "const x={f(a:number):number{return a+2}}; console.log(x.f(3));",
+    "expect": "5"
+  },
+  {
+    "name": "object-getter-return",
+    "kind": "runtime",
+    "src": "const x={get value():number{return 6}}; console.log(x.value);",
+    "expect": "6"
+  },
+  {
+    "name": "object-setter-param",
+    "kind": "runtime",
+    "src": "let y=0; const x={set value(v:number){y=v}}; x.value=9; console.log(y);",
+    "expect": "9"
+  },
+  {
+    "name": "generic-function-one",
+    "kind": "runtime",
+    "src": "function id<T>(x:T):T{return x} console.log(id<number>(3));",
+    "expect": "3"
+  },
+  {
+    "name": "generic-function-two",
+    "kind": "runtime",
+    "src": "function pair<A,B>(a:A,b:B):[A,B]{return [a,b]} console.log(pair<number,string>(1,\"x\").join(\":\"));",
+    "expect": "1:x"
+  },
+  {
+    "name": "generic-arrow-one",
+    "kind": "runtime",
+    "src": "const id=<T>(x:T):T=>x; console.log(id<number>(5));",
+    "expect": "5"
+  },
+  {
+    "name": "generic-arrow-two",
+    "kind": "runtime",
+    "src": "const pair=<A,B>(a:A,b:B):[A,B]=>[a,b]; console.log(pair<number,string>(2,\"y\").join(\":\"));",
+    "expect": "2:y"
+  },
+  {
+    "name": "generic-arrow-comment",
+    "kind": "runtime",
+    "src": "const id=<T /*x*/>(x:T):T=>x; console.log(id<number>(4));",
+    "expect": "4"
+  },
+  {
+    "name": "generic-arrow-newline",
+    "kind": "runtime",
+    "src": "const id=<T>\n(x:T):T=>x; console.log(id<number>(4));",
+    "expect": "4"
+  },
+  {
+    "name": "generic-default",
+    "kind": "runtime",
+    "src": "function id<T=number>(x:T):T{return x} console.log(id(6));",
+    "expect": "6"
+  },
+  {
+    "name": "generic-class",
+    "kind": "runtime",
+    "src": "class Box<T>{constructor(public value:T){}} console.log(new Box<number>(7).value);",
+    "expect": "7"
+  },
+  {
+    "name": "generic-class-nested",
+    "kind": "runtime",
+    "src": "class Box<T>{constructor(public value:T){}} const x=new Box<Array<number>>([1,2]); console.log(x.value[1]);",
+    "expect": "2"
+  },
+  {
+    "name": "nested-generic-call",
+    "kind": "runtime",
+    "src": "function id<T>(x:T):T{return x} console.log(id<Array<Array<number>>>([[3]])[0][0]);",
+    "expect": "3"
+  },
+  {
+    "name": "class-field-annotation",
+    "kind": "runtime",
+    "src": "class X{value:number=3} console.log(new X().value);",
+    "expect": "3"
+  },
+  {
+    "name": "class-definite",
+    "kind": "runtime",
+    "src": "class X{value!:number; constructor(){this.value=4}} console.log(new X().value);",
+    "expect": "4"
+  },
+  {
+    "name": "class-optional",
+    "kind": "runtime",
+    "src": "class X{value?:number; constructor(){this.value=5}} console.log(new X().value);",
+    "expect": "5"
+  },
+  {
+    "name": "class-method-types",
+    "kind": "runtime",
+    "src": "class X{f(a:number):number{return a+1}} console.log(new X().f(5));",
+    "expect": "6"
+  },
+  {
+    "name": "implements",
+    "kind": "runtime",
+    "src": "interface A{x:number} class X implements A{x:number=7} console.log(new X().x);",
+    "expect": "7"
+  },
+  {
+    "name": "param-property-public",
+    "kind": "runtime",
+    "src": "class X{constructor(public x:number){}} console.log(new X(8).x);",
+    "expect": "8"
+  },
+  {
+    "name": "param-property-readonly",
+    "kind": "runtime",
+    "src": "class X{constructor(readonly x:number){}} console.log(new X(8).x);",
+    "expect": "8"
+  },
+  {
+    "name": "param-property-private",
+    "kind": "runtime",
+    "src": "class X{constructor(private x:number){} get(){return this.x}} console.log(new X(8).get());",
+    "expect": "8"
+  },
+  {
+    "name": "derived-param-property",
+    "kind": "runtime",
+    "src": "class A{constructor(public x:number){}} class B extends A{constructor(public y:number){super(1)}} console.log(new B(9).x+new B(9).y);",
+    "expect": "10"
+  },
+  {
+    "name": "enum-basic",
+    "kind": "runtime",
+    "src": "enum E{A,B} console.log(E.A,E[1]);",
+    "expect": "0 B"
+  },
+  {
+    "name": "enum-explicit",
+    "kind": "runtime",
+    "src": "enum E{A=3,B} console.log(E.A,E.B,E[4]);",
+    "expect": "3 4 B"
+  },
+  {
+    "name": "enum-string",
+    "kind": "runtime",
+    "src": "enum E{A=\"a\"} console.log(E.A);",
+    "expect": "a"
+  },
+  {
+    "name": "enum-prior-member",
+    "kind": "runtime",
+    "src": "enum E{A=2,B=A+1} console.log(E.B);",
+    "expect": "3"
+  },
+  {
+    "name": "enum-chained-prior",
+    "kind": "runtime",
+    "src": "enum E{A=2,B=A+1,C=B+2} console.log(E.C);",
+    "expect": "5"
+  },
+  {
+    "name": "enum-shift",
+    "kind": "runtime",
+    "src": "enum E{A=1<<2,B=A|1} console.log(E.A,E.B);",
+    "expect": "4 5"
+  },
+  {
+    "name": "enum-negative",
+    "kind": "runtime",
+    "src": "enum E{A=-2,B} console.log(E.A,E.B);",
+    "expect": "-2 -1"
+  },
+  {
+    "name": "enum-hex",
+    "kind": "runtime",
+    "src": "enum E{A=0x10,B} console.log(E.B);",
+    "expect": "17"
+  },
+  {
+    "name": "chained-as",
+    "kind": "runtime",
+    "src": "const x=3 as unknown as number; console.log(x+1);",
+    "expect": "4"
+  },
+  {
+    "name": "annotation-comment",
+    "kind": "runtime",
+    "src": "const x: /*a*/ number = 4; console.log(x);",
+    "expect": "4"
+  },
+  {
+    "name": "param-comment",
+    "kind": "runtime",
+    "src": "function f(x /*a*/ : number){return x} console.log(f(4));",
+    "expect": "4"
+  },
+  {
+    "name": "bad-generic-arrow-missing-gt",
+    "kind": "syntax-negative",
+    "src": "const f=<T(x:T)=>x;",
+    "expect": null
+  },
+  {
+    "name": "bad-generic-arrow-double-comma",
+    "kind": "syntax-negative",
+    "src": "const f=<T,,U>(x:T)=>x;",
+    "expect": null
+  },
+  {
+    "name": "bad-generic-class-missing-gt",
+    "kind": "syntax-negative",
+    "src": "class X<T { value:T }",
+    "expect": null
+  },
+  {
+    "name": "bad-optional-param-marker",
+    "kind": "syntax-negative",
+    "src": "function f(x??: number){}",
+    "expect": null
+  },
+  {
+    "name": "bad-empty-param-type",
+    "kind": "syntax-negative",
+    "src": "function f(x:){}",
+    "expect": null
+  },
+  {
+    "name": "bad-empty-variable-type",
+    "kind": "syntax-negative",
+    "src": "const x: = 3;",
+    "expect": null
+  },
+  {
+    "name": "bad-empty-return-type",
+    "kind": "syntax-negative",
+    "src": "function f(): { return 3; }",
+    "expect": null
+  },
+  {
+    "name": "bad-empty-as-type",
+    "kind": "syntax-negative",
+    "src": "const x=3 as ;",
+    "expect": null
+  },
+  {
+    "name": "bad-class-optional-no-name",
+    "kind": "syntax-negative",
+    "src": "class X{?: number;}",
+    "expect": null
+  },
+  {
+    "name": "bad-class-definite-no-name",
+    "kind": "syntax-negative",
+    "src": "class X{!: number;}",
+    "expect": null
+  },
+  {
+    "name": "bad-interface-unclosed",
+    "kind": "syntax-negative",
+    "src": "interface X { a:number",
+    "expect": null
+  },
+  {
+    "name": "bad-type-alias-empty",
+    "kind": "syntax-negative",
+    "src": "type X = ;",
+    "expect": null
+  },
+  {
+    "name": "bad-function-unclosed-param",
+    "kind": "syntax-negative",
+    "src": "function f(x:number { return x; }",
+    "expect": null
+  },
+  {
+    "name": "bad-enum-unclosed",
+    "kind": "syntax-negative",
+    "src": "enum E{A,B",
+    "expect": null
+  },
+  {
+    "name": "bad-enum-empty-initializer",
+    "kind": "syntax-negative",
+    "src": "enum E{A=}",
+    "expect": null
+  },
+  {
+    "name": "bad-class-unclosed",
+    "kind": "syntax-negative",
+    "src": "class X{value:number;",
+    "expect": null
+  },
+  {
+    "name": "bad-as-double",
+    "kind": "syntax-negative",
+    "src": "const x=3 as as number;",
+    "expect": null
+  },
+  {
+    "name": "bad-param-colon-colon",
+    "kind": "syntax-negative",
+    "src": "function f(x::number){}",
+    "expect": null
+  },
+  {
+    "name": "bad-generic-call-double-comma",
+    "kind": "syntax-negative",
+    "src": "function f<T,U>(x:T){return x} f<number,,string>(3);",
+    "expect": null
+  },
+  {
+    "name": "bad-generic-decl-leading-comma",
+    "kind": "syntax-negative",
+    "src": "function f<,T>(x:T){return x}",
+    "expect": null
+  },
+  {
+    "name": "semantic-optional-before-required",
+    "kind": "semantic-only",
+    "src": "function f(x?: number, y: number){}",
+    "expect": null
+  },
+  {
+    "name": "semantic-private-access",
+    "kind": "semantic-only",
+    "src": "class X{private x=1} console.log(new X().x);",
+    "expect": null
+  },
+  {
+    "name": "semantic-type-mismatch",
+    "kind": "semantic-only",
+    "src": "const x:number=\"no\";",
+    "expect": null
+  },
+  {
+    "name": "semantic-missing-property",
+    "kind": "semantic-only",
+    "src": "interface X{a:number} const x:X={};",
+    "expect": null
+  },
+  {
+    "name": "semantic-call-type",
+    "kind": "semantic-only",
+    "src": "function f(x:number){} f(\"s\");",
+    "expect": null
+  },
+  {
+    "name": "semantic-readonly-write",
+    "kind": "semantic-only",
+    "src": "class X{readonly x=1} const a=new X(); a.x=2;",
+    "expect": null
+  },
+  {
+    "name": "tuple-type",
+    "kind": "runtime",
+    "src": "const x:[number,string]=[1,\"a\"]; console.log(x[0],x[1]);",
+    "expect": "1 a"
+  },
+  {
+    "name": "union-type",
+    "kind": "runtime",
+    "src": "const x:number|string=\"a\"; console.log(x);",
+    "expect": "a"
+  },
+  {
+    "name": "intersection-type",
+    "kind": "runtime",
+    "src": "type A={a:number}; type B={b:number}; const x:A&B={a:1,b:2}; console.log(x.a+x.b);",
+    "expect": "3"
+  },
+  {
+    "name": "array-type",
+    "kind": "runtime",
+    "src": "const x:number[]=[1,2,3]; console.log(x.length);",
+    "expect": "3"
+  },
+  {
+    "name": "function-type-var",
+    "kind": "runtime",
+    "src": "const f:(x:number)=>number=(x:number):number=>x+1; console.log(f(3));",
+    "expect": "4"
+  },
+  {
+    "name": "access-modifiers",
+    "kind": "runtime",
+    "src": "class X{public a:number=1; protected b:number=2; private c:number=3; sum(){return this.a+this.b+this.c}} console.log(new X().sum());",
+    "expect": "6"
+  },
+  {
+    "name": "abstract-erasure",
+    "kind": "runtime",
+    "src": "abstract class A{abstract f(x:number):number;} class B extends A{f(x:number):number{return x+1}} console.log(new B().f(4));",
+    "expect": "5"
+  },
+  {
+    "name": "satisfies",
+    "kind": "runtime",
+    "src": "const x={a:1} satisfies {a:number}; console.log(x.a);",
+    "expect": "1"
+  },
+  {
+    "name": "generic-arrow-trailing-comma",
+    "kind": "runtime",
+    "src": "const f=<T,>(x:T):T=>x; console.log(f<number>(7));",
+    "expect": "7"
+  },
+  {
+    "name": "type-keyof",
+    "kind": "runtime",
+    "src": "type K = keyof {a:number,b:string}; const x: K = \"a\"; console.log(x);",
+    "expect": "a"
+  },
+  {
+    "name": "type-typeof-query",
+    "kind": "runtime",
+    "src": "const base = {x:3}; type T = typeof base; const y: T = {x:4}; console.log(y.x);",
+    "expect": "4"
+  },
+  {
+    "name": "type-indexed-access",
+    "kind": "runtime",
+    "src": "type T={x:number}; const x: T[\"x\"] = 5; console.log(x);",
+    "expect": "5"
+  },
+  {
+    "name": "type-conditional",
+    "kind": "runtime",
+    "src": "type C<T> = T extends string ? 1 : 2; const x: C<string> = 1; console.log(x);",
+    "expect": "1"
+  },
+  {
+    "name": "type-mapped",
+    "kind": "runtime",
+    "src": "type M<T> = {[K in keyof T]: T[K]}; const x: M<{a:number}> = {a:6}; console.log(x.a);",
+    "expect": "6"
+  },
+  {
+    "name": "type-template-literal",
+    "kind": "runtime",
+    "src": "type Event = `on${string}`; const x: Event = \"onclick\"; console.log(x);",
+    "expect": "onclick"
+  },
+  {
+    "name": "type-readonly-array",
+    "kind": "runtime",
+    "src": "const x: readonly number[] = [1,2,3]; console.log(x[2]);",
+    "expect": "3"
+  },
+  {
+    "name": "tuple-optional-rest",
+    "kind": "runtime",
+    "src": "const x: [number, string?, ...boolean[]] = [1,\"a\",true]; console.log(x.length);",
+    "expect": "3"
+  },
+  {
+    "name": "function-type-nested",
+    "kind": "runtime",
+    "src": "const f: (x: {a:number}) => Array<number> = x => [x.a]; console.log(f({a:7})[0]);",
+    "expect": "7"
+  },
+  {
+    "name": "constructor-type-var",
+    "kind": "runtime",
+    "src": "class C {x=8}; const K: new () => C = C; console.log(new K().x);",
+    "expect": "8"
+  },
+  {
+    "name": "generic-function-constraint",
+    "kind": "runtime",
+    "src": "function f<T extends {x:number}>(v:T):number{return v.x;} console.log(f({x:9,y:1}));",
+    "expect": "9"
+  },
+  {
+    "name": "generic-function-default-two",
+    "kind": "runtime",
+    "src": "function f<A=number,B=string>(a:A,b:B):[A,B]{return [a,b];} console.log(f(2,\"x\")[1]);",
+    "expect": "x"
+  },
+  {
+    "name": "generic-method-call",
+    "kind": "runtime",
+    "src": "class C { f<T>(x:T):T{return x;} } console.log(new C().f<number>(10));",
+    "expect": "10"
+  },
+  {
+    "name": "generic-static-method",
+    "kind": "runtime",
+    "src": "class C { static f<T>(x:T):T{return x;} } console.log(C.f<string>(\"s\"));",
+    "expect": "s"
+  },
+  {
+    "name": "generic-constructor-new",
+    "kind": "runtime",
+    "src": "class C<T>{constructor(public x:T){}} console.log(new C<number>(11).x);",
+    "expect": "11"
+  },
+  {
+    "name": "generic-arrow-constraint",
+    "kind": "runtime",
+    "src": "const f=<T extends number>(x:T):T=>x; console.log(f(12));",
+    "expect": "12"
+  },
+  {
+    "name": "generic-arrow-default",
+    "kind": "runtime",
+    "src": "const f=<T=number>(x:T):T=>x; console.log(f(13));",
+    "expect": "13"
+  },
+  {
+    "name": "generic-arrow-three",
+    "kind": "runtime",
+    "src": "const f=<A,B,C>(a:A,b:B,c:C):[A,B,C]=>[a,b,c]; console.log(f(1,\"b\",true)[2]);",
+    "expect": "true"
+  },
+  {
+    "name": "generic-call-nested-two",
+    "kind": "runtime",
+    "src": "function f<T>(x:T):T{return x;} console.log(f<Map<string,Array<number>>>(new Map([[\"a\",[14]]])).get(\"a\")[0]);",
+    "expect": "14"
+  },
+  {
+    "name": "as-const",
+    "kind": "runtime",
+    "src": "const x = {a:15} as const; console.log(x.a);",
+    "expect": "15"
+  },
+  {
+    "name": "angle-assertion",
+    "kind": "runtime",
+    "src": "const x = <number>16; console.log(x);",
+    "expect": "16"
+  },
+  {
+    "name": "satisfies-primitive",
+    "kind": "runtime",
+    "src": "const x = 17 satisfies number; console.log(x);",
+    "expect": "17"
+  },
+  {
+    "name": "satisfies-union",
+    "kind": "runtime",
+    "src": "const x = \"a\" satisfies string | number; console.log(x);",
+    "expect": "a"
+  },
+  {
+    "name": "satisfies-nested-generic",
+    "kind": "runtime",
+    "src": "const x = [18] satisfies Array<number>; console.log(x[0]);",
+    "expect": "18"
+  },
+  {
+    "name": "non-null-index",
+    "kind": "runtime",
+    "src": "const x: number[]|null=[19]; console.log(x![0]);",
+    "expect": "19"
+  },
+  {
+    "name": "double-non-null",
+    "kind": "runtime",
+    "src": "const x: {a:number}|null={a:20}; console.log(x!!.a);",
+    "expect": "20"
+  },
+  {
+    "name": "rest-param-typed",
+    "kind": "runtime",
+    "src": "function f(...xs:number[]):number{return xs.length;} console.log(f(1,2,3));",
+    "expect": "3"
+  },
+  {
+    "name": "default-param-typed",
+    "kind": "runtime",
+    "src": "function f(x:number=21):number{return x;} console.log(f());",
+    "expect": "21"
+  },
+  {
+    "name": "destructured-param-object",
+    "kind": "runtime",
+    "src": "function f({x}:{x:number}):number{return x;} console.log(f({x:22}));",
+    "expect": "22"
+  },
+  {
+    "name": "destructured-param-array",
+    "kind": "runtime",
+    "src": "function f([x,y]:[number,number]):number{return x+y;} console.log(f([10,13]));",
+    "expect": "23"
+  },
+  {
+    "name": "destructured-variable-type",
+    "kind": "runtime",
+    "src": "const {x}:{x:number}={x:24}; console.log(x);",
+    "expect": "24"
+  },
+  {
+    "name": "function-overload",
+    "kind": "runtime",
+    "src": "function f(x:number):number; function f(x:string):string; function f(x:number|string):number|string{return x;} console.log(f(25));",
+    "expect": "25"
+  },
+  {
+    "name": "class-static-field-type",
+    "kind": "runtime",
+    "src": "class C { static x:number=26; } console.log(C.x);",
+    "expect": "26"
+  },
+  {
+    "name": "class-getter-setter-types",
+    "kind": "runtime",
+    "src": "class C { private _x:number=0; get x():number{return this._x;} set x(v:number){this._x=v;} } const c=new C();c.x=27;console.log(c.x);",
+    "expect": "27"
+  },
+  {
+    "name": "class-param-property-default",
+    "kind": "runtime",
+    "src": "class C{constructor(public x:number=28){}} console.log(new C().x);",
+    "expect": "28"
+  },
+  {
+    "name": "class-param-property-optional",
+    "kind": "runtime",
+    "src": "class C{constructor(public x?:number){}} console.log(new C(29).x);",
+    "expect": "29"
+  },
+  {
+    "name": "class-override-modifier",
+    "kind": "runtime",
+    "src": "class A{f(){return 1}} class B extends A{override f():number{return 30}} console.log(new B().f());",
+    "expect": "30"
+  },
+  {
+    "name": "class-static-override",
+    "kind": "runtime",
+    "src": "class A{static f(){return 1}} class B extends A{static override f():number{return 31}} console.log(B.f());",
+    "expect": "31"
+  },
+  {
+    "name": "class-abstract-method",
+    "kind": "runtime",
+    "src": "abstract class A{abstract f(x:number):number;} class B extends A{f(x:number):number{return x;}} console.log(new B().f(32));",
+    "expect": "32"
+  },
+  {
+    "name": "class-generic-abstract",
+    "kind": "runtime",
+    "src": "abstract class A<T>{abstract f(x:T):T;} class B extends A<number>{f(x:number):number{return x;}} console.log(new B().f(33));",
+    "expect": "33"
+  },
+  {
+    "name": "enum-arithmetic-prior",
+    "kind": "runtime",
+    "src": "enum E{A=2,B=A*3,C=B-1} console.log(E.C);",
+    "expect": "5"
+  },
+  {
+    "name": "enum-bitwise-prior",
+    "kind": "runtime",
+    "src": "enum E{A=1,B=A<<4,C=B|2} console.log(E.C);",
+    "expect": "18"
+  },
+  {
+    "name": "enum-parenthesized",
+    "kind": "runtime",
+    "src": "enum E{A=(2+3)*4} console.log(E.A);",
+    "expect": "20"
+  },
+  {
+    "name": "enum-string-name",
+    "kind": "runtime",
+    "src": "enum E{\"hello\"=34} console.log(E.hello);",
+    "expect": "34"
+  },
+  {
+    "name": "enum-computed-external",
+    "kind": "runtime",
+    "src": "const base=10; enum E{A=base+25} console.log(E.A);",
+    "expect": "35"
+  },
+  {
+    "name": "enum-member-qualified",
+    "kind": "runtime",
+    "src": "enum A{X=5} enum B{Y=A.X+31} console.log(B.Y);",
+    "expect": "36"
+  },
+  {
+    "name": "enum-auto-after-parenthesized",
+    "kind": "runtime",
+    "src": "enum E{A=(10),B} console.log(E.B);",
+    "expect": "11"
+  },
+  {
+    "name": "const-enum-basic",
+    "kind": "runtime",
+    "src": "const enum E{A=37} console.log(E.A);",
+    "expect": "37"
+  },
+  {
+    "name": "declare-function-overload",
+    "kind": "runtime",
+    "src": "declare function external(x:number):number; const external=(x:number)=>x; console.log(external(38));",
+    "expect": "38"
+  },
+  {
+    "name": "declare-class-unused",
+    "kind": "runtime",
+    "src": "declare class External {x:number}; console.log(39);",
+    "expect": "39"
+  },
+  {
+    "name": "namespace-basic",
+    "kind": "runtime",
+    "src": "namespace N { export const x:number=40; } console.log(N.x);",
+    "expect": "40"
+  },
+  {
+    "name": "namespace-function",
+    "kind": "runtime",
+    "src": "namespace N { export function f(x:number):number{return x;} } console.log(N.f(41));",
+    "expect": "41"
+  },
+  {
+    "name": "parameter-this-type",
+    "kind": "runtime",
+    "src": "function f(this:{x:number}, y:number):number{return this.x+y;} console.log(f.call({x:20},22));",
+    "expect": "42"
+  },
+  {
+    "name": "optional-method-interface",
+    "kind": "runtime",
+    "src": "interface I{f?(x:number):number} const x:I={f:n=>n}; console.log(x.f?.(43));",
+    "expect": "43"
+  },
+  {
+    "name": "implements-multiple",
+    "kind": "runtime",
+    "src": "interface A{x:number} interface B{y:number} class C implements A,B{x=20;y=24} console.log(new C().x+new C().y);",
+    "expect": "44"
+  },
+  {
+    "name": "bad-generic-empty-list",
+    "kind": "semantic-only",
+    "src": "function f<>(x:number){return x;}",
+    "expect": ""
+  },
+  {
+    "name": "bad-generic-leading-comma-function",
+    "kind": "syntax-negative",
+    "src": "function f<,T>(x:T){return x;}",
+    "expect": ""
+  },
+  {
+    "name": "bad-generic-double-comma-function",
+    "kind": "syntax-negative",
+    "src": "function f<T,,U>(x:T){return x;}",
+    "expect": ""
+  },
+  {
+    "name": "bad-generic-call-empty",
+    "kind": "semantic-only",
+    "src": "function f<T>(x:T){return x;} f<>(1);",
+    "expect": ""
+  },
+  {
+    "name": "bad-generic-call-trailing-double-comma",
+    "kind": "syntax-negative",
+    "src": "function f<T,U>(x:T){return x;} f<number,,string>(1);",
+    "expect": ""
+  },
+  {
+    "name": "bad-interface-member-empty-type",
+    "kind": "syntax-negative",
+    "src": "interface I{x:;}",
+    "expect": ""
+  },
+  {
+    "name": "bad-type-unclosed-generic",
+    "kind": "syntax-negative",
+    "src": "type X = Array<string;",
+    "expect": ""
+  },
+  {
+    "name": "bad-type-double-union",
+    "kind": "syntax-negative",
+    "src": "type X = string || number;",
+    "expect": ""
+  },
+  {
+    "name": "bad-function-rest-not-last",
+    "kind": "semantic-only",
+    "src": "function f(...x:number[], y:number){}",
+    "expect": ""
+  },
+  {
+    "name": "bad-function-optional-marker-double",
+    "kind": "syntax-negative",
+    "src": "function f(x??:number){}",
+    "expect": ""
+  },
+  {
+    "name": "bad-class-field-double-definite",
+    "kind": "syntax-negative",
+    "src": "class C{x!!:number;}",
+    "expect": ""
+  },
+  {
+    "name": "bad-class-method-empty-return",
+    "kind": "syntax-negative",
+    "src": "class C{f():{return 1}}",
+    "expect": ""
+  },
+  {
+    "name": "bad-enum-double-comma",
+    "kind": "syntax-negative",
+    "src": "enum E{A,,B}",
+    "expect": ""
+  },
+  {
+    "name": "bad-enum-member-no-name",
+    "kind": "syntax-negative",
+    "src": "enum E{=1}",
+    "expect": ""
+  },
+  {
+    "name": "bad-enum-string-no-init",
+    "kind": "runtime",
+    "src": "enum E{\"x\"} console.log(E.x);",
+    "expect": "0"
+  },
+  {
+    "name": "bad-satisfies-empty",
+    "kind": "syntax-negative",
+    "src": "const x=1 satisfies ;",
+    "expect": ""
+  },
+  {
+    "name": "bad-as-const-extra",
+    "kind": "syntax-negative",
+    "src": "const x=1 as const number;",
+    "expect": ""
+  },
+  {
+    "name": "bad-angle-assertion-empty",
+    "kind": "syntax-negative",
+    "src": "const x=<>1;",
+    "expect": ""
+  },
+  {
+    "name": "bad-param-property-no-name",
+    "kind": "semantic-only",
+    "src": "class C{constructor(public : number){}}",
+    "expect": ""
+  },
+  {
+    "name": "bad-implements-empty",
+    "kind": "semantic-only",
+    "src": "class C implements {}",
+    "expect": ""
+  },
+  {
+    "name": "semantic-generic-constraint",
+    "kind": "semantic-only",
+    "src": "function f<T extends string>(x:T){} f(1);",
+    "expect": ""
+  },
+  {
+    "name": "semantic-override-missing-base",
+    "kind": "semantic-only",
+    "src": "class A{} class B extends A{override f(){}}",
+    "expect": ""
+  },
+  {
+    "name": "semantic-enum-string-auto",
+    "kind": "semantic-only",
+    "src": "enum E{A=\"x\",B}",
+    "expect": ""
+  },
+  {
+    "name": "semantic-abstract-unimplemented",
+    "kind": "semantic-only",
+    "src": "abstract class A{abstract f():void} class B extends A{}",
+    "expect": ""
+  },
+  {
+    "name": "semantic-implements-missing",
+    "kind": "semantic-only",
+    "src": "interface I{x:number} class C implements I{}",
+    "expect": ""
+  },
+  {
+    "name": "type-predicate-return",
+    "kind": "runtime",
+    "src": "function isString(x:unknown):x is string{return typeof x===\"string\";} console.log(isString(\"x\"));",
+    "expect": "true"
+  },
+  {
+    "name": "asserts-return",
+    "kind": "runtime",
+    "src": "function assertString(x:unknown):asserts x is string{if(typeof x!==\"string\")throw 1;} const x:unknown=\"ok\";assertString(x);console.log(x);",
+    "expect": "ok"
+  },
+  {
+    "name": "generic-interface-extends",
+    "kind": "runtime",
+    "src": "interface A<T>{x:T} interface B<T> extends A<T>{y:T} const b:B<number>={x:1,y:2};console.log(b.x+b.y);",
+    "expect": "3"
+  },
+  {
+    "name": "generic-type-alias-function",
+    "kind": "runtime",
+    "src": "type F<T>=(x:T)=>T; const f:F<number>=x=>x+1;console.log(f(3));",
+    "expect": "4"
+  },
+  {
+    "name": "readonly-tuple",
+    "kind": "runtime",
+    "src": "const x:readonly [number,string]=[5,\"a\"];console.log(x[0]);",
+    "expect": "5"
+  },
+  {
+    "name": "nested-function-type",
+    "kind": "runtime",
+    "src": "type F=(x:number)=>(y:string)=>boolean; const f:F=x=>y=>x===6&&y===\"x\";console.log(f(6)(\"x\"));",
+    "expect": "true"
+  },
+  {
+    "name": "keyof-generic",
+    "kind": "runtime",
+    "src": "function key<T,K extends keyof T>(o:T,k:K):T[K]{return o[k];} console.log(key({a:7},\"a\"));",
+    "expect": "7"
+  },
+  {
+    "name": "infer-type-alias",
+    "kind": "runtime",
+    "src": "type X<T>=T extends Array<infer U>?U:never; const x:X<number[]>=8;console.log(x);",
+    "expect": "8"
+  },
+  {
+    "name": "angle-assertion-object",
+    "kind": "runtime",
+    "src": "const x=< {a:number} >({a:9});console.log(x.a);",
+    "expect": "9"
+  },
+  {
+    "name": "angle-assertion-generic",
+    "kind": "runtime",
+    "src": "const x=<Array<number>>[10];console.log(x[0]);",
+    "expect": "10"
+  },
+  {
+    "name": "chained-angle-as",
+    "kind": "runtime",
+    "src": "const x=(<number>11) as number;console.log(x);",
+    "expect": "11"
+  },
+  {
+    "name": "as-const-array",
+    "kind": "runtime",
+    "src": "const x=[12] as const;console.log(x[0]);",
+    "expect": "12"
+  },
+  {
+    "name": "satisfies-object-method",
+    "kind": "runtime",
+    "src": "const x={f(n:number){return n}} satisfies {f(n:number):number};console.log(x.f(13));",
+    "expect": "13"
+  },
+  {
+    "name": "async-function-types",
+    "kind": "runtime",
+    "src": "async function f(x:number):Promise<number>{return x+1;} f(13).then(console.log);",
+    "expect": "14"
+  },
+  {
+    "name": "generator-function-types",
+    "kind": "runtime",
+    "src": "function* f(x:number):Generator<number,number,void>{yield x;return x+1;} const g=f(14);console.log(g.next().value,g.next().value);",
+    "expect": "14 15"
+  },
+  {
+    "name": "arrow-destructured-param",
+    "kind": "runtime",
+    "src": "const f=({x}:{x:number}):number=>x;console.log(f({x:16}));",
+    "expect": "16"
+  },
+  {
+    "name": "arrow-rest-param",
+    "kind": "runtime",
+    "src": "const f=(...x:number[]):number=>x[0];console.log(f(17));",
+    "expect": "17"
+  },
+  {
+    "name": "this-only-parameter",
+    "kind": "runtime",
+    "src": "function f(this:{x:number}):number{return this.x;}console.log(f.call({x:18}));",
+    "expect": "18"
+  },
+  {
+    "name": "class-private-hash-type",
+    "kind": "runtime",
+    "src": "class C{#x:number=19;get():number{return this.#x;}}console.log(new C().get());",
+    "expect": "19"
+  },
+  {
+    "name": "class-declare-field",
+    "kind": "runtime",
+    "src": "class C{declare x:number;y=20;}console.log(new C().y);",
+    "expect": "20"
+  },
+  {
+    "name": "class-abstract-field",
+    "kind": "runtime",
+    "src": "abstract class A{abstract x:number;}class B extends A{x=21;}console.log(new B().x);",
+    "expect": "21"
+  },
+  {
+    "name": "class-optional-method-decl",
+    "kind": "runtime",
+    "src": "class C{f?(x:number):number;}console.log(new C().f);",
+    "expect": "undefined"
+  },
+  {
+    "name": "class-method-overload",
+    "kind": "runtime",
+    "src": "class C{f(x:number):number;f(x:string):string;f(x:number|string){return x;}}console.log(new C().f(22));",
+    "expect": "22"
+  },
+  {
+    "name": "class-constructor-overload",
+    "kind": "runtime",
+    "src": "class C{constructor(x:number);constructor(x:number){this.x=x;}x:number;}console.log(new C(23).x);",
+    "expect": "23"
+  },
+  {
+    "name": "class-implements-generic",
+    "kind": "runtime",
+    "src": "interface I<T>{x:T}class C implements I<number>{x=24}console.log(new C().x);",
+    "expect": "24"
+  },
+  {
+    "name": "class-protected-param-property",
+    "kind": "runtime",
+    "src": "class C{constructor(protected x:number){}get(){return this.x}}console.log(new C(25).get());",
+    "expect": "25"
+  },
+  {
+    "name": "class-static-generic",
+    "kind": "runtime",
+    "src": "class C<T>{static f<U>(x:U):U{return x;}}console.log(C.f<number>(26));",
+    "expect": "26"
+  },
+  {
+    "name": "enum-auto-after-add",
+    "kind": "runtime",
+    "src": "enum E{A=20+7,B}console.log(E.B);",
+    "expect": "28"
+  },
+  {
+    "name": "enum-auto-after-shift",
+    "kind": "runtime",
+    "src": "enum E{A=1<<5,B}console.log(E.B);",
+    "expect": "33"
+  },
+  {
+    "name": "enum-auto-after-bitwise",
+    "kind": "runtime",
+    "src": "enum E{A=(1<<5)|2,B}console.log(E.B);",
+    "expect": "35"
+  },
+  {
+    "name": "enum-auto-after-prior-computed",
+    "kind": "runtime",
+    "src": "enum E{A=10,B=A*3,C}console.log(E.C);",
+    "expect": "31"
+  },
+  {
+    "name": "enum-auto-after-fraction",
+    "kind": "runtime",
+    "src": "enum E{A=5/2,B}console.log(E.B);",
+    "expect": "3.5"
+  },
+  {
+    "name": "enum-auto-after-exponent",
+    "kind": "runtime",
+    "src": "enum E{A=2**5,B}console.log(E.B);",
+    "expect": "33"
+  },
+  {
+    "name": "enum-unary-bitwise",
+    "kind": "runtime",
+    "src": "enum E{A=~(-35)}console.log(E.A);",
+    "expect": "34"
+  },
+  {
+    "name": "enum-string-name-auto",
+    "kind": "runtime",
+    "src": "enum E{\"x\",Y}console.log(E.x,E.Y);",
+    "expect": "0 1"
+  },
+  {
+    "name": "namespace-multiple-exports",
+    "kind": "runtime",
+    "src": "namespace N{export const a:number=17;export const b:number=18;}console.log(N.a+N.b);",
+    "expect": "35"
+  },
+  {
+    "name": "namespace-local-and-export",
+    "kind": "runtime",
+    "src": "namespace N{const a:number=18;export const b:number=a+18;}console.log(N.b);",
+    "expect": "36"
+  },
+  {
+    "name": "namespace-export-function-local",
+    "kind": "runtime",
+    "src": "namespace N{const a:number=18;export function f(x:number):number{return a+x;}}console.log(N.f(19));",
+    "expect": "37"
+  },
+  {
+    "name": "nested-namespace",
+    "kind": "runtime",
+    "src": "namespace A{export namespace B{export const x:number=38;}}console.log(A.B.x);",
+    "expect": "38"
+  },
+  {
+    "name": "namespace-enum",
+    "kind": "runtime",
+    "src": "namespace N{export enum E{A=39}}console.log(N.E.A);",
+    "expect": "39"
+  },
+  {
+    "name": "declare-const-unused",
+    "kind": "runtime",
+    "src": "declare const externalValue:number;console.log(40);",
+    "expect": "40"
+  },
+  {
+    "name": "declare-namespace-unused",
+    "kind": "runtime",
+    "src": "declare namespace Ext{const x:number;}console.log(41);",
+    "expect": "41"
+  },
+  {
+    "name": "bad-interface-double-colon",
+    "kind": "syntax-negative",
+    "src": "interface I{x::number}",
+    "expect": ""
+  },
+  {
+    "name": "bad-type-unclosed-paren",
+    "kind": "syntax-negative",
+    "src": "type X = (string | number;",
+    "expect": ""
+  },
+  {
+    "name": "bad-type-unclosed-object",
+    "kind": "syntax-negative",
+    "src": "type X = {a:number;",
+    "expect": ""
+  },
+  {
+    "name": "bad-function-param-empty-type-comment",
+    "kind": "syntax-negative",
+    "src": "function f(x:/*x*/){return x}",
+    "expect": ""
+  },
+  {
+    "name": "bad-class-field-empty-type",
+    "kind": "syntax-negative",
+    "src": "class C{x:;}",
+    "expect": ""
+  },
+  {
+    "name": "bad-class-method-param-empty",
+    "kind": "syntax-negative",
+    "src": "class C{f(x:){}}",
+    "expect": ""
+  },
+  {
+    "name": "bad-class-overload-no-implementation-body",
+    "kind": "syntax-negative",
+    "src": "class C{f(x:number):number f(x:number){return x}}",
+    "expect": ""
+  },
+  {
+    "name": "bad-enum-leading-comma",
+    "kind": "syntax-negative",
+    "src": "enum E{,A}",
+    "expect": ""
+  },
+  {
+    "name": "bad-enum-triple-comma",
+    "kind": "syntax-negative",
+    "src": "enum E{A,,,B}",
+    "expect": ""
+  },
+  {
+    "name": "bad-angle-assertion-unclosed",
+    "kind": "syntax-negative",
+    "src": "const x=<number 1;",
+    "expect": ""
+  },
+  {
+    "name": "bad-satisfies-double",
+    "kind": "syntax-negative",
+    "src": "const x=1 satisfies satisfies number;",
+    "expect": ""
+  },
+  {
+    "name": "bad-as-double-type",
+    "kind": "syntax-negative",
+    "src": "const x=1 as number string;",
+    "expect": ""
+  },
+  {
+    "name": "semantic-this-param-not-first",
+    "kind": "semantic-only",
+    "src": "function f(x:number,this:{x:number}){}",
+    "expect": ""
+  },
+  {
+    "name": "semantic-optional-class-method-with-body",
+    "kind": "runtime",
+    "src": "class C{f?(){return 1}} console.log(new C().f?.());",
+    "expect": "1"
+  },
+  {
+    "name": "semantic-abstract-field-concrete",
+    "kind": "semantic-only",
+    "src": "class C{abstract x:number}",
+    "expect": ""
+  },
+  {
+    "name": "semantic-const-enum-computed",
+    "kind": "runtime",
+    "src": "const x=1;const enum E{A=x} console.log(E.A);",
+    "expect": "1"
+  },
+  {
+    "name": "mapped-type",
+    "kind": "runtime",
+    "src": "type Flags<T>={[K in keyof T]?:boolean}; const x:Flags<{a:number}>={a:true}; console.log(x.a);",
+    "expect": "true"
+  },
+  {
+    "name": "conditional-type",
+    "kind": "runtime",
+    "src": "type X<T>=T extends string?1:2; const x:X<string>=1; console.log(x);",
+    "expect": "1"
+  },
+  {
+    "name": "template-literal-type",
+    "kind": "runtime",
+    "src": "type E=`id-${number}`; const x:E=\"id-3\"; console.log(x);",
+    "expect": "id-3"
+  },
+  {
+    "name": "indexed-access-type",
+    "kind": "runtime",
+    "src": "type O={a:number}; type A=O[\"a\"]; const x:A=4; console.log(x);",
+    "expect": "4"
+  },
+  {
+    "name": "intersection-object-type",
+    "kind": "runtime",
+    "src": "type X={a:number}&{b:number}; const x:X={a:1,b:2}; console.log(x.a+x.b);",
+    "expect": "3"
+  },
+  {
+    "name": "constructor-type-alias",
+    "kind": "runtime",
+    "src": "type C=new(x:number)=>{x:number}; class X{constructor(public x:number){}} const c:C=X; console.log(new c(3).x);",
+    "expect": "3"
+  },
+  {
+    "name": "generic-constraint-keyof",
+    "kind": "runtime",
+    "src": "function get<T,K extends keyof T>(x:T,k:K):T[K]{return x[k]} console.log(get({a:4},\"a\"));",
+    "expect": "4"
+  },
+  {
+    "name": "generic-const-type-param",
+    "kind": "runtime",
+    "src": "function id<const T>(x:T):T{return x} console.log(id({a:3}).a);",
+    "expect": "3"
+  },
+  {
+    "name": "generic-in-out-type-params",
+    "kind": "runtime",
+    "src": "interface Box<out T>{get():T} class X implements Box<number>{get(){return 4}} console.log(new X().get());",
+    "expect": "4"
+  },
+  {
+    "name": "variadic-tuple-type",
+    "kind": "runtime",
+    "src": "type X<T extends unknown[]>=[string,...T]; const x:X<[number]>=[\"a\",2]; console.log(x[1]);",
+    "expect": "2"
+  },
+  {
+    "name": "readonly-array-type",
+    "kind": "runtime",
+    "src": "const x:readonly number[]=[1,2]; console.log(x[1]);",
+    "expect": "2"
+  },
+  {
+    "name": "function-optional-param",
+    "kind": "runtime",
+    "src": "function f(x?:number){return x??3} console.log(f());",
+    "expect": "3"
+  },
+  {
+    "name": "function-default-typed",
+    "kind": "runtime",
+    "src": "function f(x:number=3):number{return x} console.log(f());",
+    "expect": "3"
+  },
+  {
+    "name": "destructure-object-param-type",
+    "kind": "runtime",
+    "src": "function f({a}:{a:number}):number{return a} console.log(f({a:5}));",
+    "expect": "5"
+  },
+  {
+    "name": "destructure-array-param-type",
+    "kind": "runtime",
+    "src": "function f([a,b]:[number,number]):number{return a+b} console.log(f([2,3]));",
+    "expect": "5"
+  },
+  {
+    "name": "class-static-block-local-type",
+    "kind": "runtime",
+    "src": "class X{static value=0; static {const x:number=7; this.value=x}} console.log(X.value);",
+    "expect": "7"
+  },
+  {
+    "name": "class-accessor-types",
+    "kind": "runtime",
+    "src": "class X{#x=1; get value():number{return this.#x} set value(v:number){this.#x=v}} const x=new X();x.value=6;console.log(x.value);",
+    "expect": "6"
+  },
+  {
+    "name": "class-generic-getter",
+    "kind": "runtime",
+    "src": "class X<T>{constructor(private x:T){} get value():T{return this.x}} console.log(new X<number>(8).value);",
+    "expect": "8"
+  },
+  {
+    "name": "interface-call-signature",
+    "kind": "runtime",
+    "src": "interface F{(x:number):number} const f:F=(x:number):number=>x+1; console.log(f(2));",
+    "expect": "3"
+  },
+  {
+    "name": "interface-index-signature",
+    "kind": "runtime",
+    "src": "interface D{[key:string]:number} const d:D={a:2};console.log(d.a);",
+    "expect": "2"
+  },
+  {
+    "name": "type-query-typeof",
+    "kind": "runtime",
+    "src": "const a={x:3}; type A=typeof a; const b:A={x:4}; console.log(b.x);",
+    "expect": "4"
+  },
+  {
+    "name": "return-type-promise",
+    "kind": "runtime",
+    "src": "async function f():Promise<number>{return 4} f().then(console.log);",
+    "expect": "4"
+  },
+  {
+    "name": "import-type-only-missing",
+    "kind": "runtime",
+    "src": "import type {Foo} from \"./missing.js\"; console.log(3);",
+    "expect": "3"
+  },
+  {
+    "name": "export-type-local",
+    "kind": "runtime",
+    "src": "type Foo=number; export type {Foo}; console.log(4);",
+    "expect": "4"
+  },
+  {
+    "name": "declare-function-unused",
+    "kind": "runtime",
+    "src": "declare function external(x:number):string; console.log(5);",
+    "expect": "5"
+  },
+  {
+    "name": "declare-enum-unused",
+    "kind": "runtime",
+    "src": "declare enum E{A} console.log(7);",
+    "expect": "7"
+  },
+  {
+    "name": "namespace-merge",
+    "kind": "runtime",
+    "src": "namespace N{export const a=2} namespace N{export const b=3} console.log(N.a+N.b);",
+    "expect": "5"
+  },
+  {
+    "name": "namespace-nested-dotted",
+    "kind": "runtime",
+    "src": "namespace A.B{export const x=4} console.log(A.B.x);",
+    "expect": "4"
+  },
+  {
+    "name": "enum-member-string-name",
+    "kind": "runtime",
+    "src": "enum E{\"foo-bar\"=2} console.log(E[2]);",
+    "expect": "foo-bar"
+  },
+  {
+    "name": "enum-duplicate-values",
+    "kind": "runtime",
+    "src": "enum E{A=1,B=1} console.log(E[1]);",
+    "expect": "B"
+  },
+  {
+    "name": "enum-reference-qualified",
+    "kind": "runtime",
+    "src": "enum A{X=2} enum B{Y=A.X+1} console.log(B.Y);",
+    "expect": "3"
+  },
+  {
+    "name": "enum-parenthesized-bitwise",
+    "kind": "runtime",
+    "src": "enum E{A=((1<<3)|2),B} console.log(E.A,E.B);",
+    "expect": "10 11"
+  },
+  {
+    "name": "satisfies-array",
+    "kind": "runtime",
+    "src": "const x=[1,2] satisfies number[]; console.log(x[1]);",
+    "expect": "2"
+  },
+  {
+    "name": "satisfies-generic-object",
+    "kind": "runtime",
+    "src": "const x={a:2} satisfies Record<string,number>; console.log(x.a);",
+    "expect": "2"
+  },
+  {
+    "name": "as-const-object",
+    "kind": "runtime",
+    "src": "const x={a:3} as const; console.log(x.a);",
+    "expect": "3"
+  },
+  {
+    "name": "instantiation-expression",
+    "kind": "runtime",
+    "src": "function id<T>(x:T){return x} const f=id<number>;console.log(f(4));",
+    "expect": "4"
+  },
+  {
+    "name": "generic-tagged-call",
+    "kind": "runtime",
+    "src": "function f<T>(x:T){return x} console.log((f<string>)(\"x\"));",
+    "expect": "x"
+  },
+  {
+    "name": "non-null-chained-call",
+    "kind": "runtime",
+    "src": "const f:(()=>()=>number)|null=()=>()=>9;console.log(f!!()());",
+    "expect": "9"
+  },
+  {
+    "name": "overload-generic",
+    "kind": "runtime",
+    "src": "function f<T>(x:T):T; function f(x:any){return x} console.log(f<number>(3));",
+    "expect": "3"
+  },
+  {
+    "name": "abstract-generic-class",
+    "kind": "runtime",
+    "src": "abstract class A<T>{abstract f(x:T):T} class B extends A<number>{f(x:number){return x+1}} console.log(new B().f(2));",
+    "expect": "3"
+  },
+  {
+    "name": "override-generic-method",
+    "kind": "runtime",
+    "src": "class A{f<T>(x:T):T{return x}} class B extends A{override f<T>(x:T):T{return x}} console.log(new B().f<number>(4));",
+    "expect": "4"
+  },
+  {
+    "name": "bad-mapped-type-empty-value",
+    "kind": "syntax-negative",
+    "src": "type X<T>={[K in keyof T]:}; console.log(1);",
+    "expect": ""
+  },
+  {
+    "name": "bad-conditional-missing-false",
+    "kind": "syntax-negative",
+    "src": "type X<T>=T extends string?1:; console.log(1);",
+    "expect": ""
+  },
+  {
+    "name": "bad-template-literal-type-unclosed",
+    "kind": "syntax-negative",
+    "src": "type X=`abc-${number}; console.log(1);",
+    "expect": ""
+  },
+  {
+    "name": "bad-generic-const-no-name",
+    "kind": "syntax-negative",
+    "src": "function f<const>(x:number){return x}",
+    "expect": ""
+  },
+  {
+    "name": "bad-destructure-param-empty-type",
+    "kind": "syntax-negative",
+    "src": "function f({a}:){return a}",
+    "expect": ""
+  },
+  {
+    "name": "bad-class-accessor-empty-return",
+    "kind": "syntax-negative",
+    "src": "class X{get x():{return 1}}",
+    "expect": ""
+  },
+  {
+    "name": "bad-declare-function-body",
+    "kind": "semantic-only",
+    "src": "declare function f():number{return 1}",
+    "expect": ""
+  },
+  {
+    "name": "semantic-variance-invalid",
+    "kind": "runtime",
+    "src": "interface X<out T>{set(x:T):void}",
+    "expect": ""
+  },
+  {
+    "name": "module-import-type-default",
+    "kind": "runtime",
+    "src": "import type Foo from './types.js'; console.log(1);",
+    "expect": "1"
+  },
+  {
+    "name": "module-export-type-star",
+    "kind": "runtime",
+    "src": "export type * from './types.js'; console.log(2);",
+    "expect": "2"
+  },
+  {
+    "name": "generic-default-type",
+    "kind": "runtime",
+    "src": "function f<T=number>(x:T){return x} console.log(f(3));",
+    "expect": "3"
+  },
+  {
+    "name": "generic-const-default",
+    "kind": "runtime",
+    "src": "function f<const T=number>(x:T){return x} console.log(f(4));",
+    "expect": "4"
+  },
+  {
+    "name": "constructor-type",
+    "kind": "runtime",
+    "src": "type C=new (x:number)=>{x:number}; class A{constructor(public x:number){}} console.log(new A(6).x);",
+    "expect": "6"
+  },
+  {
+    "name": "bad-generic-default-empty",
+    "kind": "syntax-negative",
+    "src": "type X<T=>=T",
+    "expect": ""
+  },
+  {
+    "name": "bad-readonly-empty",
+    "kind": "syntax-negative",
+    "src": "const x: readonly = [];",
+    "expect": ""
+  },
+  {
+    "name": "bad-type-predicate-empty",
+    "kind": "syntax-negative",
+    "src": "function f(x:any): x is { return true }",
+    "expect": ""
+  },
+  {
+    "name": "tsx-basic-preserve",
+    "kind": "emit",
+    "ext": ".tsx",
+    "args": [
+      "--jsx",
+      "preserve"
+    ],
+    "src": "interface P{name:string}\nconst n:number=1;const x=<div>{n}</div>;",
+    "contains": [
+      "const x=<div>{n}</div>;"
+    ],
+    "not_contains": [
+      "interface P",
+      ":number"
+    ]
+  },
+  {
+    "name": "tsx-fragment-preserve",
+    "kind": "emit",
+    "ext": ".tsx",
+    "args": [
+      "--jsx",
+      "preserve"
+    ],
+    "src": "const x=<><span>A</span><span>B</span></>;",
+    "contains": [
+      "<><span>A</span><span>B</span></>"
+    ]
+  },
+  {
+    "name": "tsx-typed-arrow",
+    "kind": "emit",
+    "ext": ".tsx",
+    "args": [
+      "--jsx",
+      "preserve"
+    ],
+    "src": "const C=(p:{n:number}): JSX.Element => <div>{p.n}</div>;",
+    "contains": [
+      "const C=(p           )",
+      "<div>{p.n}</div>"
+    ],
+    "not_contains": [
+      ": JSX.Element"
+    ]
+  },
+  {
+    "name": "tsx-as-expression",
+    "kind": "emit",
+    "ext": ".tsx",
+    "args": [
+      "--jsx",
+      "preserve"
+    ],
+    "src": "const n:number=2;const x=<div>{n as number}</div>;",
+    "contains": [
+      "<div>{n          }</div>"
+    ],
+    "not_contains": [
+      ":number",
+      " as number"
+    ]
+  },
+  {
+    "name": "tsx-generic-component",
+    "kind": "emit",
+    "ext": ".tsx",
+    "args": [
+      "--jsx",
+      "preserve"
+    ],
+    "src": "const x=<Comp<number> value={3} />;",
+    "contains": [
+      "<Comp<number> value={3} />"
+    ]
+  },
+  {
+    "name": "tsx-spread-attribute",
+    "kind": "emit",
+    "ext": ".tsx",
+    "args": [
+      "--jsx",
+      "preserve"
+    ],
+    "src": "const p={x:1};const x=<Comp {...p} value={p.x}/>;",
+    "contains": [
+      "<Comp {...p} value={p.x}/>"
+    ]
+  },
+  {
+    "name": "tsx-nested-ternary",
+    "kind": "emit",
+    "ext": ".tsx",
+    "args": [
+      "--jsx",
+      "preserve"
+    ],
+    "src": "const ok:boolean=true;const x=<div>{ok?<span>A</span>:<b>B</b>}</div>;",
+    "contains": [
+      "<div>{ok?<span>A</span>:<b>B</b>}</div>"
+    ],
+    "not_contains": [
+      ":boolean"
+    ]
+  },
+  {
+    "name": "tsx-angle-assertion-invalid",
+    "kind": "syntax-negative",
+    "ext": ".tsx",
+    "args": [
+      "--jsx",
+      "preserve"
+    ],
+    "src": "const x=<number>1;",
+    "expect": ""
+  },
+  {
+    "name": "tsx-unclosed-tag-invalid",
+    "kind": "syntax-negative",
+    "ext": ".tsx",
+    "args": [
+      "--jsx",
+      "preserve"
+    ],
+    "src": "const x=<div><span></div>;",
+    "expect": ""
+  },
+  {
+    "name": "tsx-unclosed-expression-invalid",
+    "kind": "syntax-negative",
+    "ext": ".tsx",
+    "args": [
+      "--jsx",
+      "preserve"
+    ],
+    "src": "const x=<div>{1+2</div>;",
+    "expect": ""
+  },
+  {
+    "name": "tsx-member-component",
+    "kind": "emit",
+    "ext": ".tsx",
+    "args": [
+      "--jsx",
+      "preserve"
+    ],
+    "src": "const x=<UI.Button size=\"lg\">Go</UI.Button>;",
+    "contains": [
+      "<UI.Button size=\"lg\">Go</UI.Button>"
+    ]
+  },
+  {
+    "name": "tsx-namespaced-attr",
+    "kind": "emit",
+    "ext": ".tsx",
+    "args": [
+      "--jsx",
+      "preserve"
+    ],
+    "src": "const x=<svg xlink:href=\"#x\"/>;",
+    "contains": [
+      "xlink:href"
+    ]
+  },
+  {
+    "name": "tsx-js-comment-expression",
+    "kind": "emit",
+    "ext": ".tsx",
+    "args": [
+      "--jsx",
+      "preserve"
+    ],
+    "src": "const x=<div>{/* c */ 1 + 2}</div>;",
+    "contains": [
+      "<div>{/* c */ 1 + 2}</div>"
+    ]
+  },
+  {
+    "name": "tsx-function-return",
+    "kind": "emit",
+    "ext": ".tsx",
+    "args": [
+      "--jsx",
+      "preserve"
+    ],
+    "src": "function V(n:number){return <div>{n}</div>}",
+    "contains": [
+      "function V(n       ){return <div>{n}</div>}"
+    ],
+    "not_contains": [
+      ":number"
+    ]
+  },
+  {
+    "name": "tsx-optional-chain-child",
+    "kind": "emit",
+    "ext": ".tsx",
+    "args": [
+      "--jsx",
+      "preserve"
+    ],
+    "src": "const x=<div>{obj?.value ?? <span>none</span>}</div>;",
+    "contains": [
+      "obj?.value ?? <span>none</span>"
+    ]
+  },
+  {
+    "name": "tsx-map-generic-call",
+    "kind": "emit",
+    "ext": ".tsx",
+    "args": [
+      "--jsx",
+      "preserve"
+    ],
+    "src": "const x=<div>{items.map<string>(x => x.name)}</div>;",
+    "contains": [
+      "items.map        (x => x.name)"
+    ],
+    "not_contains": [
+      "<string>"
+    ]
+  },
+  {
+    "name": "tsx-comparison-child",
+    "kind": "emit",
+    "ext": ".tsx",
+    "args": [
+      "--jsx",
+      "preserve"
+    ],
+    "src": "const x=<div>{a < b && c > d ? 'x' : 'y'}</div>;",
+    "contains": [
+      "a < b && c > d"
+    ]
+  },
+  {
+    "name": "tsx-generic-arrow-comma",
+    "kind": "emit",
+    "ext": ".tsx",
+    "args": [
+      "--jsx",
+      "preserve"
+    ],
+    "src": "const f=<T,>(x:T):T=>x; const x=<div>{f(1)}</div>;",
+    "contains": [
+      "const f=    (x  )  =>x"
+    ],
+    "not_contains": [
+      "<T,>"
+    ]
+  },
+  {
+    "name": "tsx-generic-arrow-no-comma-ambiguous",
+    "kind": "syntax-negative",
+    "ext": ".tsx",
+    "args": [
+      "--jsx",
+      "preserve"
+    ],
+    "src": "const f=<T>(x:T)=>x;",
+    "expect": ""
+  },
+  {
+    "name": "type-import-alias",
+    "kind": "runtime",
+    "src": "type A={x:number}; const x:A={x:3}; console.log(x.x);",
+    "expect": "3"
+  },
+  {
+    "name": "type-keyof-typeof",
+    "kind": "runtime",
+    "src": "const o={a:1}; type K=keyof typeof o; const k:K='a'; console.log(k);",
+    "expect": "a"
+  },
+  {
+    "name": "tuple-labeled-optional",
+    "kind": "runtime",
+    "src": "type T=[x:number,y?:string]; const t:T=[4]; console.log(t[0]);",
+    "expect": "4"
+  },
+  {
+    "name": "tuple-rest-readonly",
+    "kind": "runtime",
+    "src": "type T=readonly [number,...string[]]; const t:T=[5,'a']; console.log(t[0]);",
+    "expect": "5"
+  },
+  {
+    "name": "mapped-remap",
+    "kind": "runtime",
+    "src": "type X<T>={[K in keyof T as `get${string & K}`]:()=>T[K]}; console.log(6);",
+    "expect": "6"
+  },
+  {
+    "name": "conditional-infer",
+    "kind": "runtime",
+    "src": "type X<T>=T extends Promise<infer U>?U:T; console.log(7);",
+    "expect": "7"
+  },
+  {
+    "name": "generic-function-overload",
+    "kind": "runtime",
+    "src": "function f<T>(x:T):T; function f(x:any){return x} console.log(f<number>(8));",
+    "expect": "8"
+  },
+  {
+    "name": "constructor-overload",
+    "kind": "runtime",
+    "src": "class A{constructor(x:number);constructor(x:string);constructor(public x:any){}} console.log(new A(9).x);",
+    "expect": "9"
+  },
+  {
+    "name": "method-this-parameter",
+    "kind": "runtime",
+    "src": "const o={x:10,f(this:{x:number}){return this.x}};console.log(o.f());",
+    "expect": "10"
+  },
+  {
+    "name": "declare-global-block",
+    "kind": "runtime",
+    "src": "declare global { interface Window {x:number} } console.log(11); export {};",
+    "expect": "11"
+  },
+  {
+    "name": "export-as-namespace-declare",
+    "kind": "runtime",
+    "src": "export as namespace Foo; console.log(12);",
+    "expect": "12"
+  },
+  {
+    "name": "import-equals-require",
+    "kind": "runtime",
+    "src": "import fs = require('fs'); console.log(typeof fs.readFile);",
+    "expect": "function"
+  },
+  {
+    "name": "export-assignment",
+    "kind": "runtime",
+    "src": "const x=13; export = x; console.log(module.exports);",
+    "expect": "13"
+  },
+  {
+    "name": "bad-tuple-rest-middle",
+    "kind": "semantic-only",
+    "src": "type T=[...string[],number,...boolean[]];",
+    "expect": ""
+  },
+  {
+    "name": "bad-type-operator-empty",
+    "kind": "syntax-negative",
+    "src": "type T=keyof ;",
+    "expect": ""
+  },
+  {
+    "name": "bad-mapped-missing-value",
+    "kind": "syntax-negative",
+    "src": "type T<X>={[K in keyof X]:};",
+    "expect": ""
+  },
+  {
+    "name": "bad-template-type-unclosed",
+    "kind": "syntax-negative",
+    "src": "type T=`x${string`;",
+    "expect": ""
+  },
+  {
+    "name": "bad-tuple-label-colon",
+    "kind": "syntax-negative",
+    "src": "type T=[x:];",
+    "expect": ""
+  },
+  {
+    "name": "import-type-empty-valid",
+    "kind": "emit",
+    "src": "import type {} from './x'; console.log(1);",
+    "expect": "",
+    "contains": [
+      "console.log(1)"
+    ],
+    "not_contains": [
+      "import type"
+    ]
+  },
+  {
+    "name": "bad-function-this-name",
+    "kind": "semantic-only",
+    "src": "function f(thisx:number,this:{x:number}){}",
+    "expect": ""
+  },
+  {
+    "name": "generic-class-implements-many",
+    "kind": "runtime",
+    "src": "interface A{x:number} interface B{y:number} class C implements A,B{x=1;y=2} console.log(new C().x+new C().y);",
+    "expect": "3"
+  },
+  {
+    "name": "abstract-property-erasure",
+    "kind": "runtime",
+    "src": "abstract class A{abstract x:number;abstract f():number;} class B extends A{x=4;f(){return this.x}} console.log(new B().f());",
+    "expect": "4"
+  },
+  {
+    "name": "declare-class-field",
+    "kind": "runtime",
+    "src": "class A{declare x:number;y:number=5} console.log(new A().y);",
+    "expect": "5"
+  },
+  {
+    "name": "readonly-class-field",
+    "kind": "runtime",
+    "src": "class A{readonly x:number=6} console.log(new A().x);",
+    "expect": "6"
+  },
+  {
+    "name": "optional-method-implementation",
+    "kind": "runtime",
+    "src": "class A{f?():number{return 7}} console.log(new A().f?.());",
+    "expect": "7"
+  },
+  {
+    "name": "interface-construct-signature",
+    "kind": "runtime",
+    "src": "interface C{new(x:number):{x:number}} console.log(11);",
+    "expect": "11"
+  },
+  {
+    "name": "type-import-query",
+    "kind": "runtime",
+    "src": "type X=typeof import('./x'); console.log(12);",
+    "expect": "12"
+  },
+  {
+    "name": "type-import-query-member",
+    "kind": "runtime",
+    "src": "type X=typeof import('./x').foo; console.log(13);",
+    "expect": "13"
+  },
+  {
+    "name": "nested-satisfies-asconst",
+    "kind": "runtime",
+    "src": "const x=({a:[1,2]} as const) satisfies {a:readonly number[]};console.log(x.a[1]);",
+    "expect": "2"
+  },
+  {
+    "name": "non-null-optional-chain",
+    "kind": "runtime",
+    "src": "const x:{a?:{b:number}}={a:{b:14}};console.log(x.a!.b);",
+    "expect": "14"
+  },
+  {
+    "name": "namespace-function-merge",
+    "kind": "runtime",
+    "src": "function F(){return 1} namespace F{export const x=15} console.log(F()+F.x);",
+    "expect": "16"
+  },
+  {
+    "name": "enum-namespace-merge",
+    "kind": "runtime",
+    "src": "enum E{A=1} namespace E{export const B=16} console.log(E.A+E.B);",
+    "expect": "17"
+  },
+  {
+    "name": "bad-interface-property-empty",
+    "kind": "syntax-negative",
+    "src": "interface X{a:}",
+    "expect": ""
+  },
+  {
+    "name": "bad-function-return-keyof-empty",
+    "kind": "syntax-negative",
+    "src": "function f(): keyof { return 1 }",
+    "expect": ""
+  },
+  {
+    "name": "bad-class-field-readonly-empty",
+    "kind": "syntax-negative",
+    "src": "class A{x:readonly;}",
+    "expect": ""
+  },
+  {
+    "name": "bad-generic-extends-empty",
+    "kind": "syntax-negative",
+    "src": "function f<T extends>(x:T){}",
+    "expect": ""
+  },
+  {
+    "name": "bad-type-import-query-empty",
+    "kind": "syntax-negative",
+    "src": "type X=typeof import();",
+    "expect": ""
+  },
+  {
+    "name": "indexed-access-empty-valid",
+    "kind": "runtime",
+    "src": "type X={a:number}[]; type Z=X[ ]; console.log(18);",
+    "expect": "18"
+  },
+  {
+    "name": "semantic-interface-duplicate-property",
+    "kind": "semantic-only",
+    "src": "interface X{a:number;a:string}",
+    "expect": ""
+  },
+  {
+    "name": "cjs-side-effect-import",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import 'fs';",
+    "contains": [
+      "require(\"fs\");"
+    ],
+    "not_contains": [
+      "import "
+    ]
+  },
+  {
+    "name": "cjs-default-import",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import path from 'path'; console.log(path);",
+    "contains": [
+      "const __tscc_mod0 = require(\"path\")",
+      "console.log(__tscc_mod0.default)"
+    ],
+    "not_contains": [
+      "import path",
+      "const path ="
+    ]
+  },
+  {
+    "name": "cjs-namespace-import",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import * as fs from 'fs'; console.log(fs);",
+    "contains": [
+      "const fs = require(\"fs\");"
+    ],
+    "not_contains": [
+      "import *"
+    ]
+  },
+  {
+    "name": "cjs-named-import",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {readFile as rf, writeFile} from 'fs'; console.log(rf,writeFile);",
+    "contains": [
+      "const __tscc_mod0 = require(\"fs\")",
+      "console.log(__tscc_mod0.readFile,__tscc_mod0.writeFile)"
+    ],
+    "not_contains": [
+      "import {",
+      "const readFile =",
+      "const writeFile ="
+    ]
+  },
+  {
+    "name": "cjs-mixed-type-named-import",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {type Stats, statSync} from 'fs'; console.log(statSync);",
+    "contains": [
+      "require(\"fs\")",
+      "statSync"
+    ],
+    "not_contains": [
+      "type Stats",
+      "import {"
+    ]
+  },
+  {
+    "name": "cjs-type-only-import",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import type {Stats} from 'fs'; console.log(1);",
+    "contains": [
+      "console.log(1)"
+    ],
+    "not_contains": [
+      "require(\"fs\")",
+      "import type"
+    ]
+  },
+  {
+    "name": "cjs-export-const",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "export const x:number=1;",
+    "contains": [
+      "const x       =1",
+      "Object.defineProperty(exports,\"x\""
+    ],
+    "not_contains": [
+      "export const"
+    ]
+  },
+  {
+    "name": "cjs-export-let",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "export let x:number=1;x=2;",
+    "contains": [
+      "Object.defineProperty(exports,\"x\"",
+      "get:()=>x"
+    ],
+    "not_contains": [
+      "export let"
+    ]
+  },
+  {
+    "name": "cjs-export-function",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "export function f(x:number):number{return x}",
+    "contains": [
+      "function f(x",
+      "Object.defineProperty(exports,\"f\""
+    ],
+    "not_contains": [
+      "export function"
+    ]
+  },
+  {
+    "name": "cjs-export-class",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "export class A{constructor(public x:number){}}",
+    "contains": [
+      "class A",
+      "Object.defineProperty(exports,\"A\""
+    ],
+    "not_contains": [
+      "export class",
+      "public "
+    ]
+  },
+  {
+    "name": "cjs-export-default-expression",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "const x:number=3;export default (x as number)+1;",
+    "contains": [
+      "exports.default = (x          )+1;"
+    ],
+    "not_contains": [
+      "export default",
+      " as number"
+    ]
+  },
+  {
+    "name": "cjs-export-default-named-function",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "export default function f(x:number):number{return x}",
+    "contains": [
+      "function f(x",
+      "exports.default=f"
+    ],
+    "not_contains": [
+      "export default",
+      ":number"
+    ]
+  },
+  {
+    "name": "cjs-export-default-anon-function",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "export default function (x:number):number{return x+1}",
+    "contains": [
+      "exports.default = function (x",
+      "return x+1"
+    ],
+    "not_contains": [
+      "export default",
+      ":number"
+    ]
+  },
+  {
+    "name": "cjs-export-default-named-class",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "export default class A{x:number=1}",
+    "contains": [
+      "class A",
+      "exports.default=A"
+    ],
+    "not_contains": [
+      "export default",
+      ":number"
+    ]
+  },
+  {
+    "name": "cjs-export-named-local",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "const x=1;export {x};",
+    "contains": [
+      "Object.defineProperty(exports,\"x\"",
+      "get:()=>x"
+    ],
+    "not_contains": [
+      "export {"
+    ]
+  },
+  {
+    "name": "cjs-export-named-alias",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "const x=1;export {x as y};",
+    "contains": [
+      "Object.defineProperty(exports,\"y\"",
+      "get:()=>x"
+    ],
+    "not_contains": [
+      "export {"
+    ]
+  },
+  {
+    "name": "cjs-reexport-named",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "export {readFile as rf} from 'fs';",
+    "contains": [
+      "require(\"fs\")",
+      "Object.defineProperty(exports,\"rf\""
+    ],
+    "not_contains": [
+      "export {"
+    ]
+  },
+  {
+    "name": "cjs-reexport-star",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "export * from 'fs';",
+    "contains": [
+      "require(\"fs\")",
+      "for(const k in",
+      "Object.defineProperty(exports,k"
+    ],
+    "not_contains": [
+      "export *"
+    ]
+  },
+  {
+    "name": "cjs-import-equals",
+    "kind": "runtime",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import path = require('path');console.log(typeof path.join);",
+    "expect": "function"
+  },
+  {
+    "name": "cjs-export-assignment-runtime",
+    "kind": "runtime",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "const x=19;export = x;console.log(module.exports);",
+    "expect": "19"
+  },
+  {
+    "name": "tsx-generic-arrow-extends",
+    "kind": "emit",
+    "ext": ".tsx",
+    "args": [
+      "--jsx",
+      "preserve"
+    ],
+    "src": "const f=<T extends {}>(x:T):T=>x;",
+    "contains": [
+      "const f=",
+      "(x  )  =>x"
+    ],
+    "not_contains": [
+      "<T extends {}>",
+      ":T"
+    ]
+  },
+  {
+    "name": "tsx-generic-arrow-default-comma",
+    "kind": "emit",
+    "ext": ".tsx",
+    "args": [
+      "--jsx",
+      "preserve"
+    ],
+    "src": "const f=<T=number,>(x:T):T=>x;",
+    "contains": [
+      "const f=",
+      "(x  )  =>x"
+    ],
+    "not_contains": [
+      "<T=number,>",
+      ":T"
+    ]
+  },
+  {
+    "name": "tsx-generic-arrow-const-comma",
+    "kind": "emit",
+    "ext": ".tsx",
+    "args": [
+      "--jsx",
+      "preserve"
+    ],
+    "src": "const f=<const T,>(x:T):T=>x;",
+    "contains": [
+      "const f=",
+      "(x  )  =>x"
+    ],
+    "not_contains": [
+      "<const T,>",
+      ":T"
+    ]
+  },
+  {
+    "name": "tsx-regex-angle-class",
+    "kind": "emit",
+    "ext": ".tsx",
+    "args": [
+      "--jsx",
+      "preserve"
+    ],
+    "src": "const x=<div>{/[<>]/.test(s)?<A/>:<B/>}</div>;",
+    "contains": [
+      "/[<>]/.test(s)?<A/>:<B/>"
+    ]
+  },
+  {
+    "name": "tsx-nullish-nested",
+    "kind": "emit",
+    "ext": ".tsx",
+    "args": [
+      "--jsx",
+      "preserve"
+    ],
+    "src": "const x=<div>{a??<><A/><B/></>}</div>;",
+    "contains": [
+      "a??<><A/><B/></>"
+    ]
+  },
+  {
+    "name": "tsx-logical-or-nested",
+    "kind": "emit",
+    "ext": ".tsx",
+    "args": [
+      "--jsx",
+      "preserve"
+    ],
+    "src": "const x=<div>{a||<A/>}</div>;",
+    "contains": [
+      "a||<A/>"
+    ]
+  },
+  {
+    "name": "declare-function-overload-only",
+    "kind": "runtime",
+    "src": "declare function f(x:number):number;console.log(20);",
+    "expect": "20"
+  },
+  {
+    "name": "declare-const-erasure",
+    "kind": "runtime",
+    "src": "declare const x:number;console.log(21);",
+    "expect": "21"
+  },
+  {
+    "name": "declare-let-erasure",
+    "kind": "runtime",
+    "src": "declare let x:number;console.log(22);",
+    "expect": "22"
+  },
+  {
+    "name": "declare-interface-export",
+    "kind": "runtime",
+    "src": "export declare interface X{a:number} console.log(23);",
+    "expect": "23"
+  },
+  {
+    "name": "abstract-accessor",
+    "kind": "runtime",
+    "src": "abstract class A{abstract get x():number;} class B extends A{get x(){return 24}}console.log(new B().x);",
+    "expect": "24"
+  },
+  {
+    "name": "bad-cjs-export-assignment-empty",
+    "kind": "syntax-negative",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "export = ;",
+    "expect": ""
+  },
+  {
+    "name": "bad-import-equals-empty",
+    "kind": "syntax-negative",
+    "src": "import x = ;",
+    "expect": ""
+  },
+  {
+    "name": "bad-declare-global-unclosed",
+    "kind": "syntax-negative",
+    "src": "declare global { interface X {a:number}",
+    "expect": ""
+  },
+  {
+    "name": "bad-tsx-fragment-unclosed",
+    "kind": "syntax-negative",
+    "ext": ".tsx",
+    "args": [
+      "--jsx",
+      "preserve"
+    ],
+    "src": "const x=<><A/>;",
+    "expect": ""
+  },
+  {
+    "name": "bad-tsx-generic-arrow-const-no-comma",
+    "kind": "syntax-negative",
+    "ext": ".tsx",
+    "args": [
+      "--jsx",
+      "preserve"
+    ],
+    "src": "const f=<const T>(x:T)=>x;",
+    "expect": ""
+  },
+  {
+    "name": "block-then-typed-arrow",
+    "kind": "runtime",
+    "src": "{const q:number=1;} const f=(x:number)=>x+1;console.log(f(1));",
+    "expect": "2"
+  },
+  {
+    "name": "try-catch-then-typed-arrow",
+    "kind": "runtime",
+    "src": "try{throw 1}catch(e){} const f=(x:number)=>x+2;console.log(f(1));",
+    "expect": "3"
+  },
+  {
+    "name": "catch-shadow-then-typed-arrow",
+    "kind": "runtime",
+    "src": "try{throw 1}catch(x){} const f=(x:number)=>x+3;console.log(f(1));",
+    "expect": "4"
+  },
+  {
+    "name": "nested-block-type-erasure",
+    "kind": "runtime",
+    "src": "if(true){const x:number=5;console.log(x)}",
+    "expect": "5"
+  },
+  {
+    "name": "cjs-import-argument-list-not-shorthand",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {a,b,c} from './m';console.log(a,b,c);",
+    "contains": [
+      "console.log(__tscc_mod0.a,__tscc_mod0.b,__tscc_mod0.c)"
+    ],
+    "not_contains": [
+      "a:__tscc_mod0.a"
+    ]
+  },
+  {
+    "name": "cjs-import-object-shorthand",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {a,b} from './m';const x={a,b};",
+    "contains": [
+      "const x={a:__tscc_mod0.a,b:__tscc_mod0.b}"
+    ],
+    "not_contains": [
+      "const a =",
+      "const b ="
+    ]
+  },
+  {
+    "name": "cjs-import-property-name-not-reference",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {a} from './m';const x={a:1};console.log(x.a,a);",
+    "contains": [
+      "{a:1}",
+      "x.a",
+      "__tscc_mod0.a"
+    ],
+    "not_contains": [
+      "x.__tscc_mod0.a"
+    ]
+  },
+  {
+    "name": "cjs-import-inner-parameter-shadow",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {a} from './m';function f(a:number){return a+1}console.log(f(1),a);",
+    "contains": [
+      "function f(a       ){return a+1}",
+      "__tscc_mod0.a"
+    ],
+    "not_contains": [
+      "return __tscc_mod0.a+1"
+    ]
+  },
+  {
+    "name": "cjs-import-inner-block-shadow",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {a} from './m';{const a:number=2;console.log(a)}console.log(a);",
+    "contains": [
+      "const a       =2;console.log(a)",
+      "console.log(__tscc_mod0.a)"
+    ],
+    "not_contains": [
+      "const __tscc_mod0.a"
+    ]
+  },
+  {
+    "name": "cjs-import-catch-shadow",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {a} from './m';try{throw 1}catch(a){console.log(a)}console.log(a);",
+    "contains": [
+      "catch(a){console.log(a)}",
+      "console.log(__tscc_mod0.a)"
+    ]
+  },
+  {
+    "name": "cjs-import-default-live-reference",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import value from './m';console.log(value);",
+    "contains": [
+      "const __tscc_mod0 = require(\"./m\")",
+      "console.log(__tscc_mod0.default)"
+    ],
+    "not_contains": [
+      "const value ="
+    ]
+  },
+  {
+    "name": "cjs-live-export-getter",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "export let value:number=1;value++;",
+    "contains": [
+      "Object.defineProperty(exports,\"value\"",
+      "get:()=>value"
+    ],
+    "not_contains": [
+      "exports.value=value"
+    ]
+  },
+  {
+    "name": "cjs-shorthand-multiple",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {a,b,c} from './m';const x={a,b,c};",
+    "contains": [
+      "a:__tscc_mod0.a",
+      "b:__tscc_mod0.b",
+      "c:__tscc_mod0.c"
+    ]
+  },
+  {
+    "name": "nested-switch-typed-local",
+    "kind": "runtime",
+    "src": "switch(1){case 1:{const x:number=6;console.log(x);break;}}",
+    "expect": "6"
+  },
+  {
+    "name": "nested-try-typed-local",
+    "kind": "runtime",
+    "src": "try{const x:number=7;console.log(x)}finally{}",
+    "expect": "7"
+  },
+  {
+    "name": "nested-do-typed-local",
+    "kind": "runtime",
+    "src": "do{const x:number=8;console.log(x)}while(false);",
+    "expect": "8"
+  },
+  {
+    "name": "bad-arrow-param-empty-type-after-block",
+    "kind": "syntax-negative",
+    "src": "{} const f=(x:)=>x;",
+    "expect": ""
+  },
+  {
+    "name": "bad-nested-local-empty-type",
+    "kind": "syntax-negative",
+    "src": "if(true){const x: = 1;}",
+    "expect": ""
+  },
+  {
+    "name": "cjs-export-object-destructure",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "const src={a:1,b:2};export const {a,b}=src;console.log(a+b);",
+    "contains": [
+      "Object.defineProperty(exports,\"a\"",
+      "Object.defineProperty(exports,\"b\""
+    ],
+    "not_contains": [
+      "export const"
+    ]
+  },
+  {
+    "name": "cjs-export-array-destructure",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "export const [a,b]=[1,2];console.log(a+b);",
+    "contains": [
+      "Object.defineProperty(exports,\"a\"",
+      "Object.defineProperty(exports,\"b\""
+    ],
+    "not_contains": [
+      "export const"
+    ]
+  },
+  {
+    "name": "cjs-import-default-as-named",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {default as d} from './m';console.log(d);",
+    "contains": [
+      "require(\"./m\")",
+      "console.log(__tscc_mod0.default)"
+    ],
+    "not_contains": [
+      "import {"
+    ]
+  },
+  {
+    "name": "cjs-reexport-default-as-named",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "export {default as d} from './m';",
+    "contains": [
+      "Object.defineProperty(exports,\"d\"",
+      ".default"
+    ],
+    "not_contains": [
+      "export {"
+    ]
+  },
+  {
+    "name": "cjs-export-star-as-namespace",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "export * as ns from './m';",
+    "contains": [
+      "require(\"./m\")",
+      "Object.defineProperty(exports,\"ns\""
+    ],
+    "not_contains": [
+      "export * as"
+    ]
+  },
+  {
+    "name": "cjs-local-export-default-alias",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "const x=1;export {x as default};",
+    "contains": [
+      "Object.defineProperty(exports,\"default\"",
+      "get:()=>x"
+    ],
+    "not_contains": [
+      "export {"
+    ]
+  },
+  {
+    "name": "cjs-named-import-used-in-template",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {a} from './m';console.log(`${a}`);",
+    "contains": [
+      "`${__tscc_mod0.a}`"
+    ],
+    "not_contains": [
+      "const a ="
+    ]
+  },
+  {
+    "name": "cjs-named-import-computed-key",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {a} from './m';const x={[a]:1};console.log(x);",
+    "contains": [
+      "{[__tscc_mod0.a]:1}"
+    ],
+    "not_contains": [
+      "const a ="
+    ]
+  },
+  {
+    "name": "cjs-named-import-destructure-key-not-binding",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {a} from './m';const {a:x}={a:1};console.log(x,a);",
+    "contains": [
+      "{a:x}",
+      "console.log(x,__tscc_mod0.a)"
+    ],
+    "not_contains": [
+      "{__tscc_mod0.a:x}"
+    ]
+  },
+  {
+    "name": "cjs-live-import-update-expression-semantic",
+    "kind": "semantic-only",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {a} from './m';a++;",
+    "expect": ""
+  },
+  {
+    "name": "cjs-reexport-live-chain",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "export {value} from './state';",
+    "contains": [
+      "Object.defineProperty(exports,\"value\"",
+      "get:()=>__tscc_mod0.value"
+    ]
+  },
+  {
+    "name": "export-destructure-preserve",
+    "kind": "emit",
+    "src": "export const {a,b}:{a:number,b:number}={a:1,b:2};",
+    "contains": [
+      "export const {a,b}"
+    ],
+    "not_contains": [
+      ":{a:number,b:number}"
+    ]
+  },
+  {
+    "name": "namespace-reexport-syntax",
+    "kind": "emit",
+    "src": "export * as ns from './m';",
+    "contains": [
+      "export * as ns from './m'"
+    ],
+    "not_contains": []
+  },
+  {
+    "name": "bad-export-star-as-missing-name",
+    "kind": "syntax-negative",
+    "src": "export * as from './m';",
+    "expect": ""
+  },
+  {
+    "name": "bad-export-destructure-empty-type",
+    "kind": "syntax-negative",
+    "src": "export const {a}: = {a:1};",
+    "expect": ""
+  },
+  {
+    "name": "cjs-live-reexport-alias",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "export {value as current} from './state.js';",
+    "contains": [
+      "require(\"./state.js\")",
+      "Object.defineProperty(exports,\"current\"",
+      "get:()=>"
+    ],
+    "not_contains": [
+      "export {"
+    ]
+  },
+  {
+    "name": "cjs-live-reexport-default-as-name",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "export {default as thing} from './thing.js';",
+    "contains": [
+      "require(\"./thing.js\")",
+      "Object.defineProperty(exports,\"thing\""
+    ],
+    "not_contains": [
+      "export {"
+    ]
+  },
+  {
+    "name": "cjs-import-namespace-property",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import * as ns from './m.js';console.log(ns.value);",
+    "contains": [
+      "const ns = require(\"./m.js\")",
+      "console.log(ns.value)"
+    ],
+    "not_contains": [
+      "import *"
+    ]
+  },
+  {
+    "name": "cjs-import-shadow-for-loop",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {x} from './m.js';for(let x=0;x<1;x++){console.log(x)}console.log(x);",
+    "contains": [
+      "for(let x=0;x<1;x++)",
+      "console.log(__tscc_mod0.x)"
+    ],
+    "not_contains": [
+      "for(let __tscc_mod0.x"
+    ]
+  },
+  {
+    "name": "cjs-import-shadow-class-name",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {A} from './m.js';{class A{};console.log(A)}console.log(A);",
+    "contains": [
+      "class A{}",
+      "console.log(__tscc_mod0.A)"
+    ],
+    "not_contains": [
+      "class __tscc_mod0.A"
+    ]
+  },
+  {
+    "name": "cjs-import-shadow-function-name",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {f} from './m.js';{function f(){return 1}console.log(f())}console.log(f);",
+    "contains": [
+      "function f()",
+      "console.log(__tscc_mod0.f)"
+    ],
+    "not_contains": [
+      "function __tscc_mod0.f"
+    ]
+  },
+  {
+    "name": "cjs-import-template-multiple",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {a,b} from './m.js';console.log(`${a}:${b}:${a}`);",
+    "contains": [
+      "__tscc_mod0.a",
+      "__tscc_mod0.b"
+    ],
+    "not_contains": [
+      "${a}",
+      "${b}"
+    ]
+  },
+  {
+    "name": "cjs-import-optional-call",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {f} from './m.js';f?.();",
+    "contains": [
+      "__tscc_mod0.f?.()"
+    ],
+    "not_contains": [
+      "import {"
+    ]
+  },
+  {
+    "name": "cjs-import-new-expression",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {A} from './m.js';const x=new A();",
+    "contains": [
+      "new __tscc_mod0.A()"
+    ],
+    "not_contains": [
+      "new A()"
+    ]
+  },
+  {
+    "name": "cjs-import-typeof",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {x} from './m.js';console.log(typeof x);",
+    "contains": [
+      "typeof __tscc_mod0.x"
+    ]
+  },
+  {
+    "name": "cjs-import-destructure-value",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {x} from './m.js';const {a=x}=obj;",
+    "contains": [
+      "a=__tscc_mod0.x"
+    ],
+    "not_contains": [
+      "a=x"
+    ]
+  },
+  {
+    "name": "dynamic-import-preserve",
+    "kind": "emit",
+    "src": "async function f(){const m=await import('./m.js');return m.x}",
+    "contains": [
+      "import('./m.js')"
+    ]
+  },
+  {
+    "name": "import-meta-preserve",
+    "kind": "emit",
+    "src": "console.log(import.meta.url);",
+    "contains": [
+      "import.meta.url"
+    ]
+  },
+  {
+    "name": "cjs-dynamic-import-preserve",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "async function f(){return import('./m.js')}",
+    "contains": [
+      "import('./m.js')"
+    ]
+  },
+  {
+    "name": "cjs-import-meta-preserve-current-boundary",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "console.log(import.meta.url);",
+    "contains": [
+      "import.meta.url"
+    ]
+  },
+  {
+    "name": "export-interface-no-runtime",
+    "kind": "runtime",
+    "src": "export interface X{a:number} console.log(1);",
+    "expect": "1"
+  },
+  {
+    "name": "export-type-alias-no-runtime",
+    "kind": "runtime",
+    "src": "export type X={a:number};console.log(2);",
+    "expect": "2"
+  },
+  {
+    "name": "ambient-namespace-no-runtime",
+    "kind": "runtime",
+    "src": "declare namespace X{const a:number}console.log(3);",
+    "expect": "3"
+  },
+  {
+    "name": "ambient-module-string-no-runtime",
+    "kind": "runtime",
+    "src": "declare module 'x'{export const a:number}console.log(4);",
+    "expect": "4"
+  },
+  {
+    "name": "class-generic-static-block",
+    "kind": "runtime",
+    "src": "class A<T>{static {const x:number=5;console.log(x)}} new A<number>();",
+    "expect": "5"
+  },
+  {
+    "name": "generic-arrow-after-switch",
+    "kind": "runtime",
+    "src": "switch(1){case 1:break;}const f=<T,>(x:T)=>x;console.log(f<number>(6));",
+    "expect": "6"
+  },
+  {
+    "name": "typed-arrow-after-finally",
+    "kind": "runtime",
+    "src": "try{}finally{}const f=(x:number):number=>x;console.log(f(7));",
+    "expect": "7"
+  },
+  {
+    "name": "typed-arrow-after-class",
+    "kind": "runtime",
+    "src": "class A{} const f=(x:number)=>x;console.log(f(8));",
+    "expect": "8"
+  },
+  {
+    "name": "bad-export-named-missing-from-specifier",
+    "kind": "syntax-negative",
+    "src": "export {x} from ;",
+    "expect": ""
+  },
+  {
+    "name": "bad-import-namespace-missing-name",
+    "kind": "syntax-negative",
+    "src": "import * as from './m.js';",
+    "expect": ""
+  },
+  {
+    "name": "bad-import-named-double-as",
+    "kind": "syntax-negative",
+    "src": "import {x as as y} from './m.js';",
+    "expect": ""
+  },
+  {
+    "name": "bad-export-default-empty",
+    "kind": "syntax-negative",
+    "src": "export default ;",
+    "expect": ""
+  },
+  {
+    "name": "bad-dynamic-import-empty",
+    "kind": "semantic-only",
+    "src": "import();",
+    "expect": ""
+  },
+  {
+    "name": "semantic-import-meta-commonjs",
+    "kind": "semantic-only",
+    "src": "console.log(import.meta.url);",
+    "expect": ""
+  },
+  {
+    "name": "semantic-type-only-runtime-use",
+    "kind": "semantic-only",
+    "src": "import type {Stats} from 'fs';console.log(Stats);",
+    "expect": ""
+  },
+  {
+    "name": "semantic-export-assignment-esm-mix",
+    "kind": "semantic-only",
+    "src": "export const x=1;export = x;",
+    "expect": ""
+  },
+  {
+    "name": "cjs-for-of-import-shadow",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {x} from './m';for(const x of [1])console.log(x);console.log(x);",
+    "contains": [
+      "for(const x of [1])console.log(x)",
+      "console.log(__tscc_mod0.x)"
+    ],
+    "not_contains": [
+      "const __tscc_mod0.x"
+    ]
+  },
+  {
+    "name": "cjs-for-in-import-shadow",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {x} from './m';for(const x in {a:1})console.log(x);console.log(x);",
+    "contains": [
+      "for(const x in {a:1})console.log(x)",
+      "console.log(__tscc_mod0.x)"
+    ]
+  },
+  {
+    "name": "cjs-destructured-for-of-shadow",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {x} from './m';for(const {x} of [{x:1}])console.log(x);console.log(x);",
+    "contains": [
+      "console.log(__tscc_mod0.x)"
+    ],
+    "not_contains": [
+      "{__tscc_mod0.x}"
+    ]
+  },
+  {
+    "name": "cjs-nested-arrow-shadow-default",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import x from './m';const f=(x:number)=>()=>x;console.log(f(1)(),x);",
+    "contains": [
+      "()=>x",
+      "__tscc_mod0.default"
+    ],
+    "not_contains": [
+      "()=>__tscc_mod0.default"
+    ]
+  },
+  {
+    "name": "cjs-class-method-param-shadow",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {x} from './m';class C{m(x:number){return x}}console.log(new C().m(1),x);",
+    "contains": [
+      "return x",
+      "__tscc_mod0.x"
+    ],
+    "not_contains": [
+      "return __tscc_mod0.x"
+    ]
+  },
+  {
+    "name": "cjs-object-method-param-shadow",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {x} from './m';const o={m(x:number){return x}};console.log(o.m(1),x);",
+    "contains": [
+      "return x",
+      "__tscc_mod0.x"
+    ],
+    "not_contains": [
+      "return __tscc_mod0.x"
+    ]
+  },
+  {
+    "name": "cjs-template-multiple-aliases",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {a as x,b as y} from './m';console.log(`${x}-${y}-${x}`);",
+    "contains": [
+      "${__tscc_mod0.a}-${__tscc_mod0.b}-${__tscc_mod0.a}"
+    ]
+  },
+  {
+    "name": "cjs-template-object-property-counter",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {x} from './m';const o={x:2};console.log(`${o.x}:${x}`);",
+    "contains": [
+      "${o.x}:${__tscc_mod0.x}"
+    ],
+    "not_contains": [
+      "o.__tscc_mod0.x"
+    ]
+  },
+  {
+    "name": "cjs-export-star-as-default",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "export * as default from './m';",
+    "contains": [
+      "require(\"./m\")",
+      "default"
+    ],
+    "not_contains": [
+      "export *"
+    ]
+  },
+  {
+    "name": "cjs-reexport-type-only",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "export type {T} from './m';console.log(1);",
+    "contains": [
+      "console.log(1)"
+    ],
+    "not_contains": [
+      "require(\"./m\")",
+      "export type"
+    ]
+  },
+  {
+    "name": "cjs-mixed-export-type-runtime",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "export {type T,x as y} from './m';",
+    "contains": [
+      "require(\"./m\")",
+      "\"y\""
+    ],
+    "not_contains": [
+      "\"T\"",
+      "type T"
+    ]
+  },
+  {
+    "name": "dynamic-import-preserved-esnext",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "esnext"
+    ],
+    "src": "async function f(){return import('./m.js')}",
+    "contains": [
+      "import('./m.js')"
+    ]
+  },
+  {
+    "name": "import-meta-preserved-esnext",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "esnext"
+    ],
+    "src": "console.log(import.meta.url);",
+    "contains": [
+      "import.meta.url"
+    ]
+  },
+  {
+    "name": "nested-generic-arrow-after-switch",
+    "kind": "runtime",
+    "src": "switch(1){case 1:break;} const f=<T,>(x:T):T=>x;console.log(f(12));",
+    "expect": "12"
+  },
+  {
+    "name": "nested-generic-arrow-after-try",
+    "kind": "runtime",
+    "src": "try{}finally{} const f=<T extends {}>(x:T):T=>x;console.log(f({a:13}).a);",
+    "expect": "13"
+  },
+  {
+    "name": "class-static-block-typed-local",
+    "kind": "runtime",
+    "src": "class C{static{const x:number=14;console.log(x)}}",
+    "expect": "14"
+  },
+  {
+    "name": "class-generic-static-method",
+    "kind": "runtime",
+    "src": "class C{static f<T>(x:T):T{return x}}console.log(C.f(15));",
+    "expect": "15"
+  },
+  {
+    "name": "object-generic-method",
+    "kind": "runtime",
+    "src": "const o={f<T>(x:T):T{return x}};console.log(o.f(16));",
+    "expect": "16"
+  },
+  {
+    "name": "async-generic-arrow",
+    "kind": "runtime",
+    "src": "const f=async <T,>(x:T):Promise<T>=>x;f(17).then(console.log);",
+    "expect": "17"
+  },
+  {
+    "name": "bad-export-named-double-as",
+    "kind": "syntax-negative",
+    "src": "const x=1;export {x as as y};",
+    "expect": ""
+  },
+  {
+    "name": "bad-import-named-trailing-as",
+    "kind": "syntax-negative",
+    "src": "import {x as} from './m';",
+    "expect": ""
+  },
+  {
+    "name": "bad-import-namespace-missing-as",
+    "kind": "syntax-negative",
+    "src": "import * x from './m';",
+    "expect": ""
+  },
+  {
+    "name": "bad-export-from-missing-source",
+    "kind": "syntax-negative",
+    "src": "export {x} from;",
+    "expect": ""
+  },
+  {
+    "name": "cjs-live-import-update-expression",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {x} from './m';console.log(x++);",
+    "contains": [
+      "console.log(__tscc_mod0.x++)"
+    ],
+    "not_contains": [
+      "const x ="
+    ]
+  },
+  {
+    "name": "cjs-live-import-compound-assignment",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {x} from './m';x += 2;console.log(x);",
+    "contains": [
+      "__tscc_mod0.x += 2",
+      "console.log(__tscc_mod0.x)"
+    ]
+  },
+  {
+    "name": "cjs-live-import-destructure-value",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {x} from './m';const {a=x}={};console.log(a,x);",
+    "contains": [
+      "a=__tscc_mod0.x",
+      "console.log(a,__tscc_mod0.x)"
+    ]
+  },
+  {
+    "name": "cjs-live-import-array-default",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {x} from './m';const [a=x]=[];console.log(a,x);",
+    "contains": [
+      "a=__tscc_mod0.x",
+      "console.log(a,__tscc_mod0.x)"
+    ]
+  },
+  {
+    "name": "cjs-live-import-computed-property",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {x} from './m';const o={[x]:1};console.log(o[x]);",
+    "contains": [
+      "{[__tscc_mod0.x]:1}",
+      "o[__tscc_mod0.x]"
+    ]
+  },
+  {
+    "name": "cjs-live-import-class-computed-method",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {x} from './m';class C{[x](){return x}}console.log(x);",
+    "contains": [
+      "[__tscc_mod0.x]()",
+      "return __tscc_mod0.x",
+      "console.log(__tscc_mod0.x)"
+    ]
+  },
+  {
+    "name": "cjs-live-import-object-computed-method",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {x} from './m';const o={[x](){return x}};console.log(o[x](),x);",
+    "contains": [
+      "[__tscc_mod0.x]()",
+      "return __tscc_mod0.x",
+      "o[__tscc_mod0.x]()"
+    ]
+  },
+  {
+    "name": "cjs-live-import-label-counter",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {x} from './m';x:{break x;}console.log(x);",
+    "contains": [
+      "x:{break x;}",
+      "console.log(__tscc_mod0.x)"
+    ],
+    "not_contains": [
+      "__tscc_mod0.x:{"
+    ]
+  },
+  {
+    "name": "cjs-live-import-switch-case",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {x} from './m';switch(x){case 1:console.log(x)}",
+    "contains": [
+      "switch(__tscc_mod0.x)",
+      "console.log(__tscc_mod0.x)"
+    ]
+  },
+  {
+    "name": "cjs-live-import-default-param-shadow",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {x} from './m';function f(x:number=x){return x}console.log(x);",
+    "contains": [
+      "function f(x       =x){return x}",
+      "console.log(__tscc_mod0.x)"
+    ],
+    "not_contains": [
+      "x       =__tscc_mod0.x"
+    ]
+  },
+  {
+    "name": "cjs-live-import-rest-param-shadow",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {x} from './m';function f(...x:number[]){return x[0]}console.log(x);",
+    "contains": [
+      "function f(...x         ){return x[0]}",
+      "console.log(__tscc_mod0.x)"
+    ]
+  },
+  {
+    "name": "cjs-live-import-destructured-param-shadow",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {x} from './m';function f({x}:{x:number}){return x}console.log(x);",
+    "contains": [
+      "return x",
+      "console.log(__tscc_mod0.x)"
+    ],
+    "not_contains": [
+      "return __tscc_mod0.x"
+    ]
+  },
+  {
+    "name": "cjs-export-destructured-object",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "export const {a,b:c}={a:1,b:2};",
+    "contains": [
+      "Object.defineProperty(exports,\"a\"",
+      "Object.defineProperty(exports,\"c\""
+    ]
+  },
+  {
+    "name": "cjs-export-destructured-array",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "export const [a,b]=[1,2];",
+    "contains": [
+      "Object.defineProperty(exports,\"a\"",
+      "Object.defineProperty(exports,\"b\""
+    ]
+  },
+  {
+    "name": "cjs-export-default-local-alias",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "const x=1;export {x as default};",
+    "contains": [
+      "Object.defineProperty(exports,\"default\"",
+      "get:()=>x"
+    ]
+  },
+  {
+    "name": "cjs-reexport-default-alias",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "export {default as x} from './m';",
+    "contains": [
+      "Object.defineProperty(exports,\"x\"",
+      "get:()=>__tscc_mod0.default"
+    ]
+  },
+  {
+    "name": "cjs-export-namespace-as",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "export * as ns from './m';",
+    "contains": [
+      "require(\"./m\")",
+      "Object.defineProperty(exports,\"ns\""
+    ]
+  },
+  {
+    "name": "cjs-side-effect-with-assertion",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import './m' with {type:'json'};",
+    "contains": [
+      "require(\"./m\")"
+    ],
+    "not_contains": [
+      " with "
+    ]
+  },
+  {
+    "name": "generic-arrow-return-object",
+    "kind": "runtime",
+    "src": "const f=<T,>(x:T):{value:T}=>({value:x});console.log(f(18).value);",
+    "expect": "18"
+  },
+  {
+    "name": "async-generic-function",
+    "kind": "runtime",
+    "src": "async function f<T>(x:T):Promise<T>{return x}f(19).then(console.log);",
+    "expect": "19"
+  },
+  {
+    "name": "generator-generic-function",
+    "kind": "runtime",
+    "src": "function* f<T>(x:T):Generator<T>{yield x}console.log(f(20).next().value);",
+    "expect": "20"
+  },
+  {
+    "name": "object-generic-async-method",
+    "kind": "runtime",
+    "src": "const o={async f<T>(x:T):Promise<T>{return x}};o.f(21).then(console.log);",
+    "expect": "21"
+  },
+  {
+    "name": "class-generic-generator-method",
+    "kind": "runtime",
+    "src": "class C{*f<T>(x:T):Generator<T>{yield x}}console.log(new C().f(22).next().value);",
+    "expect": "22"
+  },
+  {
+    "name": "bad-export-namespace-no-from",
+    "kind": "syntax-negative",
+    "src": "export * as ns;",
+    "expect": ""
+  },
+  {
+    "name": "bad-import-namespace-no-from",
+    "kind": "syntax-negative",
+    "src": "import * as ns;",
+    "expect": ""
+  },
+  {
+    "name": "bad-import-default-trailing-comma",
+    "kind": "syntax-negative",
+    "src": "import x, from './m';",
+    "expect": ""
+  },
+  {
+    "name": "bad-export-default-comma",
+    "kind": "syntax-negative",
+    "src": "export default, 1;",
+    "expect": ""
+  },
+  {
+    "name": "enum-string-runtime",
+    "kind": "runtime",
+    "src": "enum E{A='a',B='b'}console.log(E.A,E.B);",
+    "expect": "a b"
+  },
+  {
+    "name": "enum-computed-runtime",
+    "kind": "runtime",
+    "src": "const n=2;enum E{A=n+1,B=4}console.log(E.A,E.B);",
+    "expect": "3 4"
+  },
+  {
+    "name": "const-enum-runtime-current",
+    "kind": "runtime",
+    "src": "const enum E{A=1,B=2}console.log(E.A+E.B);",
+    "expect": "3"
+  },
+  {
+    "name": "namespace-nested-runtime",
+    "kind": "runtime",
+    "src": "namespace A{export namespace B{export const x:number=4}}console.log(A.B.x);",
+    "expect": "4"
+  },
+  {
+    "name": "namespace-dotted-runtime",
+    "kind": "runtime",
+    "src": "namespace A.B{export const x:number=5}console.log(A.B.x);",
+    "expect": "5"
+  },
+  {
+    "name": "namespace-function-merge-call",
+    "kind": "runtime",
+    "src": "function F(){return 1}namespace F{export function g(){return 5}}console.log(F()+F.g());",
+    "expect": "6"
+  },
+  {
+    "name": "parameter-property-private-readonly",
+    "kind": "runtime",
+    "src": "class A{constructor(private readonly x:number){}get(){return this.x}}console.log(new A(7).get());",
+    "expect": "7"
+  },
+  {
+    "name": "parameter-property-protected-optional",
+    "kind": "runtime",
+    "src": "class A{constructor(protected x?:number){}get(){return this.x??8}}console.log(new A().get());",
+    "expect": "8"
+  },
+  {
+    "name": "parameter-property-default",
+    "kind": "runtime",
+    "src": "class A{constructor(public x:number=9){}}console.log(new A().x);",
+    "expect": "9"
+  },
+  {
+    "name": "satisfies-array-runtime",
+    "kind": "runtime",
+    "src": "const xs=[1,2] satisfies number[];console.log(xs[1]);",
+    "expect": "2"
+  },
+  {
+    "name": "satisfies-object-runtime",
+    "kind": "runtime",
+    "src": "const x={a:10} satisfies {a:number};console.log(x.a);",
+    "expect": "10"
+  },
+  {
+    "name": "as-const-nested-runtime",
+    "kind": "runtime",
+    "src": "const x={a:[11]} as const;console.log(x.a[0]);",
+    "expect": "11"
+  },
+  {
+    "name": "non-null-index-runtime",
+    "kind": "runtime",
+    "src": "const x:{a?:number[]}={a:[12]};console.log(x.a![0]);",
+    "expect": "12"
+  },
+  {
+    "name": "tsx-generic-arrow-in-prop",
+    "kind": "emit",
+    "ext": ".tsx",
+    "args": [
+      "--jsx",
+      "preserve"
+    ],
+    "src": "const x=<Comp render={<T,>(v:T):T=>v}/>;",
+    "contains": [
+      "render={",
+      "(v  )  =>v"
+    ],
+    "not_contains": [
+      "<T,>",
+      ":T"
+    ]
+  },
+  {
+    "name": "tsx-generic-arrow-extends-in-child",
+    "kind": "emit",
+    "ext": ".tsx",
+    "args": [
+      "--jsx",
+      "preserve"
+    ],
+    "src": "const x=<div>{(<T extends {}>(v:T):T=>v)({})}</div>;",
+    "contains": [
+      "<div>{(",
+      "(v  )  =>v"
+    ],
+    "not_contains": [
+      "<T extends {}>",
+      ":T"
+    ]
+  },
+  {
+    "name": "tsx-regex-template-angle",
+    "kind": "emit",
+    "ext": ".tsx",
+    "args": [
+      "--jsx",
+      "preserve"
+    ],
+    "src": "const x=<div>{`<${/[<>]/.test(s)}>`}</div>;",
+    "contains": [
+      "`<${/[<>]/.test(s)}>`"
+    ]
+  },
+  {
+    "name": "tsx-fragment-generic-components",
+    "kind": "emit",
+    "ext": ".tsx",
+    "args": [
+      "--jsx",
+      "preserve"
+    ],
+    "src": "const x=<><A<number>/><B<string>/></>;",
+    "contains": [
+      "<A<number>",
+      "<B<string>",
+      "</>"
+    ]
+  },
+  {
+    "name": "import-attributes-esnext",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "esnext"
+    ],
+    "src": "import data from './x.json' with {type:'json'};console.log(data);",
+    "contains": [
+      "import data from './x.json' with {type:'json'}"
+    ]
+  },
+  {
+    "name": "export-attributes-esnext",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "esnext"
+    ],
+    "src": "export {default as data} from './x.json' with {type:'json'};",
+    "contains": [
+      "with {type:'json'}"
+    ]
+  },
+  {
+    "name": "type-query-generic-import",
+    "kind": "runtime",
+    "src": "type X=import('./m').Foo<string>;console.log(13);",
+    "expect": "13"
+  },
+  {
+    "name": "mapped-optional-readonly-modifiers",
+    "kind": "runtime",
+    "src": "type X<T>={-readonly[K in keyof T]-?:T[K]};console.log(14);",
+    "expect": "14"
+  },
+  {
+    "name": "conditional-nested-infer",
+    "kind": "runtime",
+    "src": "type X<T>=T extends Array<infer U>?U extends Promise<infer V>?V:U:T;console.log(15);",
+    "expect": "15"
+  },
+  {
+    "name": "template-literal-type-complex",
+    "kind": "runtime",
+    "src": "type X<T extends string>=`get${Capitalize<T>}`;console.log(16);",
+    "expect": "16"
+  },
+  {
+    "name": "bad-enum-missing-name",
+    "kind": "syntax-negative",
+    "src": "enum {A}",
+    "expect": ""
+  },
+  {
+    "name": "bad-namespace-missing-name",
+    "kind": "syntax-negative",
+    "src": "namespace {export const x=1}",
+    "expect": ""
+  },
+  {
+    "name": "bad-parameter-property-no-name",
+    "kind": "semantic-only",
+    "src": "class A{constructor(public :number){}}",
+    "expect": ""
+  },
+  {
+    "name": "bad-tsx-generic-component-unclosed",
+    "kind": "syntax-negative",
+    "ext": ".tsx",
+    "args": [
+      "--jsx",
+      "preserve"
+    ],
+    "src": "const x=<Comp<Array<number> value={x}/>;",
+    "expect": ""
+  },
+  {
+    "name": "bad-tsx-generic-arrow-empty",
+    "kind": "syntax-negative",
+    "ext": ".tsx",
+    "args": [
+      "--jsx",
+      "preserve"
+    ],
+    "src": "const f=<,>(x:number)=>x;",
+    "expect": ""
+  },
+  {
+    "name": "bad-import-attributes-empty",
+    "kind": "syntax-negative",
+    "src": "import x from './m' with ;",
+    "expect": ""
+  },
+  {
+    "name": "bad-export-attributes-empty",
+    "kind": "syntax-negative",
+    "src": "export {x} from './m' with ;",
+    "expect": ""
+  }
+]

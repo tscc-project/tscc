@@ -1,0 +1,2 @@
+import {v124} from "./m124.js";
+export const v123         = v124 + 1;

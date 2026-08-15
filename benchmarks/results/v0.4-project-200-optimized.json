@@ -1,0 +1,29 @@
+[
+  {
+    "label": "tscc project-200",
+    "median_ms": 32.603991,
+    "samples_ms": [
+      35.686836,
+      30.337944,
+      32.603991
+    ]
+  },
+  {
+    "label": "tsc --noCheck project-200",
+    "median_ms": 956.843443,
+    "samples_ms": [
+      939.506018,
+      956.843443,
+      995.766504
+    ]
+  },
+  {
+    "label": "tsc full project-200",
+    "median_ms": 1524.018529,
+    "samples_ms": [
+      1524.018529,
+      1487.72341,
+      1538.020621
+    ]
+  }
+]

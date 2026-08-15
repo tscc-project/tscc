@@ -1,0 +1,3 @@
+import {v100} from "./m100.js";
+export const v99: number = v100 + 1;
+export function f99(x: number): number { return x + v99; }

@@ -1,0 +1,1 @@
+const ok:boolean=true;const x=<div>{ok?<span>A</span>:<b>B</b>}</div>;
