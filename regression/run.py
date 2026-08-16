@@ -66,8 +66,8 @@ with tempfile.TemporaryDirectory(prefix='tscc-reg-ref-') as td:
     def one(c):
         rs=reference_status[c['name']]
         if c['kind']=='semantic-only':
-            if rs=='ok-skip': return ('skip',c['name'],'')
-            return ('fail',c['name'],f'bad semantic-only classification ({rs})')
+            if rs!='ok-skip': return ('fail',c['name'],f'bad semantic-only classification ({rs})')
+            if not c.get('tscc_check'): return ('skip',c['name'],'')
         if c['kind'] in ('runtime','emit') and rs!='ok':
             return ('fail',c['name'],'reference tsc --noCheck rejected valid case')
         if c['kind']=='syntax-negative' and rs!='ok':
@@ -76,6 +76,11 @@ with tempfile.TemporaryDirectory(prefix='tscc-reg-ref-') as td:
         with tempfile.TemporaryDirectory(prefix='tscc-reg-case-') as cd:
             cd=Path(cd); src=cd/('case'+c.get('ext','.ts')); src.write_text(c['src']); out=cd/'out'; out.mkdir()
             got=subprocess.run([a.tscc,'--pretty','false','--noResolve',*c.get('args',[]),'--outDir',str(out),str(src)],capture_output=True,text=True)
+            if c['kind']=='semantic-only':
+                detail=got.stdout+got.stderr
+                expected=c.get('diagnostic_contains','')
+                if got.returncode!=0 and (not expected or expected in detail):return ('pass',c['name'],'')
+                return ('fail',c['name'],f'tscc did not produce the expected semantic rejection\n{detail}')
             if c['kind']=='syntax-negative':
                 if got.returncode!=0:return ('pass',c['name'],'')
                 return ('fail',c['name'],'tscc accepted syntax rejected by tsc\n'+got.stdout+got.stderr)

@@ -15,7 +15,13 @@ The first checkpoint establishes the architecture rather than claiming TypeScrip
 
 Currently exercised syntax includes `interface` and `type` erasure, common type annotations, return annotations, `as` assertions, postfix non-null assertions, `implements`, `public`/`private`/`protected`/`readonly`/`abstract`, and ordinary JavaScript preservation.
 
-This is intentionally not yet a type checker and does not yet implement enums, namespaces with runtime output, decorators, JSX/TSX, module resolution, declaration emit, source maps, `tsconfig.json`, downlevel transforms, generics parsing in all contexts, or the TypeScript type system. Those belong in later checkpoints behind a proper syntax tree rather than accumulating regex-like rewrites.
+This historical first checkpoint was intentionally not a type checker. Later checkpoints added enums, namespaces, TSX preservation, relative module traversal, CommonJS lowering, and a supported `tsconfig.json` subset; consult the current capability sections and tests rather than treating this chronology as a support matrix.
+
+## First semantic checking slice
+
+tscc now has a separate `Checker` pass and its first deliberately narrow type contract. For simple variable declarations, explicit `number`, `string`, and `boolean` annotations are checked against direct primitive literal initializers (including signed numeric literals). For example, `const value: number = "no"` is rejected with a source-positioned diagnostic.
+
+This is the beginning of type checking, not a general TypeScript type system. Unions, object types, inference, assignments, calls, functions, properties, generics, narrowing, and most binding/scoping semantics remain unchecked. The independent 511-case corpus records the first implemented semantic case as a pass and retains 27 explicit semantic skips.
 
 ## CLI
 
@@ -36,7 +42,7 @@ make
 make test
 ```
 
-The smoke suite checks emitted JavaScript with Node and includes a small differential sanity check against the system `tsc` for an overlapping simple case.
+The aggregate target runs smoke, parser, checker, runtime, project/module, independent regression, TSX, and CommonJS validation. Focused targets such as `make test-checker` remain available during iteration.
 
 
 ## Parser / AST checkpoint

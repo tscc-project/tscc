@@ -332,6 +332,50 @@ void Parser::parse_variable_declarators(std::size_t first, std::size_t end) {
     // Declaration-head annotations are unambiguous before '='. Initializers are
     // expressions, except that arrow-function signatures contain their own TS
     // parameter/return annotations which are parsed explicitly below.
+    // Retain the declaration facts needed by semantic passes before erasing
+    // their source spelling. This first structural slice deliberately records
+    // only simple identifier bindings; destructuring remains unsupported by the
+    // checker rather than being guessed here.
+    std::size_t declaration_begin = first;
+    int declaration_paren = 0, declaration_square = 0, declaration_brace = 0;
+    for (std::size_t p = first; p <= end; ++p) {
+        const bool boundary = p == end || (!declaration_paren && !declaration_square &&
+                                           !declaration_brace && tokens_[p].text == ",");
+        if (boundary) {
+            std::size_t name = declaration_begin;
+            while (name < p && tokens_[name].kind == TokenKind::Comment) ++name;
+            if (name < p && tokens_[name].kind == TokenKind::Identifier) {
+                std::size_t colon = p, equals = p;
+                int par = 0, sq = 0, br = 0;
+                for (std::size_t q = name + 1; q < p; ++q) {
+                    const auto& text = tokens_[q].text;
+                    if (text == "(") ++par; else if (text == ")" && par) --par;
+                    else if (text == "[") ++sq; else if (text == "]" && sq) --sq;
+                    else if (text == "{") ++br; else if (text == "}" && br) --br;
+                    if (!par && !sq && !br && text == ":" && colon == p) colon = q;
+                    if (!par && !sq && !br && text == "=") { equals = q; break; }
+                }
+                VariableDeclaration declaration;
+                declaration.name_token = name;
+                if (colon < p) {
+                    declaration.type_begin_token = colon + 1;
+                    declaration.type_end_token = equals < p ? equals : p;
+                }
+                if (equals < p) {
+                    declaration.initializer_begin_token = equals + 1;
+                    declaration.initializer_end_token = p;
+                }
+                program_->variables.push_back(declaration);
+            }
+            declaration_begin = p + 1;
+        }
+        if (p == end) break;
+        const auto& text = tokens_[p].text;
+        if (text == "(") ++declaration_paren; else if (text == ")" && declaration_paren) --declaration_paren;
+        else if (text == "[") ++declaration_square; else if (text == "]" && declaration_square) --declaration_square;
+        else if (text == "{") ++declaration_brace; else if (text == "}" && declaration_brace) --declaration_brace;
+    }
+
     bool in_initializer = false;
     int paren = 0, square = 0, brace = 0, angle = 0;
     for (std::size_t p = first; p < end; ++p) {
@@ -1377,6 +1421,7 @@ bool Parser::parse(Program& program) {
     program.root = {SyntaxKind::Program, 0, tokens_.empty() ? 0 : tokens_.size() - 1, {}};
     program.erasures.clear();
     program.replacements.clear();
+    program.variables.clear();
     i_ = 0;
     while (!at_end()) {
         const std::size_t before = i_;

@@ -1,4 +1,5 @@
 #include "Transpiler.h"
+#include "Checker.h"
 #include "Lexer.h"
 #include "Parser.h"
 #include <algorithm>
@@ -789,6 +790,7 @@ bool transpile_tokens(const SourceFile& source, const std::vector<Token>& tokens
     Program program;
     Parser parser(source, tokens, diagnostics);
     if (!parser.parse(program)) return false;
+    if (!check_program(source, tokens, program, diagnostics)) return false;
 
     out = source.text;
     for (const auto& range : program.erasures)

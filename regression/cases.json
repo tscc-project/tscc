@@ -393,7 +393,9 @@
     "name": "semantic-type-mismatch",
     "kind": "semantic-only",
     "src": "const x:number=\"no\";",
-    "expect": null
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "Type 'string' is not assignable to type 'number'."
   },
   {
     "name": "semantic-missing-property",

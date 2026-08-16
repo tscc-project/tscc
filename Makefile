@@ -1,7 +1,7 @@
 CXX ?= g++
 CXXFLAGS ?= -std=c++17 -O2 -Wall -Wextra -pedantic
 CPPFLAGS ?= -Isrc
-SOURCES := src/main.cpp src/tscc/Diagnostic.cpp src/tscc/Source.cpp src/tscc/Lexer.cpp src/tscc/Parser.cpp src/tscc/Transpiler.cpp src/tscc/Project.cpp src/tscc/Config.cpp src/tscc/Compiler.cpp
+SOURCES := src/main.cpp src/tscc/Diagnostic.cpp src/tscc/Source.cpp src/tscc/Lexer.cpp src/tscc/Parser.cpp src/tscc/Checker.cpp src/tscc/Transpiler.cpp src/tscc/Project.cpp src/tscc/Config.cpp src/tscc/Compiler.cpp
 OBJECTS := $(SOURCES:.cpp=.o)
 all: tscc
 tscc: $(OBJECTS)
@@ -12,13 +12,16 @@ test-smoke: tscc
 	bash tests/smoke.sh
 clean:
 	rm -f $(OBJECTS) tscc
-.PHONY: all test test-smoke test-parser test-runtime test-project test-regression test-tsx test-commonjs clean
+.PHONY: all test test-smoke test-parser test-checker test-runtime test-project test-regression test-tsx test-commonjs clean
 
 
 test-parser:
 	$(CXX) -Isrc $(CXXFLAGS) tests/parser_smoke.cpp src/tscc/Diagnostic.cpp src/tscc/Source.cpp src/tscc/Lexer.cpp src/tscc/Parser.cpp -o .parser-smoke
 	./.parser-smoke
 	rm -f .parser-smoke
+
+test-checker: tscc
+	bash tests/typecheck_variables.sh
 
 test-runtime: tscc
 	bash tests/runtime_features.sh
@@ -34,4 +37,4 @@ test-tsx: tscc
 test-commonjs: tscc
 	bash tests/commonjs_modules.sh
 
-test: test-smoke test-parser test-runtime test-project test-regression test-tsx test-commonjs
+test: test-smoke test-parser test-checker test-runtime test-project test-regression test-tsx test-commonjs

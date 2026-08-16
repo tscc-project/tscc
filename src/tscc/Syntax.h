@@ -34,10 +34,19 @@ struct Replacement {
     std::string text;
 };
 
+struct VariableDeclaration {
+    std::size_t name_token = 0;
+    std::size_t type_begin_token = 0;
+    std::size_t type_end_token = 0; // exclusive; empty when unannotated
+    std::size_t initializer_begin_token = 0;
+    std::size_t initializer_end_token = 0; // exclusive; empty when absent
+};
+
 struct Program {
     SyntaxNode root;
     std::vector<EraseRange> erasures;
     std::vector<Replacement> replacements;
+    std::vector<VariableDeclaration> variables;
 };
 
 } // namespace tscc

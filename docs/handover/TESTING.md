@@ -16,9 +16,10 @@ Cases distinguish runtime, emit, syntax-negative, and semantic-only behavior.
 The runner batches reference TypeScript classification, then compiles each case
 with a candidate executable. Runtime cases execute emitted JavaScript under Node;
 emit cases assert required/forbidden structure; syntax negatives require
-controlled rejection; semantic-only cases remain skips until a checker exists.
+controlled rejection; semantic cases become candidate contracts one slice at a
+time and otherwise remain explicit skips.
 
-The 2026-08-16 baseline contains 511 cases: 483 pass, zero fail, and 28
+The first checker checkpoint contains 511 cases: 484 pass, zero fail, and 27
 semantic-only skips with Node v22.22.1 and TypeScript 7.0.2. TypeScript 7 changed
 its implicit module default, which initially reclassified
 `semantic-import-meta-commonjs`; the runner now explicitly uses CommonJS for its
@@ -26,7 +27,7 @@ semantic oracle. The smoke differential uses the supported `preserve` mode in
 place of TypeScript 7's removed `none` mode.
 
 `make test` is the complete local correctness entry point and runs smoke, parser,
-runtime/generics, project/module, regression, TSX-preserve, and CommonJS targets.
+primitive-checker, runtime/generics, project/module, regression, TSX-preserve, and CommonJS targets.
 Keep focused targets available for iteration, but require the aggregate target at
 checkpoints.
 

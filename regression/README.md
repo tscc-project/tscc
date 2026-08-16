@@ -2,7 +2,7 @@
 
 Compiler-agnostic regression corpus used to compare `tscc` with TypeScript's reference compiler.
 
-This checkpoint contains **511 cases**: **483 current parser/transpiler/runtime cases** and **28 deliberate semantic-checker-only cases**. Runtime and syntax expectations are validated with `tsc --noCheck`; semantic-only cases are additionally verified against normal `tsc --module commonjs` so missing type checking is not mislabeled as a parser defect. The explicit module mode prevents TypeScript release changes to its default configuration from silently reclassifying the corpus.
+This checkpoint contains **511 cases**: **483 parser/transpiler/runtime cases** and **28 semantic cases**. One semantic case is now an implemented tscc checker contract, producing **484 pass / 0 fail / 27 deliberate semantic skips**; the remaining semantic cases describe future checker work. Runtime and syntax expectations are validated with `tsc --noCheck`; semantic cases are additionally verified against normal `tsc --module commonjs`. The explicit module mode prevents TypeScript release changes to its default configuration from silently reclassifying the corpus.
 
 Run against a compiler with:
 

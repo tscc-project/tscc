@@ -21,16 +21,20 @@ main.cpp CLI parsing / optional tsconfig loading
 → SourceFile load and line map
 → byte-oriented Lexer producing owned token strings plus byte ranges
 → optional relative import/export discovery
-→ Parser producing a small Program of syntax nodes, erasures, and replacements
+→ Parser producing a small Program of syntax nodes, declaration facts, erasures, and replacements
+→ Checker validating the currently supported semantic slice
 → Transpiler applying erasure and runtime-lowering/module passes
 → direct binary-truncating write to .js or .jsx
 ~~~
 
-This is an ES2022-oriented native transpiler, not a type-checking compiler and not
-a conventional bound/typed AST compiler. `Program::root` is a deliberately small
+This remains primarily an ES2022-oriented native transpiler and is not a
+conventional bound/typed AST compiler. `Program::root` is a deliberately small
 structural tree; most transformation intent is represented by byte-based
-`EraseRange` and `Replacement` records. There is no binder, symbol table, type
-model, or semantic-checker pass. Transpiler-owned scope/shadow analysis is local
+`EraseRange` and `Replacement` records. The first semantic seam retains simple
+`VariableDeclaration` token ranges before erasure, then `Checker` compares direct
+primitive literal initializers with explicit `number`, `string`, or `boolean`
+annotations. There is still no binder, symbol table, general type model, inference,
+or expression checker. Transpiler-owned scope/shadow analysis remains local
 transform machinery and must not be described as a general binding phase.
 
 `compile_files` owns the shipped dependency traversal using a queue and de-duplicated
@@ -48,12 +52,12 @@ existing guarantee.
 The implementation-local `regression/` corpus and standalone suite have identical
 `README.md`, `TSCC_BUG_LOG.md`, `cases.json`, and `run.py` files at this checkpoint;
 only `REGRESSION_NOTES.md` differs. This byte equality is useful evidence but is not
-automatically enforced. The standalone README's stated 265-case count is stale:
-the current runner reports 511 classifications (483 pass, 1 fail, 27 skip under
-TypeScript 7.0.2). The sole failure is reference-oracle drift in the semantic-only
-`import.meta`/CommonJS classification, not a candidate tscc emit/runtime failure.
-The runner invokes whatever `tsc` is on `PATH`, so TypeScript version pinning or a
-documented supported range is required for reproducible classifications.
+automatically enforced. The stale case count and TypeScript 7 oracle drift were
+resolved on 2026-08-16 by documenting 511 cases and making semantic CommonJS mode
+explicit. After the first checker slice the result is 484 pass, zero fail, and 27
+semantic skips under TypeScript 7.0.2. The runner still invokes `tsc` from `PATH`,
+so a pinned release oracle or documented supported range remains required for
+fully reproducible classifications.
 
 ## Architectural identity and support standard
 
@@ -137,12 +141,14 @@ and roots. `Compiler` coordinates files, options, project behavior, and output.
 `main.cpp` owns CLI parsing/help/version and should not duplicate compiler
 semantics.
 
-## Missing semantic checker
+## Semantic checker status
 
-There is currently no TypeScript semantic type-checker pass. The regression suite
-deliberately classifies cases accepted by `tsc --noCheck` but rejected by full
-`tsc` as semantic-only skips. Do not “fix” these through ad hoc parser rejection.
-A production-ready type-checking compiler is the explicit long-term destination.
+There is now a distinct checker pass, but only for explicit primitive annotations
+against direct variable literal initializers. The regression suite promotes a
+semantic case only when tscc owns that contract; all other cases accepted by
+`tsc --noCheck` but rejected by full `tsc` remain semantic skips. Do not “fix”
+those through ad hoc parser rejection. A production-ready type-checking compiler
+is the explicit long-term destination.
 Reaching it requires deliberate syntax, binder, symbol/module, type-system,
 checker, diagnostic, and incremental-program checkpoints. Preserve the current
 transpiler as working infrastructure while those layers are introduced; do not

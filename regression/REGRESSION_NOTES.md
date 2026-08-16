@@ -1,5 +1,7 @@
 # Regression notes
 
+The first semantic-checker checkpoint retains simple variable declaration spans through parsing and checks explicit `number`, `string`, and `boolean` annotations against direct literal initializers. `semantic-type-mismatch` is consequently the first semantic-only case promoted into the tscc contract. Current result: **484 pass / 0 fail / 27 semantic skips** under TypeScript 7.0.2.
+
 The corpus grew from 216 to **265 cases** in the v0.6.0 checkpoint. The added families cover mapped/conditional/template-literal/indexed/variadic types, const type parameters, destructured parameters, class static/accessor syntax, type-only module forms, ambient enums/classes/functions, namespace merging and dotted namespaces, instantiation expressions, generic expression references, and additional malformed advanced-type grammar.
 
 Current result: **246 pass / 0 fail / 19 semantic-only skips**.

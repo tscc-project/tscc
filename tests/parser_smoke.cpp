@@ -59,6 +59,7 @@ const typedObject: {name: string; x: number} = {name: "Grace", x: 2};
     if (interfaces != 1 || aliases != 1 || functions != 1 || classes != 1 || vars != 2)
         fail("unexpected top-level syntax tree shape");
     if (program.erasures.size() < 10) fail("parser did not record expected TypeScript erasures");
+    if (program.variables.size() < 5) fail("parser did not retain variable declaration facts");
 
     // Object-literal colons must not be parser-owned erasures.
     const auto object_colon = source.text.find("name: \"Ada\"");
