@@ -12,37 +12,144 @@ std::vector<std::size_t> significant_tokens(const std::vector<Token>& tokens,
     return result;
 }
 
-TypeId literal_type(const std::vector<Token>& tokens,
-                    std::size_t begin, std::size_t end, const TypeStore& store) {
-    const auto significant = significant_tokens(tokens, begin, end);
-    if (significant.size() == 1) {
-        const auto& token = tokens[significant.front()];
-        if (token.kind == TokenKind::Number)
-            return !token.text.empty() && token.text.back() == 'n' ? store.bigint()
-                                                                   : store.number();
-        if (token.kind == TokenKind::String || token.kind == TokenKind::Template)
-            return store.string();
-        if (token.text == "true" || token.text == "false") return store.boolean();
+struct ExpressionResult {
+    TypeId type = 0;
+    bool complete = false;
+    std::size_t error_token = static_cast<std::size_t>(-1);
+    std::string error;
+};
+
+class PrimitiveExpressionTyper {
+public:
+    PrimitiveExpressionTyper(const std::vector<Token>& tokens, std::size_t begin,
+                             std::size_t end, const BindingModel& binding,
+                             const TypeModel& types)
+        : tokens_(tokens), binding_(binding), types_(types), sig_(significant_tokens(tokens, begin, end)) {}
+
+    ExpressionResult run() {
+        ExpressionResult result;
+        result.type = additive();
+        result.complete = pos_ == sig_.size();
+        result.error_token = error_token_;
+        result.error = error_;
+        if (!result.complete) result.type = types_.store.unknown();
+        return result;
     }
-    if (significant.size() == 2 &&
-        (tokens[significant[0]].text == "+" || tokens[significant[0]].text == "-") &&
-        tokens[significant[1]].kind == TokenKind::Number &&
-        (tokens[significant[1]].text.empty() || tokens[significant[1]].text.back() != 'n'))
-        return store.number();
-    return store.unknown();
+
+private:
+    const std::vector<Token>& tokens_;
+    const BindingModel& binding_;
+    const TypeModel& types_;
+    std::vector<std::size_t> sig_;
+    std::size_t pos_ = 0;
+    std::size_t error_token_ = static_cast<std::size_t>(-1);
+    std::string error_;
+
+    bool accept(const char* text) {
+        if (pos_ >= sig_.size() || tokens_[sig_[pos_]].text != text) return false;
+        ++pos_;
+        return true;
+    }
+    TypeId primary() {
+        if (pos_ >= sig_.size()) return types_.store.unknown();
+        if (accept("(")) {
+            const auto value = additive();
+            if (!accept(")")) return types_.store.unknown();
+            return value;
+        }
+        const auto token_index = sig_[pos_++];
+        const auto& token = tokens_[token_index];
+        if (token.kind == TokenKind::Number)
+            return !token.text.empty() && token.text.back() == 'n'
+                       ? types_.store.bigint() : types_.store.number();
+        if (token.kind == TokenKind::String || token.kind == TokenKind::Template)
+            return types_.store.string();
+        if (token.text == "true" || token.text == "false") return types_.store.boolean();
+        if (token.kind == TokenKind::Identifier) {
+            const auto symbol = binding_.symbol_for_reference(token_index);
+            if (symbol < types_.symbol_types.size()) return types_.symbol_types[symbol];
+        }
+        return types_.store.unknown();
+    }
+    TypeId unary() {
+        if (pos_ >= sig_.size()) return types_.store.unknown();
+        const auto op_token = sig_[pos_];
+        const auto& op = tokens_[op_token].text;
+        if (op != "+" && op != "-" && op != "~" && op != "!" && op != "typeof")
+            return primary();
+        ++pos_;
+        const auto value = unary();
+        const auto kind = types_.store.kind(value);
+        if (value == types_.store.unknown()) return value;
+        if (op == "!") return types_.store.boolean();
+        if (op == "typeof") return types_.store.string();
+        if ((op == "-" || op == "~") && kind == TypeKind::BigInt) return types_.store.bigint();
+        if (kind == TypeKind::Number) return types_.store.number();
+        fail_unary(op_token, op, value);
+        return types_.store.unknown();
+    }
+    TypeId multiplicative() {
+        auto left = unary();
+        while (pos_ < sig_.size()) {
+            const auto op_token = sig_[pos_];
+            const auto& op = tokens_[op_token].text;
+            if (op != "*" && op != "/" && op != "%" && op != "**") break;
+            ++pos_;
+            const auto right = unary();
+            left = arithmetic(op_token, op, left, right);
+        }
+        return left;
+    }
+    TypeId additive() {
+        auto left = multiplicative();
+        while (pos_ < sig_.size()) {
+            const auto op_token = sig_[pos_];
+            const auto& op = tokens_[op_token].text;
+            if (op != "+" && op != "-") break;
+            ++pos_;
+            const auto right = multiplicative();
+            if (op == "+" && left != types_.store.unknown() && right != types_.store.unknown() &&
+                (types_.store.kind(left) == TypeKind::String ||
+                 types_.store.kind(right) == TypeKind::String))
+                left = types_.store.string();
+            else left = arithmetic(op_token, op, left, right);
+        }
+        return left;
+    }
+    TypeId arithmetic(std::size_t token, const std::string& op, TypeId left, TypeId right) {
+        if (left == types_.store.unknown() || right == types_.store.unknown())
+            return types_.store.unknown();
+        const auto left_kind = types_.store.kind(left), right_kind = types_.store.kind(right);
+        if (left_kind == TypeKind::Number && right_kind == TypeKind::Number)
+            return types_.store.number();
+        if (left_kind == TypeKind::BigInt && right_kind == TypeKind::BigInt)
+            return types_.store.bigint();
+        if (error_.empty()) {
+            error_token_ = token;
+            error_ = std::string("Operator '") + op + "' cannot be applied to types '" +
+                     types_.store.name(left) + "' and '" + types_.store.name(right) + "'.";
+        }
+        return types_.store.unknown();
+    }
+    void fail_unary(std::size_t token, const std::string& op, TypeId value) {
+        if (!error_.empty()) return;
+        error_token_ = token;
+        error_ = std::string("Operator '") + op + "' cannot be applied to type '" +
+                 types_.store.name(value) + "'.";
+    }
+};
+
+ExpressionResult expression_type(const std::vector<Token>& tokens, std::size_t begin,
+                                 std::size_t end, const BindingModel& binding,
+                                 const TypeModel& types) {
+    return PrimitiveExpressionTyper(tokens, begin, end, binding, types).run();
 }
 
-TypeId expression_type(const std::vector<Token>& tokens, std::size_t begin,
-                       std::size_t end, const BindingModel& binding,
-                       const TypeModel& types) {
-    const auto literal = literal_type(tokens, begin, end, types.store);
-    if (literal != types.store.unknown()) return literal;
-    const auto significant = significant_tokens(tokens, begin, end);
-    if (significant.size() != 1 || tokens[significant.front()].kind != TokenKind::Identifier)
-        return types.store.unknown();
-    const auto symbol = binding.symbol_for_reference(significant.front());
-    return symbol < types.symbol_types.size() ? types.symbol_types[symbol]
-                                              : types.store.unknown();
+void report_expression_error(const SourceFile& source, const std::vector<Token>& tokens,
+                             const ExpressionResult& result, Diagnostics& diagnostics) {
+    if (result.error.empty() || result.error_token >= tokens.size()) return;
+    const auto [line, column] = source.line_col(tokens[result.error_token].begin);
+    diagnostics.error(source.path, line, column, result.error, source.line_text(line));
 }
 
 void report_mismatch(const SourceFile& source, const std::vector<Token>& tokens,
@@ -69,13 +176,15 @@ bool check_program(const SourceFile& source, const std::vector<Token>& tokens,
             if (binding.symbols[i].declaration_token == declaration.name_token) {
                 expected = types.symbol_types[i]; break;
             }
-        if (expected == types.store.unknown() ||
-            declaration.initializer_end_token <= declaration.initializer_begin_token)
+        if (declaration.initializer_end_token <= declaration.initializer_begin_token)
             continue;
-        const auto actual = expression_type(tokens, declaration.initializer_begin_token,
-                                            declaration.initializer_end_token,
-                                            binding, types);
-        if (actual == types.store.unknown() || actual == expected) continue;
+        const auto expression = expression_type(tokens, declaration.initializer_begin_token,
+                                                declaration.initializer_end_token,
+                                                binding, types);
+        report_expression_error(source, tokens, expression, diagnostics);
+        const auto actual = expression.type;
+        if (!expression.error.empty() || expected == types.store.unknown() ||
+            actual == types.store.unknown() || actual == expected) continue;
         report_mismatch(source, tokens, declaration.initializer_begin_token,
                         actual, expected, types.store, diagnostics);
     }
@@ -98,8 +207,10 @@ bool check_program(const SourceFile& source, const std::vector<Token>& tokens,
         std::size_t end = begin;
         while (end < tokens.size() && tokens[end].text != ";" &&
                tokens[end].text != "," && tokens[end].kind != TokenKind::End) ++end;
-        const auto actual = expression_type(tokens, begin, end, binding, types);
-        if (actual != types.store.unknown() && actual != expected)
+        const auto expression = expression_type(tokens, begin, end, binding, types);
+        report_expression_error(source, tokens, expression, diagnostics);
+        const auto actual = expression.type;
+        if (expression.error.empty() && actual != types.store.unknown() && actual != expected)
             report_mismatch(source, tokens, begin, actual, expected, types.store, diagnostics);
     }
     return !diagnostics.has_errors();

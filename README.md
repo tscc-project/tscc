@@ -21,7 +21,7 @@ This historical first checkpoint was intentionally not a type checker. Later che
 
 tscc now has a separate `Checker` pass and a deliberately narrow type contract. For simple variable declarations, explicit `number`, `string`, and `boolean` annotations are checked against direct primitive literal initializers (including signed numeric literals). Those annotated primitive facts also flow through bound identifier initializers and direct assignments, so `const text: string = "x"; const value: number = text` is rejected with a source-positioned diagnostic.
 
-This is the beginning of type checking, not a general TypeScript type system. Unions, object types, inference, compound/destructuring assignments, calls, functions, properties, generics, and narrowing remain unchecked. A bounded binder protects ordinary variable/function/parameter identity and is used by both the checker and CommonJS live-import rewriting, but many binding forms remain on the legacy compatibility path. The independent 514-case corpus records 487 passes, no failures, and 27 explicit semantic skips.
+This is the beginning of type checking, not a general TypeScript type system. A bounded primitive expression grammar now covers parentheses, unary operators, additive and multiplicative arithmetic over literals and bound identifiers. Unions, object types, inference, compound/destructuring assignments, calls, functions, properties, generics, logical/conditional expressions and narrowing remain unchecked. The independent 516-case corpus records 489 passes, no failures, and 27 explicit semantic skips.
 
 ## CLI
 

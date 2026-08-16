@@ -222,6 +222,12 @@ number, string, boolean, and bigint identities. This removes checker-private typ
 identity without pretending to establish unions, literals, objects, functions,
 or inference.
 
+`PrimitiveExpressionTyper` is the first expression-semantic consumer. It parses a
+bounded grammar of literals, bound identifiers, parentheses, unary `+ - ~ !
+typeof`, and additive/multiplicative arithmetic with precedence. Unknown or
+unconsumed expression forms remain outside the slice; known invalid primitive
+operator pairs receive semantic diagnostics.
+
 The Makefile emits and includes compiler dependency files (`-MMD -MP`). This is a
 correctness invariant for incremental native development: semantic-header layout
 changes must rebuild every consumer rather than linking ABI-incompatible stale

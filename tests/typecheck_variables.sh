@@ -70,4 +70,25 @@ if "$ROOT/tscc" --pretty false --noEmit "$TMP/assignment-mismatch.ts" >"$TMP/ass
 fi
 grep -Fq "Type 'string' is not assignable to type 'number'." "$TMP/assign.err"
 
+cat >"$TMP/expressions-valid.ts" <<'TS'
+const left: number = 2;
+const right: number = 3;
+const arithmetic: number = left + right * 4;
+const grouped: number = (left + right) * 4;
+const negative: number = -left;
+const inverted: number = ~right;
+const truthy: boolean = !left;
+const kind: string = typeof left;
+const big: bigint = 2n * 3n;
+const text: string = "value=" + left;
+TS
+"$ROOT/tscc" --pretty false --noEmit "$TMP/expressions-valid.ts" >/dev/null
+
+printf '%s\n' 'const value = "wrong" - 1;' >"$TMP/operator-mismatch.ts"
+if "$ROOT/tscc" --pretty false --noEmit "$TMP/operator-mismatch.ts" >"$TMP/op.out" 2>"$TMP/op.err"; then
+    echo "invalid primitive operator unexpectedly succeeded" >&2
+    exit 1
+fi
+grep -Fq "Operator '-' cannot be applied to types 'string' and 'number'." "$TMP/op.err"
+
 printf 'tscc primitive variable type-check test passed\n'

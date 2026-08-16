@@ -175,8 +175,10 @@ These are bounded current directions and must be revised after each checkpoint:
 7. **Completed durable type ownership:** `TypeModel` owns canonical primitive and
    special type IDs plus bound-symbol facts for the program lifetime. The store is
    intentionally small; add composite types only with a complete semantic slice.
-8. **Next expression slice:** choose one complete unary/binary primitive operator
-   family before introducing inference or control-flow state.
+8. **Completed primitive expression slice:** a bounded precedence grammar covers
+   primitive unary, additive and multiplicative expressions over literals and
+   bound identifiers. Logical/comparison/conditional/call/property expressions,
+   inference and control flow remain outside it.
 
 Every checkpoint requires unchanged/equivalent transpiler output and runtime
 evidence plus measured performance/RSS impact. Do not require the entire language
