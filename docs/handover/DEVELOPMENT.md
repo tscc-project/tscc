@@ -3,8 +3,9 @@
 ## Establish the baseline
 
 Record branch/commit/status, version, compiler/reference/Node versions, and
-current focused/full results. Preserve unexplained files. Run validation relevant
-to the intended stage; remember that `make test` alone is not the complete set.
+current focused/full results. Preserve unexplained files. `make test` is now the
+aggregate correctness gate; add sanitizer, fuzz/stress, performance, packaging,
+and platform evidence separately when the checkpoint's risk requires them.
 
 ## Define a bounded semantic slice
 
@@ -54,3 +55,11 @@ scope/binding architectural weakness outranks planned syntax accumulation. Real
 project failures may reorder the roadmap. Items can shrink or disappear when
 evidence shows them unnecessary.
 
+The Minify++ 2026-08 fuzz-hardening checkpoint is the reference precedent: when
+new evidence interrupts planned infrastructure or compiler work, minimize it,
+identify the semantic family, retain exact and property-level protection, fix the
+responsible architectural boundary, and then resume the original campaign. For
+tscc, translate a single shadowing, malformed-input, or bad-emit failure into a
+binding, recovery, or source-edit invariant question before considering a local
+special case. Record what the checkpoint teaches in this workflow and the living
+roadmap so the lesson survives the current development context.
