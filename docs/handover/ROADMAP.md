@@ -126,11 +126,11 @@ deliberate trade-offs rather than hidden inside semantic progress.
 
 ## Reconciliation findings to resolve
 
-- Pin or define the supported TypeScript oracle range. TypeScript 7.0.2 removed
-  the smoke test's `--module none` mode and changed one semantic-only corpus
-  classification.
-- Refresh the standalone suite's stale 265-case README count and automate parity
-  checks between the local mirror and canonical independent corpus.
+- Pin or define the supported TypeScript oracle range. The 2026-08-16 baseline is
+  green on TypeScript 7.0.2 after making module modes explicit; upgrades still
+  require complete-suite classification rather than relying on ambient defaults.
+- Automate parity checks between the local mirror and canonical independent
+  corpus; the stale case count and TypeScript 7 oracle drift are resolved.
 - Decide whether `ModuleGraph` should become the driver implementation or remain
   separately tested infrastructure; avoid maintaining two traversal paths without
   an explicit reason.

@@ -8,11 +8,11 @@ tscc: $(OBJECTS)
 	$(CXX) $(CXXFLAGS) $(OBJECTS) -o $@
 %.o: %.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
-test: tscc
+test-smoke: tscc
 	bash tests/smoke.sh
 clean:
 	rm -f $(OBJECTS) tscc
-.PHONY: all test clean
+.PHONY: all test test-smoke test-parser test-runtime test-project test-regression test-tsx test-commonjs clean
 
 
 test-parser:
@@ -33,3 +33,5 @@ test-tsx: tscc
 
 test-commonjs: tscc
 	bash tests/commonjs_modules.sh
+
+test: test-smoke test-parser test-runtime test-project test-regression test-tsx test-commonjs

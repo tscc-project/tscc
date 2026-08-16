@@ -54,7 +54,10 @@ with tempfile.TemporaryDirectory(prefix='tscc-reg-ref-') as td:
     # isolated from one another's globals without changing their syntax.
     sem_files=[str(p) for _,p in by_kind['semantic-only']]
     if sem_files:
-        full=subprocess.run(['tsc','--pretty','false','--target','es2022','--moduleDetection','force','--skipLibCheck','--noEmit',*sem_files],capture_output=True,text=True)
+        # Keep the semantic oracle independent of TypeScript's changing default
+        # module mode. These cases historically exercise the CommonJS checking
+        # contract; TypeScript 7 changed its implicit default to preserve.
+        full=subprocess.run(['tsc','--pretty','false','--target','es2022','--module','commonjs','--moduleDetection','force','--skipLibCheck','--noEmit',*sem_files],capture_output=True,text=True)
         full_diags=diag_files(full.stdout+full.stderr,file_map)
         for c,_ in by_kind['semantic-only']:
             if reference_status[c['name']]=='pending-semantic':

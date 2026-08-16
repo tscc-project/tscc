@@ -18,19 +18,17 @@ with a candidate executable. Runtime cases execute emitted JavaScript under Node
 emit cases assert required/forbidden structure; syntax negatives require
 controlled rejection; semantic-only cases remain skips until a checker exists.
 
-The inherited retained checkpoint was 511 cases, 483 pass, zero fail, and 28
-semantic-only skips. Reproduction on 2026-08-16 with Node v22.22.1 and the
-`tsc` found on `PATH` (TypeScript 7.0.2) produced 483 pass, one fail, and 27
-skips. The changed case is `semantic-import-meta-commonjs`: its expected
-semantic-only classification no longer matches that reference compiler. Treat
-this as unpinned-oracle drift until the intended TypeScript range is decided.
+The 2026-08-16 baseline contains 511 cases: 483 pass, zero fail, and 28
+semantic-only skips with Node v22.22.1 and TypeScript 7.0.2. TypeScript 7 changed
+its implicit module default, which initially reclassified
+`semantic-import-meta-commonjs`; the runner now explicitly uses CommonJS for its
+semantic oracle. The smoke differential uses the supported `preserve` mode in
+place of TypeScript 7's removed `none` mode.
 
-The focused parser, runtime/generics, project/module, TSX-preserve, and CommonJS
-targets all passed in the same run. The general `make test` smoke target did not:
-it invokes `tsc --module none`, which TypeScript 7 no longer accepts. Its earlier
-tscc and Node checks passed before the reference command failed. Update the oracle
-invocation deliberately; do not hide the incompatibility by treating the whole
-smoke result as compiler failure or success.
+`make test` is the complete local correctness entry point and runs smoke, parser,
+runtime/generics, project/module, regression, TSX-preserve, and CommonJS targets.
+Keep focused targets available for iteration, but require the aggregate target at
+checkpoints.
 
 ## Feature test dimensions
 
@@ -89,9 +87,9 @@ ambient `PATH`.
 
 ## Suite synchronization
 
-The local and standalone corpora currently match byte-for-byte for README, bug
-log, cases, and runner; only regression notes differ. Establish canonical
-ownership and an automated comparison.
+The local and standalone corpora currently match byte-for-byte for README, cases,
+and runner; only repository-specific notes differ. Establish canonical ownership
+and an automated comparison.
 Do not keep two manually diverging “canonical” suites.
 
 ## Environment and determinism

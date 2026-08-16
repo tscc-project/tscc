@@ -23,7 +23,7 @@ node "$TMP/out/basic.js" | grep -Fx 'Ada!'
 "$ROOT/tscc" --help | grep -Fq -- '--outDir'
 printf 'const x: string = "ok";\n' > "$TMP/compare.ts"
 "$ROOT/tscc" --outDir "$TMP/ours" "$TMP/compare.ts" >/dev/null
-tsc --target es2022 --module none --outDir "$TMP/tsc" "$TMP/compare.ts"
+tsc --target es2022 --module preserve --outDir "$TMP/tsc" "$TMP/compare.ts"
 node --check "$TMP/ours/compare.js"
 printf 'tscc smoke test passed\n'
 
