@@ -177,11 +177,12 @@ decided.
 
 Current `Replacement` already represents erase, replacement, and insertion:
 `begin == end` is an insertion. Parser erasures are sorted ascending; replacements
-from parser and CommonJS passes are sorted descending before application so
-original source offsets remain usable. There is not currently a general validator
-that proves all edits are non-overlapping and composition-safe. As transform
-ownership grows, add explicit edit-conflict invariants rather than relying only on
-individual passes to avoid collisions.
+from parser and CommonJS passes are applied through `SourceEdit`. Original source
+offsets remain usable because edits are ordered from the end of the source.
+Non-empty replacements may be adjacent but not overlap, insertions may share a
+boundary, and same-position insertion text retains producer order. Invalid ranges,
+overlaps, and insertions inside replaced spans are diagnosed before mutation.
+Parser erasures remain composable blanking ranges and may overlap safely.
 
 The original `SourceFile` should remain authoritative for unchanged bytes; the
 durable syntax overlay should be authoritative for meaning; the validated edit
@@ -208,7 +209,7 @@ Use these labels deliberately:
 - **Hypothesis to test:** a promising direction that still requires measurements
   and implementation evidence.
 
-Current pressures include anonymous edit provenance and unvalidated composition,
+Current pressures include anonymous edit provenance beyond conflict diagnostics,
 transform-local shadow reasoning, parallel dependency traversal paths, regex-based
 configuration extraction, and per-file opportunistic output writes. A useful
 migration bridge will be semantic nodes retaining original source spans so an

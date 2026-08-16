@@ -2,6 +2,7 @@
 #include "Checker.h"
 #include "Lexer.h"
 #include "Parser.h"
+#include "SourceEdit.h"
 #include <algorithm>
 #include <unordered_map>
 #include <unordered_set>
@@ -922,13 +923,7 @@ bool transpile_tokens(const SourceFile& source, const std::vector<Token>& tokens
         collect_commonjs_replacements(out,tokens,replacements,imported_bindings,diagnostics);
         add_live_import_reference_replacements(tokens,imported_bindings,replacements);
     }
-    std::sort(replacements.begin(), replacements.end(),
-              [](const Replacement& a, const Replacement& b) {
-                  if (a.begin != b.begin) return a.begin > b.begin;
-                  return a.end > b.end;
-              });
-    for (const auto& replacement : replacements)
-        out.replace(replacement.begin, replacement.end - replacement.begin, replacement.text);
+    if (!apply_replacements(source, out, replacements, diagnostics)) return false;
 
     // Trim erasure-introduced trailing spaces while preserving line shape.
     std::string clean;

@@ -145,10 +145,10 @@ deliberate trade-offs rather than hidden inside semantic progress.
 
 These are bounded current directions and must be revised after each checkpoint:
 
-1. **Edit invariants:** inventory every erasure/replacement/insertion producer and
-   current adjacent, nested, overlapping, same-position, parser-plus-module pattern;
-   define deterministic boundary and insertion ordering; attach lightweight pass
-   provenance if useful; validate before application; add conflict regressions.
+1. **Completed — edit invariants:** replacement composition now has deterministic
+   boundary/insertion ordering and rejects conflicts before source mutation.
+   Erasures remain idempotent source blanking; add provenance only when diagnostics
+   or a newly observed conflict family justifies its cost.
 2. **Structural foundation:** introduce a small coherent node/span slice needed for
    declarations, blocks, functions, parameters, identifier references, returns,
    and initial binding without changing output.
@@ -160,10 +160,13 @@ These are bounded current directions and must be revised after each checkpoint:
 4. **Production migration bridge:** route one existing shadow-sensitive transform
    through binder identity, compare it against the protected legacy heuristic,
    prove equivalent or better behavior, then retire that heuristic.
-5. **Minimal types:** add only the canonical primitive/special types required for
-   the first annotation slice and measure their representation cost.
-6. **First checking slice:** check annotation/initializer compatibility with both
-   positive and negative diagnostics, then let the result determine the next slice.
+5. **Completed first experiment — minimal literal types:** the first checker owns
+   primitive annotations and direct literal initializer compatibility. Move these
+   type facts onto bound declarations rather than broadening expression syntax yet.
+6. **Next checking slice:** check primitive compatibility through bound identifier
+   references and direct assignments, with shadowing-aware positive and negative
+   diagnostics. Keep unions, structural object types, calls, and narrowing outside
+   this slice.
 
 Every checkpoint requires unchanged/equivalent transpiler output and runtime
 evidence plus measured performance/RSS impact. Do not require the entire language
