@@ -721,6 +721,7 @@ static bool object_literal_context(const std::vector<Token>& tokens, std::size_t
 static void add_live_import_reference_replacements(
     const std::vector<Token>& tokens,
     const std::unordered_map<std::string, ImportedBinding>& bindings,
+    const BindingModel& binding_model,
     std::vector<Replacement>& replacements) {
 
     // Templates are a single lexer token. Rewrite all imported identifiers in
@@ -759,6 +760,12 @@ static void add_live_import_reference_replacements(
             if(tok.kind==TokenKind::Template) continue;
             if(tok.kind!=TokenKind::Identifier || tok.text!=name) continue;
             if(tok.begin>=binding.declaration_begin&&tok.begin<binding.declaration_end) continue;
+            // An ordinary identifier resolved by the binder belongs to a local
+            // declaration and is not a live reference to the imported binding.
+            // The legacy shadow ranges remain as a compatibility bridge for
+            // destructuring, arrows, catch bindings, classes and other binding
+            // forms outside the first binder contract.
+            if (binding_model.symbol_for_reference(i) != static_cast<std::size_t>(-1)) continue;
             std::size_t statement_start=i;
             while(statement_start>0 && tokens[statement_start-1].text!=";" &&
                   tokens[statement_start-1].kind!=TokenKind::End) --statement_start;
@@ -926,7 +933,7 @@ bool transpile_tokens(const SourceFile& source, const std::vector<Token>& tokens
     if (options.module=="commonjs") {
         std::unordered_map<std::string, ImportedBinding> imported_bindings;
         collect_commonjs_replacements(out,tokens,replacements,imported_bindings,diagnostics);
-        add_live_import_reference_replacements(tokens,imported_bindings,replacements);
+        add_live_import_reference_replacements(tokens,imported_bindings,binding,replacements);
     }
     if (!apply_replacements(source, out, replacements, diagnostics)) return false;
 

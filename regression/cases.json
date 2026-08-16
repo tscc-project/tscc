@@ -2729,6 +2729,23 @@
     ]
   },
   {
+    "name": "cjs-import-function-var-shadow",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {a} from './m';function f(){var a:number=2;return a}console.log(f(),a);",
+    "contains": [
+      "var a       =2;return a",
+      "console.log(f(),__tscc_mod0.a)"
+    ],
+    "not_contains": [
+      "var __tscc_mod0.a",
+      "return __tscc_mod0.a"
+    ]
+  },
+  {
     "name": "cjs-import-catch-shadow",
     "kind": "emit",
     "args": [

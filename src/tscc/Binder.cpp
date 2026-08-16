@@ -26,6 +26,21 @@ std::size_t resolve(const BindingModel& binding, std::size_t scope, const std::s
         scope = binding.scopes[scope].parent;
     }
 }
+
+bool in_for_header(const std::vector<Token>& tokens, std::size_t token) {
+    int depth = 0;
+    for (std::size_t i = token; i > 0;) {
+        --i;
+        if (tokens[i].text == ")") { ++depth; continue; }
+        if (tokens[i].text == "(") {
+            if (depth) { --depth; continue; }
+            return i > 0 && tokens[i-1].text == "for";
+        }
+        if (!depth && (tokens[i].text == ";" || tokens[i].text == "{" ||
+                       tokens[i].text == "}")) return false;
+    }
+    return false;
+}
 }
 
 std::size_t BindingModel::symbol_for_reference(std::size_t token) const {
@@ -77,6 +92,9 @@ BindingModel bind_semantic_model(const std::vector<Token>& tokens, const Program
         if (node.kind != SemanticNodeKind::VariableDeclaration &&
             node.kind != SemanticNodeKind::ParameterDeclaration) continue;
         if (node.name_token == missing || node.name_token >= tokens.size()) continue;
+        if (node.kind == SemanticNodeKind::VariableDeclaration &&
+            in_for_header(tokens, node.name_token))
+            continue; // Loop binding extent remains owned by the legacy bridge.
         auto scope = containing_scope(binding, node.name_token);
         SymbolKind kind = node.kind == SemanticNodeKind::ParameterDeclaration
                               ? SymbolKind::Parameter : SymbolKind::Variable;

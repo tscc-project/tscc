@@ -206,6 +206,13 @@ create empty scopes around object literals; because lookup walks outward and no
 object-property declarations are introduced, this is conservative for the current
 subset rather than a claim that every brace is semantically a block.
 
+CommonJS live-import reference rewriting is the first production consumer of
+bound identity. Resolved ordinary local identifiers are excluded from imported
+binding rewrites; this fixed function-local `var` shadowing that the previous
+range heuristic missed. The range heuristic remains an explicit migration bridge
+for arrows, destructuring, catch/loop/class bindings, templates, and other forms
+outside the binder's current contract.
+
 The Makefile emits and includes compiler dependency files (`-MMD -MP`). This is a
 correctness invariant for incremental native development: semantic-header layout
 changes must rebuild every consumer rather than linking ABI-incompatible stale

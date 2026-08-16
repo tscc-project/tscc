@@ -159,9 +159,11 @@ These are bounded current directions and must be revised after each checkpoint:
    nested functions, closure references, and lexical shadowing now have stable
    symbol identity. Destructuring, arrows, imports, classes/members, full hoisting,
    and default-parameter temporal semantics remain explicit future slices.
-4. **Production migration bridge:** route one existing shadow-sensitive transform
-   through binder identity, compare it against the protected legacy heuristic,
-   prove equivalent or better behavior, then retire that heuristic.
+4. **Completed first production migration bridge:** CommonJS live-import rewriting
+   now consults bound identity for ordinary local references and retains legacy
+   shadow ranges for unsupported binding forms. The migration found and fixed a
+   function-local `var` shadowing bug. Retire each remaining heuristic branch only
+   as its binding form enters the protected binder contract.
 5. **Completed first experiment — minimal literal types:** the first checker owns
    primitive annotations and direct literal initializer compatibility. Move these
    type facts onto bound declarations rather than broadening expression syntax yet.
