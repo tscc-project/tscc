@@ -149,9 +149,11 @@ These are bounded current directions and must be revised after each checkpoint:
    boundary/insertion ordering and rejects conflicts before source mutation.
    Erasures remain idempotent source blanking; add provenance only when diagnostics
    or a newly observed conflict family justifies its cost.
-2. **Structural foundation:** introduce a small coherent node/span slice needed for
-   declarations, blocks, functions, parameters, identifier references, returns,
-   and initial binding without changing output.
+2. **Completed first structural foundation:** the lightweight semantic overlay now
+   retains declaration, function, parameter, brace-region, and return spans and is
+   consumed by the checker without changing output. Identifier references and
+   semantic scope classification belong to the binder checkpoint rather than being
+   guessed by this neutral structural layer.
 3. **Binder foundation:** establish correct global/module, function, parameter, and
    block semantics for the supported subset; directly test declaration/reference
    identity, `var` versus lexical declarations, shadowing, nested functions,

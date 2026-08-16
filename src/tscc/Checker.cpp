@@ -57,8 +57,12 @@ const char* type_name(PrimitiveType type) {
 }
 
 bool check_program(const SourceFile& source, const std::vector<Token>& tokens,
-                   const Program& program, Diagnostics& diagnostics) {
-    for (const auto& declaration : program.variables) {
+                   const Program& program, const SemanticModel& model,
+                   Diagnostics& diagnostics) {
+    for (const auto& node : model.nodes) {
+        if (node.kind != SemanticNodeKind::VariableDeclaration ||
+            node.variable_index >= program.variables.size()) continue;
+        const auto& declaration = program.variables[node.variable_index];
         const auto expected = annotation_type(tokens, declaration);
         if (expected == PrimitiveType::Unsupported ||
             declaration.initializer_end_token <= declaration.initializer_begin_token)

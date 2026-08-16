@@ -2,6 +2,7 @@
 #include "tscc/Lexer.h"
 #include "tscc/Parser.h"
 #include "tscc/Source.h"
+#include "tscc/Semantic.h"
 #include <cstdlib>
 #include <iostream>
 #include <string>
@@ -60,6 +61,23 @@ const typedObject: {name: string; x: number} = {name: "Grace", x: 2};
         fail("unexpected top-level syntax tree shape");
     if (program.erasures.size() < 10) fail("parser did not record expected TypeScript erasures");
     if (program.variables.size() < 5) fail("parser did not retain variable declaration facts");
+
+    const auto semantic = build_semantic_model(tokens, program);
+    std::size_t declarations=0, functions_semantic=0, parameters=0, braces=0, returns=0;
+    for (const auto& node : semantic.nodes) {
+        if (node.begin_token > node.end_token || node.end_token > tokens.size())
+            fail("semantic node has invalid source span");
+        switch (node.kind) {
+            case SemanticNodeKind::VariableDeclaration: ++declarations; break;
+            case SemanticNodeKind::FunctionDeclaration: ++functions_semantic; break;
+            case SemanticNodeKind::ParameterDeclaration: ++parameters; break;
+            case SemanticNodeKind::BraceRegion: ++braces; break;
+            case SemanticNodeKind::ReturnStatement: ++returns; break;
+        }
+    }
+    if (declarations != program.variables.size() || functions_semantic != 1 ||
+        parameters != 2 || braces < 5 || returns < 3)
+        fail("unexpected lightweight semantic model shape");
 
     // Object-literal colons must not be parser-owned erasures.
     const auto object_colon = source.text.find("name: \"Ada\"");

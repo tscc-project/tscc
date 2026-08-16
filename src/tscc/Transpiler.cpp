@@ -3,6 +3,7 @@
 #include "Lexer.h"
 #include "Parser.h"
 #include "SourceEdit.h"
+#include "Semantic.h"
 #include <algorithm>
 #include <unordered_map>
 #include <unordered_set>
@@ -791,7 +792,8 @@ bool transpile_tokens(const SourceFile& source, const std::vector<Token>& tokens
     Program program;
     Parser parser(source, tokens, diagnostics);
     if (!parser.parse(program)) return false;
-    if (!check_program(source, tokens, program, diagnostics)) return false;
+    const auto semantic = build_semantic_model(tokens, program);
+    if (!check_program(source, tokens, program, semantic, diagnostics)) return false;
 
     out = source.text;
     for (const auto& range : program.erasures)

@@ -30,7 +30,11 @@ main.cpp CLI parsing / optional tsconfig loading
 This remains primarily an ES2022-oriented native transpiler and is not a
 conventional bound/typed AST compiler. `Program::root` is a deliberately small
 structural tree; most transformation intent is represented by byte-based
-`EraseRange` and `Replacement` records. The first semantic seam retains simple
+`EraseRange` and `Replacement` records. A lightweight `SemanticModel` now retains
+source/token spans for variable and parameter declarations, function declarations,
+brace regions, and returns without taking ownership of emission. The first checker
+consumes its variable-declaration nodes, so the overlay is connected to production
+compilation rather than being a parallel unused tree. The first semantic seam retains simple
 `VariableDeclaration` token ranges before erasure, then `Checker` compares direct
 primitive literal initializers with explicit `number`, `string`, or `boolean`
 annotations. There is still no binder, symbol table, general type model, inference,
@@ -184,8 +188,9 @@ boundary, and same-position insertion text retains producer order. Invalid range
 overlaps, and insertions inside replaced spans are diagnosed before mutation.
 Parser erasures remain composable blanking ranges and may overlap safely.
 
-The original `SourceFile` should remain authoritative for unchanged bytes; the
-durable syntax overlay should be authoritative for meaning; the validated edit
+The original `SourceFile` remains authoritative for unchanged bytes; the compact
+semantic overlay is becoming authoritative for the bounded meanings it represents;
+the validated edit
 set should be authoritative for changed bytes. This can reduce pressure to store
 formatting trivia or duplicate token text in every semantic node. It is a current
 architectural hypothesis—not yet a benchmark-proven final design—that this compact
