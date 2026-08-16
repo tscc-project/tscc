@@ -5,8 +5,10 @@
 #include "Syntax.h"
 #include "Semantic.h"
 #include "Binder.h"
+#include "Type.h"
 
 namespace tscc {
 bool check_program(const SourceFile&, const std::vector<Token>&, const Program&,
-                   const SemanticModel&, const BindingModel&, Diagnostics&);
+                   const SemanticModel&, const BindingModel&, const TypeModel&,
+                   Diagnostics&);
 }

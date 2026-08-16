@@ -172,9 +172,11 @@ These are bounded current directions and must be revised after each checkpoint:
    positive and negative diagnostics. Unions, structural object types, calls,
    inference, compound/destructuring assignment, and narrowing remain outside it.
 
-The next type-model checkpoint should make primitive/special type facts durable,
-then choose one complete expression family (likely unary/binary primitive
-operators) before introducing inference or control-flow state.
+7. **Completed durable type ownership:** `TypeModel` owns canonical primitive and
+   special type IDs plus bound-symbol facts for the program lifetime. The store is
+   intentionally small; add composite types only with a complete semantic slice.
+8. **Next expression slice:** choose one complete unary/binary primitive operator
+   family before introducing inference or control-flow state.
 
 Every checkpoint requires unchanged/equivalent transpiler output and runtime
 evidence plus measured performance/RSS impact. Do not require the entire language
