@@ -212,6 +212,27 @@ tables and cross-file type propagation remain valuable, but should follow a clea
 file-local callable/object type contract rather than transporting only `unknown`
 facts between files.
 
+## 2026-08-17 campaign assessment
+
+The twelve-checkpoint architecture campaign passes:
+
+- clean optimized build and every focused/integration test;
+- independent and mirrored 519-case corpus at 492 pass, zero fail, 27 deliberate
+  semantic skips under TypeScript 7.0.2;
+- ASan+UBSan build and full test suite with no sanitizer finding;
+- a build/test from a clean `git archive` of committed `HEAD`;
+- five-run performance medians of 1.575 ms small, 6.827 ms/100 basic files,
+  25.529 ms/500 basic files, 8.480 ms/100 feature-heavy files, and
+  9.391 ms/100 advanced files.
+
+The candid result is not “production-ready TypeScript checker.” It is a stronger,
+well-protected experimental transpiler and compiler foundation whose semantic
+architecture is now real and used in production paths. The remaining gap is
+fundamental language scope: callable/composite types, richer binding forms,
+inference/control flow, module export/type graphs, libraries/packages, broad
+diagnostics, fuzzing, representative projects, platforms, and packaging. Do not
+convert green infrastructure evidence into a compatibility claim.
+
 ## Roadmap response to evidence
 
 If a feature reveals a binding/transform-ownership deficiency, prioritize that
