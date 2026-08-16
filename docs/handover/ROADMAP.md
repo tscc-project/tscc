@@ -167,10 +167,14 @@ These are bounded current directions and must be revised after each checkpoint:
 5. **Completed first experiment — minimal literal types:** the first checker owns
    primitive annotations and direct literal initializer compatibility. Move these
    type facts onto bound declarations rather than broadening expression syntax yet.
-6. **Next checking slice:** check primitive compatibility through bound identifier
-   references and direct assignments, with shadowing-aware positive and negative
-   diagnostics. Keep unions, structural object types, calls, and narrowing outside
-   this slice.
+6. **Completed bound primitive checking slice:** annotated primitive facts flow
+   through bound identifier initializers and direct assignments with shadow-aware
+   positive and negative diagnostics. Unions, structural object types, calls,
+   inference, compound/destructuring assignment, and narrowing remain outside it.
+
+The next type-model checkpoint should make primitive/special type facts durable,
+then choose one complete expression family (likely unary/binary primitive
+operators) before introducing inference or control-flow state.
 
 Every checkpoint requires unchanged/equivalent transpiler output and runtime
 evidence plus measured performance/RSS impact. Do not require the entire language

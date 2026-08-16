@@ -17,11 +17,11 @@ Currently exercised syntax includes `interface` and `type` erasure, common type 
 
 This historical first checkpoint was intentionally not a type checker. Later checkpoints added enums, namespaces, TSX preservation, relative module traversal, CommonJS lowering, and a supported `tsconfig.json` subset; consult the current capability sections and tests rather than treating this chronology as a support matrix.
 
-## First semantic checking slice
+## Bounded semantic checking slice
 
-tscc now has a separate `Checker` pass and its first deliberately narrow type contract. For simple variable declarations, explicit `number`, `string`, and `boolean` annotations are checked against direct primitive literal initializers (including signed numeric literals). For example, `const value: number = "no"` is rejected with a source-positioned diagnostic.
+tscc now has a separate `Checker` pass and a deliberately narrow type contract. For simple variable declarations, explicit `number`, `string`, and `boolean` annotations are checked against direct primitive literal initializers (including signed numeric literals). Those annotated primitive facts also flow through bound identifier initializers and direct assignments, so `const text: string = "x"; const value: number = text` is rejected with a source-positioned diagnostic.
 
-This is the beginning of type checking, not a general TypeScript type system. Unions, object types, inference, assignments, calls, functions, properties, generics, and narrowing remain unchecked. A bounded binder now protects ordinary variable/function/parameter identity and is used by CommonJS live-import rewriting, but many binding forms remain on the legacy compatibility path. The independent 512-case corpus records 485 passes, no failures, and 27 explicit semantic skips.
+This is the beginning of type checking, not a general TypeScript type system. Unions, object types, inference, compound/destructuring assignments, calls, functions, properties, generics, and narrowing remain unchecked. A bounded binder protects ordinary variable/function/parameter identity and is used by both the checker and CommonJS live-import rewriting, but many binding forms remain on the legacy compatibility path. The independent 514-case corpus records 487 passes, no failures, and 27 explicit semantic skips.
 
 ## CLI
 

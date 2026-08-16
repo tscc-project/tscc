@@ -12,9 +12,10 @@ This is the entry point for developers and coding agents working on tscc. Read
   written in C++17.
 - Current default target: `es2022`; default module mode: `preserve`.
 - Build: Make.
-- The first deliberately bounded semantic checker slice is active: primitive
-  `number`, `string`, and `boolean` annotations are checked against direct
-  literal initializers. This is not yet a general TypeScript type checker.
+- A deliberately bounded semantic checker slice is active: primitive `number`,
+  `string`, and `boolean` annotations are checked against direct literals and
+  annotated primitive facts flowing through bound identifier initializers and
+  direct assignments. This is not yet a general TypeScript type checker.
 
 Source and tests define current behavior. The internal and standalone regression
 corpora define executable compatibility evidence. README/website claims must stay
@@ -59,9 +60,9 @@ erasure, generics, enums, namespaces, parameter properties, project/relative
 module discovery, TSX preserve mode, CommonJS lowering with live imported reads,
 module grammar hardening, scope/shadowing work, and import attributes.
 
-The independent corpus currently contains 512 cases: 485 pass, zero fail, and 27
+The independent corpus currently contains 514 cases: 487 pass, zero fail, and 27
 semantic-checker-only skips at the retained checkpoint. Counts are evidence, not
-the product definition. One semantic case is implemented; the project is not
+the product definition. Three semantic cases are implemented; the project is not
 implicitly a drop-in replacement for all `tsc` behavior.
 
 ## Build and validation

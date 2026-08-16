@@ -35,4 +35,39 @@ if "$ROOT/tscc" --pretty false --noEmit "$TMP/bigint.ts" >"$TMP/bigint.out" 2>"$
 fi
 grep -Fq "Type 'bigint' is not assignable to type 'number'." "$TMP/bigint.err"
 
+cat >"$TMP/references-valid.ts" <<'TS'
+const text: string = "ready";
+const copy: string = text;
+let count: number = 1;
+const next: number = 2;
+count = next;
+{
+    const text: number = 3;
+    const local: number = text;
+}
+const outer: string = text;
+TS
+"$ROOT/tscc" --pretty false --noEmit "$TMP/references-valid.ts" >/dev/null
+
+cat >"$TMP/reference-mismatch.ts" <<'TS'
+const source: string = "wrong";
+const value: number = source;
+TS
+if "$ROOT/tscc" --pretty false --noEmit "$TMP/reference-mismatch.ts" >"$TMP/ref.out" 2>"$TMP/ref.err"; then
+    echo "bound identifier initializer mismatch unexpectedly succeeded" >&2
+    exit 1
+fi
+grep -Fq "Type 'string' is not assignable to type 'number'." "$TMP/ref.err"
+
+cat >"$TMP/assignment-mismatch.ts" <<'TS'
+let value: number = 1;
+const source: string = "wrong";
+value = source;
+TS
+if "$ROOT/tscc" --pretty false --noEmit "$TMP/assignment-mismatch.ts" >"$TMP/assign.out" 2>"$TMP/assign.err"; then
+    echo "bound direct assignment mismatch unexpectedly succeeded" >&2
+    exit 1
+fi
+grep -Fq "Type 'string' is not assignable to type 'number'." "$TMP/assign.err"
+
 printf 'tscc primitive variable type-check test passed\n'

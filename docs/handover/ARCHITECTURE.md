@@ -213,6 +213,13 @@ range heuristic missed. The range heuristic remains an explicit migration bridge
 for arrows, destructuring, catch/loop/class bindings, templates, and other forms
 outside the binder's current contract.
 
+The checker is the second bound-identity consumer. Primitive annotation facts are
+attached to bound variable symbols for the duration of checking, allowing simple
+identifier initializers and direct assignments to compare source and target types
+without textual-name ambiguity. Type facts are intentionally ephemeral until the
+next type-model checkpoint establishes ownership needed by wider expression and
+control-flow analysis.
+
 The Makefile emits and includes compiler dependency files (`-MMD -MP`). This is a
 correctness invariant for incremental native development: semantic-header layout
 changes must rebuild every consumer rather than linking ABI-incompatible stale

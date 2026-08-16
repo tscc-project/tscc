@@ -19,7 +19,7 @@ emit cases assert required/forbidden structure; syntax negatives require
 controlled rejection; semantic cases become candidate contracts one slice at a
 time and otherwise remain explicit skips.
 
-The binder-backed transform checkpoint contains 512 cases: 485 pass, zero fail, and 27
+The bound primitive checker checkpoint contains 514 cases: 487 pass, zero fail, and 27
 semantic-only skips with Node v22.22.1 and TypeScript 7.0.2. TypeScript 7 changed
 its implicit module default, which initially reclassified
 `semantic-import-meta-commonjs`; the runner now explicitly uses CommonJS for its
@@ -35,6 +35,12 @@ The retained `cjs-import-function-var-shadow` case proves the binder participate
 in production CommonJS emission: a function-local `var` must not be rewritten as
 the homonymous imported live binding. Legacy shadow-range coverage remains for
 binding forms outside the bounded binder contract.
+
+Three semantic-only cases are now active checker contracts: direct literal
+initializer mismatch, bound identifier initializer mismatch, and direct bound
+assignment mismatch. Positive focused tests cover matching types and lexical
+shadowing. Unsupported expression/type forms continue to skip rather than being
+rejected by syntax-shaped heuristics.
 
 ## Feature test dimensions
 

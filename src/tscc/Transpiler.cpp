@@ -803,7 +803,7 @@ bool transpile_tokens(const SourceFile& source, const std::vector<Token>& tokens
     const auto semantic = build_semantic_model(tokens, program);
     const auto binding = bind_semantic_model(tokens, program, semantic);
     (void)binding;
-    if (!check_program(source, tokens, program, semantic, diagnostics)) return false;
+    if (!check_program(source, tokens, program, semantic, binding, diagnostics)) return false;
 
     out = source.text;
     for (const auto& range : program.erasures)

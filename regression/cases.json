@@ -398,6 +398,22 @@
     "diagnostic_contains": "Type 'string' is not assignable to type 'number'."
   },
   {
+    "name": "semantic-bound-identifier-initializer-mismatch",
+    "kind": "semantic-only",
+    "src": "const source:string='wrong';const value:number=source;",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "Type 'string' is not assignable to type 'number'."
+  },
+  {
+    "name": "semantic-bound-direct-assignment-mismatch",
+    "kind": "semantic-only",
+    "src": "let value:number=1;const source:string='wrong';value=source;",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "Type 'string' is not assignable to type 'number'."
+  },
+  {
     "name": "semantic-missing-property",
     "kind": "semantic-only",
     "src": "interface X{a:number} const x:X={};",
