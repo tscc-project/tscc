@@ -161,6 +161,26 @@ void report_mismatch(const SourceFile& source, const std::vector<Token>& tokens,
         std::string("Type '") + types.name(actual) + "' is not assignable to type '" +
         types.name(expected) + "'.", source.line_text(line));
 }
+
+TypeId compound_result(const std::string& op, TypeId left, TypeId right,
+                       const TypeStore& types) {
+    if (left == types.unknown() || right == types.unknown()) return types.unknown();
+    const auto left_kind = types.kind(left), right_kind = types.kind(right);
+    if (op == "+=" && (left_kind == TypeKind::String || right_kind == TypeKind::String))
+        return types.string();
+    if (left_kind == TypeKind::Number && right_kind == TypeKind::Number) return types.number();
+    if (left_kind == TypeKind::BigInt && right_kind == TypeKind::BigInt) return types.bigint();
+    return types.unknown();
+}
+
+void report_operator_error(const SourceFile& source, const std::vector<Token>& tokens,
+                           std::size_t token, const std::string& op, TypeId left,
+                           TypeId right, const TypeStore& types, Diagnostics& diagnostics) {
+    const auto [line, column] = source.line_col(tokens[token].begin);
+    diagnostics.error(source.path, line, column,
+        std::string("Operator '") + op + "' cannot be applied to types '" +
+        types.name(left) + "' and '" + types.name(right) + "'.", source.line_text(line));
+}
 }
 
 bool check_program(const SourceFile& source, const std::vector<Token>& tokens,
@@ -191,27 +211,44 @@ bool check_program(const SourceFile& source, const std::vector<Token>& tokens,
 
     std::unordered_set<std::size_t> declaration_names;
     for (const auto& symbol : binding.symbols) declaration_names.insert(symbol.declaration_token);
-    for (std::size_t equals = 1; equals + 1 < tokens.size(); ++equals) {
-        if (tokens[equals].text != "=") continue;
-        std::size_t left = equals;
+    for (std::size_t assignment = 1; assignment + 1 < tokens.size(); ++assignment) {
+        const auto& op = tokens[assignment].text;
+        if (op != "=" && op != "+=" && op != "-=" && op != "*=" &&
+            op != "/=" && op != "%=" && op != "**=") continue;
+        std::size_t left = assignment;
         while (left > 0 && tokens[left-1].kind == TokenKind::Comment) --left;
         if (left == 0) continue;
         --left;
         if (tokens[left].kind != TokenKind::Identifier || declaration_names.count(left)) continue;
         const auto target_symbol = binding.symbol_for_reference(left);
         if (target_symbol >= types.symbol_types.size()) continue;
+        if (binding.symbols[target_symbol].variable_kind == VariableKind::Const) {
+            const auto [line, column] = source.line_col(tokens[left].begin);
+            diagnostics.error(source.path, line, column,
+                std::string("Cannot assign to '") + binding.symbols[target_symbol].name +
+                "' because it is a constant.", source.line_text(line));
+            continue;
+        }
         const auto expected = types.symbol_types[target_symbol];
         if (expected == types.store.unknown()) continue;
-        std::size_t begin = equals + 1;
+        std::size_t begin = assignment + 1;
         while (begin < tokens.size() && tokens[begin].kind == TokenKind::Comment) ++begin;
         std::size_t end = begin;
         while (end < tokens.size() && tokens[end].text != ";" &&
                tokens[end].text != "," && tokens[end].kind != TokenKind::End) ++end;
         const auto expression = expression_type(tokens, begin, end, binding, types);
         report_expression_error(source, tokens, expression, diagnostics);
-        const auto actual = expression.type;
-        if (expression.error.empty() && actual != types.store.unknown() && actual != expected)
-            report_mismatch(source, tokens, begin, actual, expected, types.store, diagnostics);
+        const auto rhs = expression.type;
+        if (!expression.error.empty() || rhs == types.store.unknown()) continue;
+        if (op == "=") {
+            if (rhs != expected)
+                report_mismatch(source, tokens, begin, rhs, expected, types.store, diagnostics);
+            continue;
+        }
+        const auto result = compound_result(op, expected, rhs, types.store);
+        if (result == types.store.unknown() || result != expected)
+            report_operator_error(source, tokens, assignment, op, expected, rhs,
+                                  types.store, diagnostics);
     }
     return !diagnostics.has_errors();
 }

@@ -91,4 +91,22 @@ if "$ROOT/tscc" --pretty false --noEmit "$TMP/operator-mismatch.ts" >"$TMP/op.ou
 fi
 grep -Fq "Operator '-' cannot be applied to types 'string' and 'number'." "$TMP/op.err"
 
+cat >"$TMP/compound-valid.ts" <<'TS'
+let count: number = 1;
+count += 2;
+count *= 3;
+let text: string = "count=";
+text += count;
+let big: bigint = 2n;
+big **= 3n;
+TS
+"$ROOT/tscc" --pretty false --noEmit "$TMP/compound-valid.ts" >/dev/null
+
+printf '%s\n' 'const fixed:number=1;fixed=2;' >"$TMP/const-assignment.ts"
+if "$ROOT/tscc" --pretty false --noEmit "$TMP/const-assignment.ts" >"$TMP/const.out" 2>"$TMP/const.err"; then
+    echo "const reassignment unexpectedly succeeded" >&2
+    exit 1
+fi
+grep -Fq "Cannot assign to 'fixed' because it is a constant." "$TMP/const.err"
+
 printf 'tscc primitive variable type-check test passed\n'

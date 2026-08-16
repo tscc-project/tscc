@@ -9,6 +9,7 @@
 namespace tscc {
 
 enum class SymbolKind { Variable, Parameter, Function };
+enum class VariableKind { None, Var, Let, Const };
 
 struct BoundScope {
     std::size_t begin_token = 0;
@@ -23,6 +24,7 @@ struct BoundSymbol {
     std::size_t declaration_token = 0;
     std::size_t scope = 0;
     std::size_t semantic_node = static_cast<std::size_t>(-1);
+    VariableKind variable_kind = VariableKind::None;
 };
 
 struct BoundReference {

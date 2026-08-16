@@ -60,9 +60,9 @@ erasure, generics, enums, namespaces, parameter properties, project/relative
 module discovery, TSX preserve mode, CommonJS lowering with live imported reads,
 module grammar hardening, scope/shadowing work, and import attributes.
 
-The independent corpus currently contains 516 cases: 489 pass, zero fail, and 27
+The independent corpus currently contains 518 cases: 491 pass, zero fail, and 27
 semantic-checker-only skips at the retained checkpoint. Counts are evidence, not
-the product definition. Five semantic cases are implemented; the project is not
+the product definition. Seven semantic cases are implemented; the project is not
 implicitly a drop-in replacement for all `tsc` behavior.
 
 ## Build and validation

@@ -98,6 +98,7 @@ BindingModel bind_semantic_model(const std::vector<Token>& tokens, const Program
         auto scope = containing_scope(binding, node.name_token);
         SymbolKind kind = node.kind == SemanticNodeKind::ParameterDeclaration
                               ? SymbolKind::Parameter : SymbolKind::Variable;
+        VariableKind variable_kind = VariableKind::None;
         if (kind == SymbolKind::Parameter) {
             for (std::size_t i = 1; i < binding.scopes.size(); ++i)
                 if (binding.scopes[i].begin_token == node.scope_token) { scope = i; break; }
@@ -106,11 +107,15 @@ BindingModel bind_semantic_model(const std::vector<Token>& tokens, const Program
             while (keyword > 0 && tokens[keyword].text != "var" && tokens[keyword].text != "let" &&
                    tokens[keyword].text != "const" && tokens[keyword].text != ";" &&
                    tokens[keyword].text != "{") --keyword;
+            if (tokens[keyword].text == "var") variable_kind = VariableKind::Var;
+            else if (tokens[keyword].text == "let") variable_kind = VariableKind::Let;
+            else if (tokens[keyword].text == "const") variable_kind = VariableKind::Const;
             if (tokens[keyword].text == "var")
                 while (scope != 0 && !binding.scopes[scope].function_scope)
                     scope = binding.scopes[scope].parent;
         }
-        binding.symbols.push_back({tokens[node.name_token].text, kind, node.name_token, scope, node_index});
+        binding.symbols.push_back({tokens[node.name_token].text, kind, node.name_token,
+                                   scope, node_index, variable_kind});
         declaration_tokens.insert(node.name_token);
     }
     for (const auto& symbol : binding.symbols) declaration_tokens.insert(symbol.declaration_token);
@@ -122,7 +127,8 @@ BindingModel bind_semantic_model(const std::vector<Token>& tokens, const Program
     };
     for (std::size_t i = 0; i < tokens.size(); ++i) {
         if (tokens[i].kind != TokenKind::Identifier || declaration_tokens.count(i) || in_type(i)) continue;
-        if (i > 0 && (tokens[i-1].text == "." || tokens[i-1].text == "?.")) continue;
+        if (i > 0 && (tokens[i-1].text == "." || tokens[i-1].text == "?." ||
+                      tokens[i-1].text == "#")) continue;
         if (i + 1 < tokens.size() && tokens[i+1].text == ":") continue;
         const auto scope = containing_scope(binding, i);
         binding.references.push_back({i, scope, resolve(binding, scope, tokens[i].text)});

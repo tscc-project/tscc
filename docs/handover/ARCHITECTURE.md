@@ -228,6 +228,12 @@ typeof`, and additive/multiplicative arithmetic with precedence. Unknown or
 unconsumed expression forms remain outside the slice; known invalid primitive
 operator pairs receive semantic diagnostics.
 
+Bound variable symbols retain `var`, `let`, or `const` identity. The checker uses
+that ownership for const-reassignment diagnostics and primitive compound
+assignment. Private names are explicitly excluded from ordinary lexical reference
+resolution; the full corpus caught the otherwise possible `#x` → unrelated `x`
+false binding during this checkpoint.
+
 The Makefile emits and includes compiler dependency files (`-MMD -MP`). This is a
 correctness invariant for incremental native development: semantic-header layout
 changes must rebuild every consumer rather than linking ABI-incompatible stale

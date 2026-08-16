@@ -179,6 +179,10 @@ These are bounded current directions and must be revised after each checkpoint:
    primitive unary, additive and multiplicative expressions over literals and
    bound identifiers. Logical/comparison/conditional/call/property expressions,
    inference and control flow remain outside it.
+9. **Completed bounded assignment semantics:** symbols retain `var`/`let`/`const`
+   identity; const reassignment and primitive direct/compound assignment are
+   checked. Updates, destructuring, properties, definite assignment and
+   control-flow state remain outside this slice.
 
 Every checkpoint requires unchanged/equivalent transpiler output and runtime
 evidence plus measured performance/RSS impact. Do not require the entire language
