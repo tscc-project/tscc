@@ -10,7 +10,7 @@ artifacts, and current documentation remain authoritative. Exact names and curre
 capabilities must be verified against the live repository. Never reshape the
 compiler merely to make it resemble this handover.
 
-## Reconciled implementation snapshot (2026-08-16)
+## Reconciled implementation snapshot (2026-08-17)
 
 The inherited model has now been checked against the compiler and the standalone
 suite. The executable pipeline is concretely:
@@ -22,9 +22,11 @@ main.cpp CLI parsing / optional tsconfig loading
 → byte-oriented Lexer producing owned token strings plus byte ranges
 → optional relative import/export discovery
 → Parser producing a small Program of syntax nodes, declaration facts, erasures, and replacements
-→ Checker validating the currently supported semantic slice
+→ SemanticModel plus Binder and durable TypeModel
+→ Checker validating the currently supported primitive semantic slice
 → Transpiler applying erasure and runtime-lowering/module passes
-→ direct binary-truncating write to .js or .jsx
+→ prepared output set
+→ selected emit policy and staged .js/.jsx replacement
 ~~~
 
 This remains primarily an ES2022-oriented native transpiler and is not a
@@ -37,9 +39,13 @@ consumes its variable-declaration nodes, so the overlay is connected to producti
 compilation rather than being a parallel unused tree. The first semantic seam retains simple
 `VariableDeclaration` token ranges before erasure, then `Checker` compares direct
 primitive literal initializers with explicit `number`, `string`, or `boolean`
-annotations. There is still no binder, symbol table, general type model, inference,
-or expression checker. Transpiler-owned scope/shadow analysis remains local
-transform machinery and must not be described as a general binding phase.
+annotations. The bounded binder now owns simple variables, functions, parameters,
+catch/loop declarations, and static value imports; a durable type store owns
+primitive symbol facts; and the expression checker covers a small precedence-aware
+primitive grammar. There is still no structural/composite type system, inference,
+control-flow analysis, export table, or cross-module type propagation.
+Transpiler-owned shadow analysis remains only as a compatibility bridge for
+unsupported binding forms.
 
 `compile_files` owns the shipped dependency traversal using a queue and de-duplicated
 absolute path strings. `ModuleGraph` is real, tested infrastructure, but the current
@@ -47,11 +53,12 @@ driver does not instantiate it. Relative resolution is deliberately small: `.ts`
 `.tsx`, `index.ts`, `index.tsx`, and `.js`/`.jsx` source substitution; packages,
 path aliases, declaration files, and Node resolution are outside this implementation.
 
-Output writing currently occurs per file immediately after successful transpilation.
-Consequently a later error in a multi-file invocation can leave earlier outputs,
-and each destination is opened with truncation rather than staged/renamed. Treat
-transactional multi-file emission as an explicit future policy decision, not an
-existing guarantee.
+Every file now prepares with its own diagnostic collection before program output
+policy is applied. Default emit-on-error commits successfully prepared sources;
+`noEmitOnError` suppresses all prepared output if any source fails; `noEmit`
+suppresses all output unconditionally. Sibling staging plus rename avoids exposing
+half-written individual files, but the multi-file rename sequence is not a
+transaction and must not be presented as one.
 
 The implementation-local `regression/` corpus and standalone suite have identical
 `README.md`, `TSCC_BUG_LOG.md`, `cases.json`, and `run.py` files at this checkpoint;
@@ -147,9 +154,11 @@ semantics.
 
 ## Semantic checker status
 
-There is now a distinct checker pass, but only for explicit primitive annotations
-against direct variable literal initializers. The regression suite promotes a
-semantic case only when tscc owns that contract; all other cases accepted by
+The checker owns a bounded primitive slice: explicit primitive annotations,
+literal and bound-identifier initializers, precedence-aware unary/additive/
+multiplicative expressions, direct and compound assignment, and const
+reassignment. The regression suite promotes a semantic case only when tscc owns
+that contract; all other cases accepted by
 `tsc --noCheck` but rejected by full `tsc` remain semantic skips. Do not “fix”
 those through ad hoc parser rejection. A production-ready type-checking compiler
 is the explicit long-term destination.
@@ -197,21 +206,24 @@ architectural hypothesis—not yet a benchmark-proven final design—that this c
 semantic overlay can remain materially lighter and faster than full AST re-emission.
 
 `Binder` adds the first bounded identity layer over that overlay. It models a root
-scope, nested brace scopes, function-body scopes, ordinary function/parameter and
-simple variable symbols, `var` promotion to the nearest function scope, lexical
-shadowing, and ordinary identifier references. Property names, type positions,
-destructuring, arrows, class/member namespaces, imports, and complete JavaScript
-hoisting remain outside this first binding contract. Neutral brace regions may
+scope, nested brace scopes, function-body scopes, ordinary function/parameter,
+simple variable, catch/loop, and static value-import symbols, `var` promotion to
+the nearest function scope, lexical shadowing, and ordinary identifier references.
+Imported values deliberately receive `unknown` types until module export/type
+ownership exists. Property names, type positions, destructuring, arrows,
+class/member namespaces, and complete JavaScript hoisting remain outside this
+binding contract. Neutral brace regions may
 create empty scopes around object literals; because lookup walks outward and no
 object-property declarations are introduced, this is conservative for the current
 subset rather than a claim that every brace is semantically a block.
 
 CommonJS live-import reference rewriting is the first production consumer of
-bound identity. Resolved ordinary local identifiers are excluded from imported
-binding rewrites; this fixed function-local `var` shadowing that the previous
-range heuristic missed. The range heuristic remains an explicit migration bridge
-for arrows, destructuring, catch/loop/class bindings, templates, and other forms
-outside the binder's current contract.
+bound identity. Static default and named imports now create root-scope import
+symbols, and ordinary live references positively resolve to those symbols;
+resolved local identifiers are excluded. This also protects function-local `var`
+shadowing that the previous range heuristic missed. The range heuristic remains
+an explicit migration bridge for arrows, destructuring, class bindings, templates,
+and other forms outside the binder's current contract.
 
 The checker is the second bound-identity consumer. Primitive annotation facts are
 attached to bound variable symbols, allowing simple identifier initializers and
@@ -265,8 +277,9 @@ Use these labels deliberately:
   and implementation evidence.
 
 Current pressures include anonymous edit provenance beyond conflict diagnostics,
-transform-local shadow reasoning, parallel dependency traversal paths, regex-based
-configuration extraction, and per-file opportunistic output writes. A useful
+remaining transform-local shadow reasoning, parallel dependency traversal paths,
+regex-based configuration extraction, and the absence of program-wide module
+symbol/type ownership. A useful
 migration bridge will be semantic nodes retaining original source spans so an
 existing transformation can consult binder symbol identity while continuing to
 produce the proven `Replacement` form. Capture the old heuristic in regressions,

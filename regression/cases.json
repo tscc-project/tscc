@@ -2223,6 +2223,23 @@
     ]
   },
   {
+    "name": "cjs-semicolonless-named-import",
+    "kind": "emit",
+    "args": [
+      "--module",
+      "commonjs"
+    ],
+    "src": "import {value} from './state.js'\nconsole.log(value)",
+    "contains": [
+      "const __tscc_mod0 = require(\"./state.js\")",
+      "console.log(__tscc_mod0.value)"
+    ],
+    "not_contains": [
+      "import {",
+      "console.log(value)"
+    ]
+  },
+  {
     "name": "cjs-namespace-import",
     "kind": "emit",
     "args": [

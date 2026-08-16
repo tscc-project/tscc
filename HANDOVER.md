@@ -12,10 +12,10 @@ This is the entry point for developers and coding agents working on tscc. Read
   written in C++17.
 - Current default target: `es2022`; default module mode: `preserve`.
 - Build: Make.
-- A deliberately bounded semantic checker slice is active: primitive `number`,
-  `string`, and `boolean` annotations are checked against direct literals and
-  annotated primitive facts flowing through bound identifier initializers and
-  direct assignments. This is not yet a general TypeScript type checker.
+- A deliberately bounded semantic checker slice is active: durable primitive facts
+  flow through precedence-aware arithmetic expressions and direct/compound
+  assignment, with const-reassignment checks. This is not yet a general TypeScript
+  type checker.
 
 Source and tests define current behavior. The internal and standalone regression
 corpora define executable compatibility evidence. README/website claims must stay
@@ -42,11 +42,15 @@ grammar productions without end-to-end meaning.
 - `Lexer`: tokens.
 - `Syntax`/`Parser`: a deliberately compact `Program` representation and
   parser-owned ranges/replacements for TypeScript-only/runtime-bearing syntax.
+- `Semantic`/`Binder`/`Type`/`Checker`: bounded structural spans, lexical symbol
+  identity (including static value imports), durable primitive types, and the
+  currently protected semantic slice.
 - `Transpiler`: parser/token transforms and JavaScript emission.
 - `Project`/`ModuleGraph`: source loading, relative dependency discovery, and
   graph/project work.
 - `Config`: current `tsconfig.json` subset.
-- `Compiler`: compiler options and multi-file/output orchestration.
+- `Compiler`: file-local preparation, program-wide emit policy, and staged output
+  orchestration. Default emit-on-error and opt-in `noEmitOnError` are intentional.
 - `main.cpp`: CLI.
 
 Read `docs/handover/ARCHITECTURE.md` and current headers/implementation before
@@ -60,7 +64,7 @@ erasure, generics, enums, namespaces, parameter properties, project/relative
 module discovery, TSX preserve mode, CommonJS lowering with live imported reads,
 module grammar hardening, scope/shadowing work, and import attributes.
 
-The independent corpus currently contains 518 cases: 491 pass, zero fail, and 27
+The independent corpus currently contains 519 cases: 492 pass, zero fail, and 27
 semantic-checker-only skips at the retained checkpoint. Counts are evidence, not
 the product definition. Seven semantic cases are implemented; the project is not
 implicitly a drop-in replacement for all `tsc` behavior.

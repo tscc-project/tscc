@@ -192,4 +192,13 @@ tsc --noCheck --pretty false --target es2022 --module commonjs --rootDir "$TMP/s
 FORCE_COLOR=0 node "$TMP/context-tsc/context-main.js" >"$TMP/context-tsc.txt"
 cmp "$TMP/context-ours.txt" "$TMP/context-tsc.txt"
 
+# A semicolonless import ends at its module clause, not at the next statement.
+cat >"$TMP/src/semicolonless-main.ts" <<'TS'
+import {value} from "./state2.js"
+console.log(value)
+TS
+"$ROOT/tscc" --pretty false --module commonjs --rootDir "$TMP/src" \
+  --outDir "$TMP/semicolonless-out" "$TMP/src/semicolonless-main.ts" >/dev/null
+test "$(FORCE_COLOR=0 node "$TMP/semicolonless-out/semicolonless-main.js")" = "1"
+
 echo "tscc CommonJS module transform test passed"

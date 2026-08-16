@@ -203,6 +203,32 @@ static std::size_t statement_end_token(const std::vector<Token>& tokens, std::si
     return tokens.size()-1;
 }
 
+static std::size_t static_import_end_token(const std::vector<Token>& tokens,
+                                           std::size_t start) {
+    std::size_t module = start + 1;
+    while (module < tokens.size() && tokens[module].kind != TokenKind::String &&
+           tokens[module].text != ";" && tokens[module].kind != TokenKind::End) ++module;
+    if (module >= tokens.size() || tokens[module].kind != TokenKind::String)
+        return statement_end_token(tokens, start);
+    std::size_t end = module, next = module + 1;
+    while (next < tokens.size() && tokens[next].kind == TokenKind::Comment) ++next;
+    if (next < tokens.size() && (tokens[next].text == "with" ||
+                                 tokens[next].text == "assert")) {
+        ++next;
+        while (next < tokens.size() && tokens[next].kind == TokenKind::Comment) ++next;
+        if (next < tokens.size() && tokens[next].text == "{") {
+            int depth = 0;
+            for (; next < tokens.size(); ++next) {
+                if (tokens[next].text == "{") ++depth;
+                else if (tokens[next].text == "}" && --depth == 0) { end = next; break; }
+            }
+        }
+    }
+    next = end + 1;
+    while (next < tokens.size() && tokens[next].kind == TokenKind::Comment) ++next;
+    return next < tokens.size() && tokens[next].text == ";" ? next : end;
+}
+
 static std::string unquote_module(const std::string& text) {
     if(text.size()>=2 && (text.front()=='"' || text.front()=='\'') && text.back()==text.front())
         return text.substr(1,text.size()-2);
@@ -278,18 +304,18 @@ static void collect_commonjs_replacements(const std::string& erased_source,
             if(i+2<tokens.size() && tokens[i+1].kind==TokenKind::Identifier &&
                tokens[i+2].text=="=") continue;
 
-            const std::size_t end=statement_end_token(tokens,i);
+            const std::size_t end=static_import_end_token(tokens,i);
             if(end<=i) continue;
 
             // import "module";
-            if(i+1<end && tokens[i+1].kind==TokenKind::String){
+            if(i+1<=end && tokens[i+1].kind==TokenKind::String){
                 add(i,end,"require("+js_quote(import_spec(i+1))+");");
                 i=end; continue;
             }
 
             std::size_t from=i+1;
-            while(from<end && tokens[from].text!="from") ++from;
-            if(from>=end || from+1>=end || tokens[from+1].kind!=TokenKind::String)
+            while(from<=end && tokens[from].text!="from") ++from;
+            if(from>end || from+1>end || tokens[from+1].kind!=TokenKind::String)
                 continue;
             const std::string spec=import_spec(from+1);
             const std::string req="require("+js_quote(spec)+")";
@@ -766,18 +792,17 @@ static void add_live_import_reference_replacements(
             const auto& tok=tokens[i];
             if(tok.kind==TokenKind::Template) continue;
             if(tok.kind!=TokenKind::Identifier || tok.text!=name) continue;
+            if (binding_model.is_import_token(i)) continue;
             if(tok.begin>=binding.declaration_begin&&tok.begin<binding.declaration_end) continue;
             if (binding_model.is_declaration_token(i)) continue;
-            // An ordinary identifier resolved by the binder belongs to a local
-            // declaration and is not a live reference to the imported binding.
-            // The legacy shadow ranges remain as a compatibility bridge for
-            // destructuring, arrows, catch bindings, classes and other binding
-            // forms outside the first binder contract.
-            if (binding_model.symbol_for_reference(i) != static_cast<std::size_t>(-1)) continue;
-            std::size_t statement_start=i;
-            while(statement_start>0 && tokens[statement_start-1].text!=";" &&
-                  tokens[statement_start-1].kind!=TokenKind::End) --statement_start;
-            if(statement_start<tokens.size() && tokens[statement_start].text=="import") continue;
+            // A binder-owned import reference is the positive authority for the
+            // rewrite. A supported local declaration resolves to a non-import
+            // symbol. Missing identity retains the legacy compatibility bridge
+            // for destructuring, arrows, classes and other unbound forms.
+            const auto symbol = binding_model.symbol_for_reference(i);
+            if (symbol != static_cast<std::size_t>(-1) &&
+                (symbol >= binding_model.symbols.size() ||
+                 binding_model.symbols[symbol].kind != SymbolKind::Import)) continue;
             if(inside_range(tok.begin,shadows)) continue;
 
             if(i>0&&(tokens[i-1].text=="."||tokens[i-1].text=="?.")) continue;

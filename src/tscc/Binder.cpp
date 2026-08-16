@@ -1,5 +1,6 @@
 #include "Binder.h"
 #include <algorithm>
+#include <utility>
 #include <unordered_set>
 
 namespace tscc {
@@ -38,6 +39,12 @@ std::size_t BindingModel::symbol_for_reference(std::size_t token) const {
 bool BindingModel::is_declaration_token(std::size_t token) const {
     for (const auto& symbol : symbols)
         if (symbol.declaration_token == token) return true;
+    return false;
+}
+
+bool BindingModel::is_import_token(std::size_t token) const {
+    for (const auto& range : import_ranges)
+        if (token >= range.first && token <= range.second) return true;
     return false;
 }
 
@@ -116,6 +123,72 @@ BindingModel bind_semantic_model(const std::vector<Token>& tokens, const Program
     }
     for (const auto& symbol : binding.symbols) declaration_tokens.insert(symbol.declaration_token);
 
+    // Static value imports are root-scope declarations. Keep the supported slice
+    // deliberately syntactic here: default, namespace and named bindings. Type-only
+    // imports do not introduce runtime symbols.
+    for (std::size_t i = 0; i + 1 < tokens.size(); ++i) {
+        if (tokens[i].text != "import" || tokens[i+1].text == "(" ||
+            tokens[i+1].text == "type") continue;
+        std::size_t module = i + 1;
+        while (module < tokens.size() && tokens[module].kind != TokenKind::String &&
+               tokens[module].text != ";" && tokens[module].kind != TokenKind::End) ++module;
+        if (module >= tokens.size() || tokens[module].kind != TokenKind::String) continue;
+        std::size_t end = module, after = module + 1;
+        while (after < tokens.size() && tokens[after].kind == TokenKind::Comment) ++after;
+        if (after < tokens.size() && (tokens[after].text == "with" ||
+                                      tokens[after].text == "assert")) {
+            ++after;
+            while (after < tokens.size() && tokens[after].kind == TokenKind::Comment) ++after;
+            if (after < tokens.size() && tokens[after].text == "{") {
+                int depth = 0;
+                for (; after < tokens.size(); ++after) {
+                    if (tokens[after].text == "{") ++depth;
+                    else if (tokens[after].text == "}" && --depth == 0) { end = after; break; }
+                }
+            }
+        }
+        after = end + 1;
+        while (after < tokens.size() && tokens[after].kind == TokenKind::Comment) ++after;
+        if (after < tokens.size() && tokens[after].text == ";") end = after;
+        binding.import_ranges.push_back({i, end});
+        if (tokens[i+1].kind == TokenKind::String) { i = end; continue; }
+        std::size_t from = i + 1;
+        while (from < module && tokens[from].text != "from") ++from;
+        if (from == module) { i = end; continue; }
+        auto add_import = [&](std::size_t token) {
+            if (token >= from || tokens[token].kind != TokenKind::Identifier) return;
+            binding.symbols.push_back({tokens[token].text, SymbolKind::Import, token, 0});
+            declaration_tokens.insert(token);
+        };
+        std::size_t p = i + 1;
+        if (p < from && tokens[p].kind == TokenKind::Identifier) {
+            add_import(p++);
+            if (p < from && tokens[p].text == ",") ++p;
+        }
+        if (p + 2 < from && tokens[p].text == "*" && tokens[p+1].text == "as") {
+            add_import(p + 2);
+        } else if (p < from && tokens[p].text == "{") {
+            ++p;
+            while (p < from && tokens[p].text != "}") {
+                if (tokens[p].text == ",") { ++p; continue; }
+                if (tokens[p].text == "type") {
+                    ++p;
+                    while (p < from && tokens[p].text != "," && tokens[p].text != "}") ++p;
+                    continue;
+                }
+                if (tokens[p].kind != TokenKind::Identifier && tokens[p].text != "default") {
+                    ++p; continue;
+                }
+                const auto imported = p++;
+                if (p + 1 < from && tokens[p].text == "as") {
+                    add_import(p + 1); p += 2;
+                } else add_import(imported);
+                while (p < from && tokens[p].text != "," && tokens[p].text != "}") ++p;
+            }
+        }
+        i = end;
+    }
+
     auto in_type = [&](std::size_t token) {
         for (const auto& variable : program.variables)
             if (token >= variable.type_begin_token && token < variable.type_end_token) return true;
@@ -123,6 +196,10 @@ BindingModel bind_semantic_model(const std::vector<Token>& tokens, const Program
     };
     for (std::size_t i = 0; i < tokens.size(); ++i) {
         if (tokens[i].kind != TokenKind::Identifier || declaration_tokens.count(i) || in_type(i)) continue;
+        bool in_import = false;
+        for (const auto& range : binding.import_ranges)
+            if (i >= range.first && i <= range.second) { in_import = true; break; }
+        if (in_import) continue;
         if (i > 0 && (tokens[i-1].text == "." || tokens[i-1].text == "?." ||
                       tokens[i-1].text == "#")) continue;
         if (i + 1 < tokens.size() && tokens[i+1].text == ":") continue;

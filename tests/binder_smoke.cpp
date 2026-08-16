@@ -14,6 +14,8 @@ int main() {
     SourceFile source;
     source.path = "binder.ts";
     source.text = R"TS(
+import defaultRead, {value as importedValue, type Shape} from "./state.js";
+import * as state from "./state.js";
 const value: number = 1;
 function outer(parameter: string) {
     const captured: string = parameter;
@@ -26,6 +28,7 @@ function outer(parameter: string) {
 }
 try { throw 1; } catch (problem) { console.log(problem); }
 for (let index = 0; index < 1; index++) { console.log(index); }
+console.log(defaultRead(), importedValue, state.value);
 )TS";
     source.line_starts = {0};
     for (std::size_t i = 0; i < source.text.size(); ++i)
@@ -44,6 +47,7 @@ for (let index = 0; index < 1; index++) { console.log(index); }
     std::size_t global_value_symbol = static_cast<std::size_t>(-1);
     std::size_t catch_symbol = static_cast<std::size_t>(-1);
     std::size_t loop_symbol = static_cast<std::size_t>(-1);
+    std::size_t import_symbols = 0, import_references = 0;
     for (std::size_t i = 0; i < binding.symbols.size(); ++i) {
         const auto& symbol = binding.symbols[i];
         if (symbol.name == "value") {
@@ -52,23 +56,29 @@ for (let index = 0; index < 1; index++) { console.log(index); }
         }
         if (symbol.name == "problem") catch_symbol = i;
         if (symbol.name == "index") loop_symbol = i;
+        if (symbol.kind == SymbolKind::Import) ++import_symbols;
     }
     for (const auto& reference : binding.references) {
         if (reference.symbol == static_cast<std::size_t>(-1)) { ++unresolved; continue; }
         ++resolved;
         if (tokens[reference.token].text == "value") {
             const auto line = source.line_col(tokens[reference.token].begin).first;
-            if (line == 7 && reference.symbol != block_value_symbol)
+            if (line == 9 && reference.symbol != block_value_symbol)
                 fail("block reference did not resolve to shadowing declaration");
-            if (line == 10 && reference.symbol != global_value_symbol)
+            if (line == 12 && reference.symbol != global_value_symbol)
                 fail("outer return did not resolve beyond the block shadow");
         }
         if (tokens[reference.token].text == "problem" && reference.symbol != catch_symbol)
             fail("catch reference did not resolve to catch binding");
         if (tokens[reference.token].text == "index" && reference.symbol != loop_symbol)
             fail("loop reference did not resolve to loop binding");
+        if ((tokens[reference.token].text == "defaultRead" ||
+             tokens[reference.token].text == "importedValue" ||
+             tokens[reference.token].text == "state") &&
+            binding.symbols[reference.symbol].kind == SymbolKind::Import) ++import_references;
     }
     if (resolved < 9 || unresolved == 0 || catch_symbol == static_cast<std::size_t>(-1) ||
-        loop_symbol == static_cast<std::size_t>(-1)) fail("unexpected bounded binder evidence");
+        loop_symbol == static_cast<std::size_t>(-1) || import_symbols != 3 ||
+        import_references != 3) fail("unexpected bounded binder evidence");
     std::cout << "tscc bounded binder smoke test passed\n";
 }

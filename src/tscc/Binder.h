@@ -4,11 +4,12 @@
 #include "Syntax.h"
 #include <cstddef>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace tscc {
 
-enum class SymbolKind { Variable, Parameter, Function };
+enum class SymbolKind { Variable, Parameter, Function, Import };
 enum class VariableKind { None, Var, Let, Const };
 
 struct BoundScope {
@@ -37,9 +38,11 @@ struct BindingModel {
     std::vector<BoundScope> scopes;
     std::vector<BoundSymbol> symbols;
     std::vector<BoundReference> references;
+    std::vector<std::pair<std::size_t, std::size_t>> import_ranges;
 
     std::size_t symbol_for_reference(std::size_t token) const;
     bool is_declaration_token(std::size_t token) const;
+    bool is_import_token(std::size_t token) const;
 };
 
 BindingModel bind_semantic_model(const std::vector<Token>&, const Program&,

@@ -193,18 +193,24 @@ These are bounded current directions and must be revised after each checkpoint:
     suppress the entire prepared set when any source fails. Staged sibling files
     reduce individual replacement risk, but filesystem rename failure is not a
     transactional multi-file commit and must not be described as one.
+12. **Completed bounded import identity:** static default, namespace, and named
+    value imports are root-scope binder symbols. Ordinary CommonJS live references
+    now positively resolve to import identity while supported local shadows resolve
+    elsewhere; the legacy bridge remains for unbound destructuring, arrows,
+    classes, and template interpolation. Imported symbol types remain deliberately
+    `unknown`: this checkpoint does not claim export tables or cross-module types.
 
 Every checkpoint requires unchanged/equivalent transpiler output and runtime
 evidence plus measured performance/RSS impact. Do not require the entire language
 to migrate before a bounded binder slice can ship, and do not accept semantic
 infrastructure that remains disconnected from production compilation.
 
-The next bounded architecture checkpoint should give static imports binder-owned
-symbol identity and use that identity in CommonJS live-binding rewriting. It must
-not imply cross-module type propagation: imported values can remain `unknown`
-until export tables and module-level type facts have a complete protected slice.
-Retain the legacy import-shadow bridge for unsupported destructuring or binding
-forms, and remove it only as tests prove equivalent ownership.
+Reassess the next semantic slice from final validation evidence. The likely next
+direction is function signatures and call checking because it extends durable
+types vertically without first requiring a complete module system. Module export
+tables and cross-file type propagation remain valuable, but should follow a clear
+file-local callable/object type contract rather than transporting only `unknown`
+facts between files.
 
 ## Roadmap response to evidence
 
