@@ -608,6 +608,9 @@ shadow_ranges_for(const std::vector<Token>& tokens, const std::string& name) {
         if(tokens[i].text!="catch"||tokens[i+1].text!="(")continue;
         const auto close=matching(i+1,"(",")");
         if(close>=tokens.size())continue;
+        std::size_t significant=0;
+        for(std::size_t p=i+2;p<close;++p) if(tokens[p].kind!=TokenKind::Comment) ++significant;
+        if(significant==1) continue; // Simple catch bindings are binder-owned.
         bool match=false;
         for(std::size_t p=i+2;p<close;++p)
             if(tokens[p].kind==TokenKind::Identifier&&tokens[p].text==name){match=true;break;}
@@ -628,6 +631,10 @@ shadow_ranges_for(const std::vector<Token>& tokens, const std::string& name) {
         bool declares=false;
         for(std::size_t q=i+2;q<close;++q){
             if(tokens[q].text!="let"&&tokens[q].text!="const"&&tokens[q].text!="var") continue;
+            std::size_t simple=q+1;
+            while(simple<close&&tokens[simple].kind==TokenKind::Comment)++simple;
+            if(simple<close&&tokens[simple].kind==TokenKind::Identifier&&
+               tokens[simple].text==name) continue; // Simple loop bindings are binder-owned.
             // The binding may be a plain identifier or a destructuring pattern.
             int paren=0,square=0,brace=0;
             for(std::size_t r=q+1;r<close;++r){
@@ -760,6 +767,7 @@ static void add_live_import_reference_replacements(
             if(tok.kind==TokenKind::Template) continue;
             if(tok.kind!=TokenKind::Identifier || tok.text!=name) continue;
             if(tok.begin>=binding.declaration_begin&&tok.begin<binding.declaration_end) continue;
+            if (binding_model.is_declaration_token(i)) continue;
             // An ordinary identifier resolved by the binder belongs to a local
             // declaration and is not a live reference to the imported binding.
             // The legacy shadow ranges remain as a compatibility bridge for

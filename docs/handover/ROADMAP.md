@@ -183,6 +183,10 @@ These are bounded current directions and must be revised after each checkpoint:
    identity; const reassignment and primitive direct/compound assignment are
    checked. Updates, destructuring, properties, definite assignment and
    control-flow state remain outside this slice.
+10. **Completed catch/loop binder migration:** simple catch identifiers and simple
+    `for` variable declarations have explicit lexical regions and binder-owned
+    CommonJS shadowing. Destructuring and arrow/class binding forms remain on the
+    legacy bridge.
 
 Every checkpoint requires unchanged/equivalent transpiler output and runtime
 evidence plus measured performance/RSS impact. Do not require the entire language

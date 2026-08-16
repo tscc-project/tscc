@@ -26,6 +26,19 @@ std::size_t first_parameter_name(const std::vector<Token>& tokens,
     }
     return static_cast<std::size_t>(-1);
 }
+
+std::size_t statement_end(const std::vector<Token>& tokens, std::size_t begin) {
+    int paren = 0, square = 0, brace = 0;
+    for (std::size_t i = begin; i < tokens.size(); ++i) {
+        const auto& text = tokens[i].text;
+        if (text == "(") ++paren; else if (text == ")" && paren) --paren;
+        else if (text == "[") ++square; else if (text == "]" && square) --square;
+        else if (text == "{") ++brace; else if (text == "}" && brace) --brace;
+        if (!paren && !square && !brace && text == ";") return i + 1;
+        if (tokens[i].kind == TokenKind::End) return i;
+    }
+    return tokens.size();
+}
 }
 
 SemanticModel build_semantic_model(const std::vector<Token>& tokens, const Program& program) {
@@ -91,6 +104,31 @@ SemanticModel build_semantic_model(const std::vector<Token>& tokens, const Progr
             while (end < tokens.size() && tokens[end].text != ";" &&
                    tokens[end].kind != TokenKind::End) ++end;
             model.nodes.push_back({SemanticNodeKind::ReturnStatement, i, end});
+        }
+    }
+    for (std::size_t i = 0; i + 2 < tokens.size(); ++i) {
+        if ((tokens[i].text != "for" && tokens[i].text != "catch") ||
+            tokens[i+1].text != "(") continue;
+        const auto close = matching(tokens, i + 1, "(", ")");
+        if (close >= tokens.size()) continue;
+        std::size_t body = close + 1;
+        while (body < tokens.size() && tokens[body].kind == TokenKind::Comment) ++body;
+        std::size_t end = statement_end(tokens, body);
+        if (body < tokens.size() && tokens[body].text == "{") {
+            const auto body_close = matching(tokens, body, "{", "}");
+            if (body_close < tokens.size()) end = body_close + 1;
+        }
+        model.nodes.push_back({SemanticNodeKind::LexicalRegion, i, end,
+                               static_cast<std::size_t>(-1), static_cast<std::size_t>(-1),
+                               i, end});
+        if (tokens[i].text == "catch") {
+            std::size_t name = i + 2;
+            while (name < close && tokens[name].kind == TokenKind::Comment) ++name;
+            std::size_t after = name + 1;
+            while (after < close && tokens[after].kind == TokenKind::Comment) ++after;
+            if (name < close && after == close && tokens[name].kind == TokenKind::Identifier)
+                model.nodes.push_back({SemanticNodeKind::CatchDeclaration, name, name + 1,
+                                       name, static_cast<std::size_t>(-1), i, end});
         }
     }
     return model;

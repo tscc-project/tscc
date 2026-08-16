@@ -234,6 +234,12 @@ assignment. Private names are explicitly excluded from ordinary lexical referenc
 resolution; the full corpus caught the otherwise possible `#x` → unrelated `x`
 false binding during this checkpoint.
 
+Simple catch identifiers and simple `for`-header variable declarations now have
+explicit lexical-region ownership. Brace scopes nested inside those regions link
+back to the catch/loop scope, so header and body references share symbol identity.
+CommonJS live-import rewriting no longer asks the legacy range heuristic to own
+these simple forms. Destructured catches/loops remain on that bridge.
+
 The Makefile emits and includes compiler dependency files (`-MMD -MP`). This is a
 correctness invariant for incremental native development: semantic-header layout
 changes must rebuild every consumer rather than linking ABI-incompatible stale

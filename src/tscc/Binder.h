@@ -39,6 +39,7 @@ struct BindingModel {
     std::vector<BoundReference> references;
 
     std::size_t symbol_for_reference(std::size_t token) const;
+    bool is_declaration_token(std::size_t token) const;
 };
 
 BindingModel bind_semantic_model(const std::vector<Token>&, const Program&,

@@ -24,6 +24,8 @@ function outer(parameter: string) {
     function inner() { return captured; }
     return value;
 }
+try { throw 1; } catch (problem) { console.log(problem); }
+for (let index = 0; index < 1; index++) { console.log(index); }
 )TS";
     source.line_starts = {0};
     for (std::size_t i = 0; i < source.text.size(); ++i)
@@ -40,12 +42,16 @@ function outer(parameter: string) {
     std::size_t resolved = 0, unresolved = 0;
     std::size_t block_value_symbol = static_cast<std::size_t>(-1);
     std::size_t global_value_symbol = static_cast<std::size_t>(-1);
+    std::size_t catch_symbol = static_cast<std::size_t>(-1);
+    std::size_t loop_symbol = static_cast<std::size_t>(-1);
     for (std::size_t i = 0; i < binding.symbols.size(); ++i) {
         const auto& symbol = binding.symbols[i];
         if (symbol.name == "value") {
             if (symbol.scope == 0) global_value_symbol = i;
             else block_value_symbol = i;
         }
+        if (symbol.name == "problem") catch_symbol = i;
+        if (symbol.name == "index") loop_symbol = i;
     }
     for (const auto& reference : binding.references) {
         if (reference.symbol == static_cast<std::size_t>(-1)) { ++unresolved; continue; }
@@ -57,7 +63,12 @@ function outer(parameter: string) {
             if (line == 10 && reference.symbol != global_value_symbol)
                 fail("outer return did not resolve beyond the block shadow");
         }
+        if (tokens[reference.token].text == "problem" && reference.symbol != catch_symbol)
+            fail("catch reference did not resolve to catch binding");
+        if (tokens[reference.token].text == "index" && reference.symbol != loop_symbol)
+            fail("loop reference did not resolve to loop binding");
     }
-    if (resolved < 5 || unresolved == 0) fail("unexpected bounded binder evidence");
+    if (resolved < 9 || unresolved == 0 || catch_symbol == static_cast<std::size_t>(-1) ||
+        loop_symbol == static_cast<std::size_t>(-1)) fail("unexpected bounded binder evidence");
     std::cout << "tscc bounded binder smoke test passed\n";
 }

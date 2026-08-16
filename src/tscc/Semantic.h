@@ -12,6 +12,8 @@ enum class SemanticNodeKind {
     ParameterDeclaration,
     BraceRegion,
     ReturnStatement,
+    LexicalRegion,
+    CatchDeclaration,
 };
 
 struct SemanticNode {
@@ -21,6 +23,7 @@ struct SemanticNode {
     std::size_t name_token = static_cast<std::size_t>(-1);
     std::size_t variable_index = static_cast<std::size_t>(-1);
     std::size_t scope_token = static_cast<std::size_t>(-1);
+    std::size_t scope_end_token = static_cast<std::size_t>(-1);
 };
 
 struct SemanticModel {

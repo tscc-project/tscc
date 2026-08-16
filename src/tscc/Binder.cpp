@@ -27,26 +27,18 @@ std::size_t resolve(const BindingModel& binding, std::size_t scope, const std::s
     }
 }
 
-bool in_for_header(const std::vector<Token>& tokens, std::size_t token) {
-    int depth = 0;
-    for (std::size_t i = token; i > 0;) {
-        --i;
-        if (tokens[i].text == ")") { ++depth; continue; }
-        if (tokens[i].text == "(") {
-            if (depth) { --depth; continue; }
-            return i > 0 && tokens[i-1].text == "for";
-        }
-        if (!depth && (tokens[i].text == ";" || tokens[i].text == "{" ||
-                       tokens[i].text == "}")) return false;
-    }
-    return false;
-}
 }
 
 std::size_t BindingModel::symbol_for_reference(std::size_t token) const {
     for (const auto& reference : references)
         if (reference.token == token) return reference.symbol;
     return missing;
+}
+
+bool BindingModel::is_declaration_token(std::size_t token) const {
+    for (const auto& symbol : symbols)
+        if (symbol.declaration_token == token) return true;
+    return false;
 }
 
 BindingModel bind_semantic_model(const std::vector<Token>& tokens, const Program& program,
@@ -56,7 +48,8 @@ BindingModel bind_semantic_model(const std::vector<Token>& tokens, const Program
 
     std::vector<std::size_t> brace_nodes;
     for (std::size_t i = 0; i < semantic.nodes.size(); ++i)
-        if (semantic.nodes[i].kind == SemanticNodeKind::BraceRegion) brace_nodes.push_back(i);
+        if (semantic.nodes[i].kind == SemanticNodeKind::BraceRegion ||
+            semantic.nodes[i].kind == SemanticNodeKind::LexicalRegion) brace_nodes.push_back(i);
     std::sort(brace_nodes.begin(), brace_nodes.end(), [&](auto a, auto b) {
         if (semantic.nodes[a].begin_token != semantic.nodes[b].begin_token)
             return semantic.nodes[a].begin_token < semantic.nodes[b].begin_token;
@@ -67,7 +60,7 @@ BindingModel bind_semantic_model(const std::vector<Token>& tokens, const Program
         std::size_t parent = 0;
         for (std::size_t i = 1; i < binding.scopes.size(); ++i)
             if (node.begin_token > binding.scopes[i].begin_token &&
-                node.end_token < binding.scopes[i].end_token &&
+                node.end_token <= binding.scopes[i].end_token &&
                 (parent == 0 || binding.scopes[i].end_token - binding.scopes[i].begin_token <
                                     binding.scopes[parent].end_token - binding.scopes[parent].begin_token))
                 parent = i;
@@ -90,16 +83,19 @@ BindingModel bind_semantic_model(const std::vector<Token>& tokens, const Program
     for (std::size_t node_index = 0; node_index < semantic.nodes.size(); ++node_index) {
         const auto& node = semantic.nodes[node_index];
         if (node.kind != SemanticNodeKind::VariableDeclaration &&
-            node.kind != SemanticNodeKind::ParameterDeclaration) continue;
+            node.kind != SemanticNodeKind::ParameterDeclaration &&
+            node.kind != SemanticNodeKind::CatchDeclaration) continue;
         if (node.name_token == missing || node.name_token >= tokens.size()) continue;
-        if (node.kind == SemanticNodeKind::VariableDeclaration &&
-            in_for_header(tokens, node.name_token))
-            continue; // Loop binding extent remains owned by the legacy bridge.
         auto scope = containing_scope(binding, node.name_token);
-        SymbolKind kind = node.kind == SemanticNodeKind::ParameterDeclaration
+        SymbolKind kind = (node.kind == SemanticNodeKind::ParameterDeclaration ||
+                           node.kind == SemanticNodeKind::CatchDeclaration)
                               ? SymbolKind::Parameter : SymbolKind::Variable;
         VariableKind variable_kind = VariableKind::None;
-        if (kind == SymbolKind::Parameter) {
+        if (node.kind == SemanticNodeKind::CatchDeclaration) {
+            for (std::size_t i = 1; i < binding.scopes.size(); ++i)
+                if (binding.scopes[i].begin_token == node.scope_token &&
+                    binding.scopes[i].end_token == node.scope_end_token) { scope = i; break; }
+        } else if (kind == SymbolKind::Parameter) {
             for (std::size_t i = 1; i < binding.scopes.size(); ++i)
                 if (binding.scopes[i].begin_token == node.scope_token) { scope = i; break; }
         } else if (node.variable_index < program.variables.size()) {
