@@ -40,19 +40,26 @@ SemanticModel build_semantic_model(const std::vector<Token>& tokens, const Progr
                                variable.name_token, end, variable.name_token, i});
     }
 
-    for (const auto& syntax : program.root.children) {
-        if (syntax.kind != SyntaxKind::FunctionDeclaration) continue;
-        std::size_t open = syntax.begin_token;
-        while (open <= syntax.end_token && open < tokens.size() && tokens[open].text != "(") ++open;
-        if (open >= tokens.size() || open > syntax.end_token) continue;
+    for (std::size_t function_token = 0; function_token < tokens.size(); ++function_token) {
+        if (tokens[function_token].text != "function") continue;
+        std::size_t open = function_token + 1;
+        while (open < tokens.size() && tokens[open].text != "(" &&
+               tokens[open].text != ";" && tokens[open].text != "{") ++open;
+        if (open >= tokens.size() || tokens[open].text != "(") continue;
         const auto close = matching(tokens, open, "(", ")");
         if (close >= tokens.size()) continue;
-        std::size_t name = syntax.begin_token + 1;
+        std::size_t body = close + 1;
+        while (body < tokens.size() && tokens[body].text != "{" &&
+               tokens[body].text != ";" && tokens[body].kind != TokenKind::End) ++body;
+        if (body >= tokens.size() || tokens[body].text != "{") continue;
+        const auto body_close = matching(tokens, body, "{", "}");
+        if (body_close >= tokens.size()) continue;
+        std::size_t name = function_token + 1;
         while (name < open && tokens[name].kind == TokenKind::Comment) ++name;
         model.nodes.push_back({SemanticNodeKind::FunctionDeclaration,
-                               syntax.begin_token, syntax.end_token + 1,
+                               function_token, body_close + 1,
                                name < open ? name : static_cast<std::size_t>(-1),
-                               static_cast<std::size_t>(-1)});
+                               static_cast<std::size_t>(-1), body});
 
         std::size_t part = open + 1;
         int paren = 0, square = 0, brace = 0, angle = 0;
@@ -67,7 +74,7 @@ SemanticModel build_semantic_model(const std::vector<Token>& tokens, const Progr
                 if (parameter_name != static_cast<std::size_t>(-1))
                     model.nodes.push_back({SemanticNodeKind::ParameterDeclaration,
                                            part, i, parameter_name,
-                                           static_cast<std::size_t>(-1)});
+                                           static_cast<std::size_t>(-1), body});
                 part = i + 1;
             }
         }

@@ -154,11 +154,11 @@ These are bounded current directions and must be revised after each checkpoint:
    consumed by the checker without changing output. Identifier references and
    semantic scope classification belong to the binder checkpoint rather than being
    guessed by this neutral structural layer.
-3. **Binder foundation:** establish correct global/module, function, parameter, and
-   block semantics for the supported subset; directly test declaration/reference
-   identity, `var` versus lexical declarations, shadowing, nested functions,
-   closures, and default-parameter/body nuances rather than assuming every brace
-   or parameter list creates the same kind of scope.
+3. **Completed bounded binder foundation:** ordinary function declarations,
+   parameters, simple variables, root/function/brace scopes, `var` promotion,
+   nested functions, closure references, and lexical shadowing now have stable
+   symbol identity. Destructuring, arrows, imports, classes/members, full hoisting,
+   and default-parameter temporal semantics remain explicit future slices.
 4. **Production migration bridge:** route one existing shadow-sensitive transform
    through binder identity, compare it against the protected legacy heuristic,
    prove equivalent or better behavior, then retire that heuristic.

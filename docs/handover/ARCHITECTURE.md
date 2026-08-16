@@ -196,6 +196,22 @@ formatting trivia or duplicate token text in every semantic node. It is a curren
 architectural hypothesis—not yet a benchmark-proven final design—that this compact
 semantic overlay can remain materially lighter and faster than full AST re-emission.
 
+`Binder` adds the first bounded identity layer over that overlay. It models a root
+scope, nested brace scopes, function-body scopes, ordinary function/parameter and
+simple variable symbols, `var` promotion to the nearest function scope, lexical
+shadowing, and ordinary identifier references. Property names, type positions,
+destructuring, arrows, class/member namespaces, imports, and complete JavaScript
+hoisting remain outside this first binding contract. Neutral brace regions may
+create empty scopes around object literals; because lookup walks outward and no
+object-property declarations are introduced, this is conservative for the current
+subset rather than a claim that every brace is semantically a block.
+
+The Makefile emits and includes compiler dependency files (`-MMD -MP`). This is a
+correctness invariant for incremental native development: semantic-header layout
+changes must rebuild every consumer rather than linking ABI-incompatible stale
+objects. Clean builds remain part of checkpoints, but ordinary incremental builds
+must also be trustworthy.
+
 Avoid two independent grammar implementations. A staged migration may temporarily
 leave some constructs represented only by current parser/range machinery and a
 bounded subset represented by durable semantic nodes, but both modes should

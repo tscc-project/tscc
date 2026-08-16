@@ -1,0 +1,115 @@
+#include "Binder.h"
+#include <algorithm>
+#include <unordered_set>
+
+namespace tscc {
+namespace {
+constexpr std::size_t missing = static_cast<std::size_t>(-1);
+
+std::size_t containing_scope(const BindingModel& binding, std::size_t token) {
+    std::size_t best = 0;
+    for (std::size_t i = 1; i < binding.scopes.size(); ++i) {
+        const auto& scope = binding.scopes[i];
+        if (token > scope.begin_token && token < scope.end_token &&
+            (best == 0 || scope.end_token - scope.begin_token <
+                              binding.scopes[best].end_token - binding.scopes[best].begin_token))
+            best = i;
+    }
+    return best;
+}
+
+std::size_t resolve(const BindingModel& binding, std::size_t scope, const std::string& name) {
+    for (;;) {
+        for (std::size_t i = 0; i < binding.symbols.size(); ++i)
+            if (binding.symbols[i].scope == scope && binding.symbols[i].name == name) return i;
+        if (scope == 0 || binding.scopes[scope].parent == missing) return missing;
+        scope = binding.scopes[scope].parent;
+    }
+}
+}
+
+std::size_t BindingModel::symbol_for_reference(std::size_t token) const {
+    for (const auto& reference : references)
+        if (reference.token == token) return reference.symbol;
+    return missing;
+}
+
+BindingModel bind_semantic_model(const std::vector<Token>& tokens, const Program& program,
+                                 const SemanticModel& semantic) {
+    BindingModel binding;
+    binding.scopes.push_back({0, tokens.size(), missing, true});
+
+    std::vector<std::size_t> brace_nodes;
+    for (std::size_t i = 0; i < semantic.nodes.size(); ++i)
+        if (semantic.nodes[i].kind == SemanticNodeKind::BraceRegion) brace_nodes.push_back(i);
+    std::sort(brace_nodes.begin(), brace_nodes.end(), [&](auto a, auto b) {
+        if (semantic.nodes[a].begin_token != semantic.nodes[b].begin_token)
+            return semantic.nodes[a].begin_token < semantic.nodes[b].begin_token;
+        return semantic.nodes[a].end_token > semantic.nodes[b].end_token;
+    });
+    for (auto node_index : brace_nodes) {
+        const auto& node = semantic.nodes[node_index];
+        std::size_t parent = 0;
+        for (std::size_t i = 1; i < binding.scopes.size(); ++i)
+            if (node.begin_token > binding.scopes[i].begin_token &&
+                node.end_token < binding.scopes[i].end_token &&
+                (parent == 0 || binding.scopes[i].end_token - binding.scopes[i].begin_token <
+                                    binding.scopes[parent].end_token - binding.scopes[parent].begin_token))
+                parent = i;
+        binding.scopes.push_back({node.begin_token, node.end_token, parent, false});
+    }
+
+    for (const auto& function : semantic.nodes) {
+        if (function.kind != SemanticNodeKind::FunctionDeclaration) continue;
+        std::size_t body_scope = missing;
+        for (std::size_t i = 1; i < binding.scopes.size(); ++i)
+            if (binding.scopes[i].begin_token == function.scope_token) body_scope = i;
+        if (body_scope != missing) binding.scopes[body_scope].function_scope = true;
+        if (function.name_token != missing && function.name_token < tokens.size())
+            binding.symbols.push_back({tokens[function.name_token].text, SymbolKind::Function,
+                                       function.name_token, containing_scope(binding, function.begin_token),
+                                       static_cast<std::size_t>(&function - semantic.nodes.data())});
+    }
+
+    std::unordered_set<std::size_t> declaration_tokens;
+    for (std::size_t node_index = 0; node_index < semantic.nodes.size(); ++node_index) {
+        const auto& node = semantic.nodes[node_index];
+        if (node.kind != SemanticNodeKind::VariableDeclaration &&
+            node.kind != SemanticNodeKind::ParameterDeclaration) continue;
+        if (node.name_token == missing || node.name_token >= tokens.size()) continue;
+        auto scope = containing_scope(binding, node.name_token);
+        SymbolKind kind = node.kind == SemanticNodeKind::ParameterDeclaration
+                              ? SymbolKind::Parameter : SymbolKind::Variable;
+        if (kind == SymbolKind::Parameter) {
+            for (std::size_t i = 1; i < binding.scopes.size(); ++i)
+                if (binding.scopes[i].begin_token == node.scope_token) { scope = i; break; }
+        } else if (node.variable_index < program.variables.size()) {
+            std::size_t keyword = node.name_token;
+            while (keyword > 0 && tokens[keyword].text != "var" && tokens[keyword].text != "let" &&
+                   tokens[keyword].text != "const" && tokens[keyword].text != ";" &&
+                   tokens[keyword].text != "{") --keyword;
+            if (tokens[keyword].text == "var")
+                while (scope != 0 && !binding.scopes[scope].function_scope)
+                    scope = binding.scopes[scope].parent;
+        }
+        binding.symbols.push_back({tokens[node.name_token].text, kind, node.name_token, scope, node_index});
+        declaration_tokens.insert(node.name_token);
+    }
+    for (const auto& symbol : binding.symbols) declaration_tokens.insert(symbol.declaration_token);
+
+    auto in_type = [&](std::size_t token) {
+        for (const auto& variable : program.variables)
+            if (token >= variable.type_begin_token && token < variable.type_end_token) return true;
+        return false;
+    };
+    for (std::size_t i = 0; i < tokens.size(); ++i) {
+        if (tokens[i].kind != TokenKind::Identifier || declaration_tokens.count(i) || in_type(i)) continue;
+        if (i > 0 && (tokens[i-1].text == "." || tokens[i-1].text == "?.")) continue;
+        if (i + 1 < tokens.size() && tokens[i+1].text == ":") continue;
+        const auto scope = containing_scope(binding, i);
+        binding.references.push_back({i, scope, resolve(binding, scope, tokens[i].text)});
+    }
+    return binding;
+}
+
+} // namespace tscc

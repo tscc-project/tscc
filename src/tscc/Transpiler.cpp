@@ -4,6 +4,7 @@
 #include "Parser.h"
 #include "SourceEdit.h"
 #include "Semantic.h"
+#include "Binder.h"
 #include <algorithm>
 #include <unordered_map>
 #include <unordered_set>
@@ -793,6 +794,8 @@ bool transpile_tokens(const SourceFile& source, const std::vector<Token>& tokens
     Parser parser(source, tokens, diagnostics);
     if (!parser.parse(program)) return false;
     const auto semantic = build_semantic_model(tokens, program);
+    const auto binding = bind_semantic_model(tokens, program, semantic);
+    (void)binding;
     if (!check_program(source, tokens, program, semantic, diagnostics)) return false;
 
     out = source.text;
