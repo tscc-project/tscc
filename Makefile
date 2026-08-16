@@ -12,7 +12,7 @@ test-smoke: tscc
 	bash tests/smoke.sh
 clean:
 	rm -f $(OBJECTS) tscc
-.PHONY: all test test-smoke test-parser test-checker test-runtime test-project test-regression test-tsx test-commonjs clean
+.PHONY: all test test-smoke test-parser test-checker test-runtime test-project test-regression test-tsx test-commonjs check-regression-sync clean
 
 
 test-parser:
@@ -30,6 +30,9 @@ test-project: tscc
 
 test-regression: tscc
 	python3 regression/run.py --tscc "$(CURDIR)/tscc"
+
+check-regression-sync:
+	bash tools/check_regression_sync.sh
 
 test-tsx: tscc
 	bash tests/tsx_preserve.sh

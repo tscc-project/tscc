@@ -12,7 +12,8 @@ product suite.
 **Status:** CURRENT
 
 The project is not currently documented as a complete drop-in `tsc` replacement
-and has no semantic type checker. Compatibility promises must remain explicit.
+and has only a first bounded primitive-initializer checker slice. Compatibility
+promises must remain explicit.
 
 ## Feature support definition
 
@@ -91,4 +92,3 @@ Classify through history/scripts/references; do not delete by appearance.
 
 Prepare locally; commits, pushes, tags, releases, deployments, and public
 compatibility/version changes require explicit direction.
-

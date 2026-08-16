@@ -12,7 +12,9 @@ This is the entry point for developers and coding agents working on tscc. Read
   written in C++17.
 - Current default target: `es2022`; default module mode: `preserve`.
 - Build: Make.
-- There is no semantic TypeScript type checker at this checkpoint.
+- The first deliberately bounded semantic checker slice is active: primitive
+  `number`, `string`, and `boolean` annotations are checked against direct
+  literal initializers. This is not yet a general TypeScript type checker.
 
 Source and tests define current behavior. The internal and standalone regression
 corpora define executable compatibility evidence. README/website claims must stay
@@ -57,9 +59,9 @@ erasure, generics, enums, namespaces, parameter properties, project/relative
 module discovery, TSX preserve mode, CommonJS lowering with live imported reads,
 module grammar hardening, scope/shadowing work, and import attributes.
 
-The independent corpus currently contains 511 cases: 483 pass, zero fail, and 28
+The independent corpus currently contains 511 cases: 484 pass, zero fail, and 27
 semantic-checker-only skips at the retained checkpoint. Counts are evidence, not
-the product definition. There is still no semantic checker and the project is not
+the product definition. One semantic case is implemented; the project is not
 implicitly a drop-in replacement for all `tsc` behavior.
 
 ## Build and validation
@@ -106,11 +108,11 @@ rather than literals alone.
 
 ## Regression repositories
 
-This repo contains `regression/`; a standalone `tscc-regression-suite` mirrors the
-corpus/runner. Current comparison shows the substantive corpus files match while
-standalone `REGRESSION_NOTES.md` includes newer checkpoint notes. The canonical
-sync direction is not yet sufficiently encoded. Do not guess or allow drift:
-establish and automate ownership as a dedicated checkpoint.
+The sibling standalone `tscc-regression-suite` is the canonical external contract
+owner. This repo contains a release/convenience mirror in `regression/`.
+`make check-regression-sync` compares the executable corpus and runner; update the
+standalone suite first and synchronize the mirror in the same checkpoint. Notes
+and handovers remain repository-owned and are not required to be byte-identical.
 
 ## Unknown artifacts
 

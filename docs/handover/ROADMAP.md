@@ -114,7 +114,8 @@ deliberate trade-offs rather than hidden inside semantic progress.
    runtime, negative diagnostics, and semantic-only gaps.
 4. Prioritize incomplete semantic slices and architecture weaknesses over adding
    more syntax.
-5. Establish canonical local/standalone regression ownership and automated sync.
+5. Maintain the standalone regression suite as canonical external contract owner
+   and enforce parity of its executable corpus with the implementation mirror.
 6. Expand runtime/differential, side-effect, scope, malformed/recovery, and
    real-world project coverage.
 7. Run native safety validation and introduce targeted fuzzing/stress work.
@@ -129,8 +130,9 @@ deliberate trade-offs rather than hidden inside semantic progress.
 - Pin or define the supported TypeScript oracle range. The 2026-08-16 baseline is
   green on TypeScript 7.0.2 after making module modes explicit; upgrades still
   require complete-suite classification rather than relying on ambient defaults.
-- Automate parity checks between the local mirror and canonical independent
-  corpus; the stale case count and TypeScript 7 oracle drift are resolved.
+- Keep the automated parity check between the local mirror and canonical
+  independent corpus green; the stale case count and TypeScript 7 oracle drift
+  are resolved.
 - Decide whether `ModuleGraph` should become the driver implementation or remain
   separately tested infrastructure; avoid maintaining two traversal paths without
   an explicit reason.
