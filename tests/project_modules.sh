@@ -136,3 +136,36 @@ printf 'console.log(3);\n' >"$TMP/glob/tests/c.ts"
 test -f "$TMP/glob/dist/a.js"
 test ! -e "$TMP/glob/dist/skip/b.js"
 test ! -e "$TMP/glob/dist/tests/c.js"
+
+# Preparation is program-wide. Default emit-on-error commits valid prepared files,
+# while --noEmitOnError commits none when any input has semantic errors.
+mkdir -p "$TMP/emit-policy"
+printf '%s\n' 'export const ok:number=1;' >"$TMP/emit-policy/good.ts"
+printf '%s\n' 'export const bad:number="wrong";' >"$TMP/emit-policy/bad.ts"
+if "$ROOT/tscc" --pretty false --noResolve --outDir "$TMP/emit-default" \
+    "$TMP/emit-policy/good.ts" "$TMP/emit-policy/bad.ts" >/dev/null 2>&1; then
+  echo "mixed valid/invalid compilation unexpectedly succeeded" >&2; exit 1
+fi
+test -f "$TMP/emit-default/good.js"
+test ! -e "$TMP/emit-default/bad.js"
+if "$ROOT/tscc" --pretty false --noResolve --noEmitOnError --outDir "$TMP/emit-atomic" \
+    "$TMP/emit-policy/good.ts" "$TMP/emit-policy/bad.ts" >/dev/null 2>&1; then
+  echo "noEmitOnError compilation unexpectedly succeeded" >&2; exit 1
+fi
+test ! -e "$TMP/emit-atomic/good.js"
+test ! -e "$TMP/emit-atomic/bad.js"
+
+cat >"$TMP/emit-policy/tsconfig.json" <<'JSON'
+{
+  "compilerOptions": {
+    "outDir": "dist",
+    "noEmitOnError": true
+  },
+  "files": ["good.ts", "bad.ts"]
+}
+JSON
+if "$ROOT/tscc" --pretty false -p "$TMP/emit-policy/tsconfig.json" >/dev/null 2>&1; then
+  echo "configured noEmitOnError compilation unexpectedly succeeded" >&2; exit 1
+fi
+test ! -e "$TMP/emit-policy/dist/good.js"
+test ! -e "$TMP/emit-policy/dist/bad.js"

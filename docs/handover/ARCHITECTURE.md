@@ -493,9 +493,15 @@ current product can do so honestly. Exact tsc codes/messages are not a contract
 unless deliberately chosen. Test at an appropriate level—status, category/code,
 substring, or exact text—without making all wording brittle.
 
-Invalid compilation should not create or partially replace output. Write failure,
-missing directory, permissions, and multi-file partial success need explicit
-behavior.
+The program driver separates preparation from output commitment. Diagnostics are
+collected per source and then merged, preventing an earlier failure from poisoning
+the parse/check state of later sources. Default emit-on-error commits every
+successfully prepared source and returns failure; `noEmitOnError` commits none when
+any source failed; `noEmit` never commits. Outputs are first written to sibling
+staging files and renamed only after all staging succeeds. This protects against
+compile-time partial replacement and most individual write failures, but it is not
+a transactional multi-file filesystem commit: a rename failure can still leave an
+already-renamed subset. Tests and documentation must preserve that distinction.
 
 ## Runtime and differential evidence
 

@@ -23,6 +23,7 @@ static void help() {
         << "  --target <name>            Target label (currently es2022-compatible erasure)\n"
         << "  --removeComments           Remove comments\n"
         << "  --noEmit                   Parse/transpile without writing files\n"
+        << "  --noEmitOnError            Commit no outputs when any input has errors\n"
         << "  --noResolve                Do not follow relative module dependencies\n"
         << "  --pretty / --pretty false  Enable/disable ANSI diagnostics\n";
 }
@@ -44,6 +45,7 @@ int main(int argc, char** argv) {
         if (arg == "--target" && i + 1 < argc) { options.target = argv[++i]; continue; }
         if (arg == "--removeComments") { options.remove_comments = true; continue; }
         if (arg == "--noEmit") { options.no_emit = true; continue; }
+        if (arg == "--noEmitOnError") { options.no_emit_on_error = true; continue; }
         if (arg == "--noResolve") { options.follow_imports = false; continue; }
         if (arg == "--pretty" && i + 1 < argc && std::string(argv[i + 1]) == "false") {
             options.pretty = false; ++i; continue;

@@ -163,7 +163,7 @@ Current additions:
 
 - `-p` / `--project tsconfig.json`;
 - JSONC-style comments and trailing commas for the currently supported tsconfig fields;
-- `compilerOptions.rootDir`, `outDir`, `target`, `module`, `removeComments`, and `noEmit`;
+- `compilerOptions.rootDir`, `outDir`, `target`, `module`, `removeComments`, `noEmit`, and `noEmitOnError`;
 - `files` arrays, with recursive `.ts` discovery when `files` is omitted;
 - static relative `import` / `export ... from` dependency discovery;
 - `.js` source specifiers resolving to sibling `.ts` inputs, so runtime-correct ESM specifiers can remain unchanged in emitted JS;
@@ -174,6 +174,14 @@ Current additions:
 - erasure of `import type`, `export type`, and exported interfaces/type aliases.
 
 The module syntax itself is currently preserved; CommonJS rewriting is intentionally not being faked before a proper module transform exists.
+
+Compilation now has separate preparation and output-commit phases. Every input is
+processed independently before output policy is applied, so the order of valid and
+invalid files cannot suppress later diagnostics or valid preparation. By default,
+tscc follows an emit-on-error policy and writes the successfully prepared files
+while still returning a failing status. Pass `--noEmitOnError`, or set
+`compilerOptions.noEmitOnError` to `true`, to write no files when any input has an
+error. `--noEmit` remains stronger and never writes output.
 
 The compiler initially built the entire module graph and then lexed/transpiled in a second phase. Benchmarking showed that architecture hurt the many-file baseline, so v0.4 switched to a streaming work queue: each source is loaded and lexed once, relative dependencies are discovered from that token stream, the source is transpiled immediately, and unseen dependencies are queued.
 

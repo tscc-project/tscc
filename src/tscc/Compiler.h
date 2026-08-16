@@ -9,7 +9,7 @@ struct CompilerOptions {
     std::string target="es2022";
     std::string module="preserve";
     std::string jsx;
-    bool remove_comments=false,no_emit=false,pretty=true;
+    bool remove_comments=false,no_emit=false,no_emit_on_error=false,pretty=true;
     bool follow_imports=true;
 };
 int compile_files(const std::vector<std::string>& files,const CompilerOptions& options);

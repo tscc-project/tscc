@@ -187,16 +187,24 @@ These are bounded current directions and must be revised after each checkpoint:
     `for` variable declarations have explicit lexical regions and binder-owned
     CommonJS shadowing. Destructuring and arrow/class binding forms remain on the
     legacy bridge.
+11. **Completed program preparation/output policy:** each source now prepares with
+    file-local diagnostics before any output is committed. Default emit-on-error
+    writes only successfully prepared sources; CLI and tsconfig `noEmitOnError`
+    suppress the entire prepared set when any source fails. Staged sibling files
+    reduce individual replacement risk, but filesystem rename failure is not a
+    transactional multi-file commit and must not be described as one.
 
 Every checkpoint requires unchanged/equivalent transpiler output and runtime
 evidence plus measured performance/RSS impact. Do not require the entire language
 to migrate before a bounded binder slice can ship, and do not accept semantic
 infrastructure that remains disconnected from production compilation.
 
-Before project-wide checking, separate the program compilation lifecycle from emit
-policy. The architecture should prepare and classify a whole program before
-committing outputs, while deliberately supporting whichever policy is chosen for
-emit-on-error or no-emit-on-error. Traversal order must not accidentally decide it.
+The next bounded architecture checkpoint should give static imports binder-owned
+symbol identity and use that identity in CommonJS live-binding rewriting. It must
+not imply cross-module type propagation: imported values can remain `unknown`
+until export tables and module-level type facts have a complete protected slice.
+Retain the legacy import-shadow bridge for unsupported destructuring or binding
+forms, and remove it only as tests prove equivalent ownership.
 
 ## Roadmap response to evidence
 

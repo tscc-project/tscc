@@ -19,6 +19,7 @@ public:
     void warning(const std::string& file, std::size_t line, std::size_t column,
                  const std::string& message, const std::string& source_line = {});
     bool has_errors() const;
+    void append(Diagnostics&& other);
     void print(bool color = true) const;
 private:
     std::vector<Diagnostic> items_;

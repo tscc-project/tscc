@@ -75,6 +75,7 @@ bool load_tsconfig(const std::string& path, CompilerOptions& options,
     if(get_string(s,"jsx",v)) options.jsx=v;
     if(get_bool(s,"removeComments",bv)) options.remove_comments=bv;
     if(get_bool(s,"noEmit",bv)) options.no_emit=bv;
+    if(get_bool(s,"noEmitOnError",bv)) options.no_emit_on_error=bv;
 
     auto files=get_array(s,"files");
     auto include=get_array(s,"include");
