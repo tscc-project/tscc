@@ -1,0 +1,477 @@
+{
+  "schema_version": 1,
+  "project": "tscc",
+  "commit": "a05d3d86609486c793b309460bb942be96ba6ed5",
+  "timestamp_utc": "2026-08-18T01:43:04.834914+00:00",
+  "platform": {
+    "system": "Linux",
+    "release": "6.18.35",
+    "machine": "x86_64",
+    "python": "3.13.5"
+  },
+  "toolchain": {
+    "compiler": "c++ (Debian 14.2.0-19) 14.2.0",
+    "valgrind": null,
+    "time": "/usr/bin/time"
+  },
+  "mode": "rss",
+  "command": [
+    "./.build/tscc-memory-lifetime",
+    "20"
+  ],
+  "warmup_iterations": 5,
+  "requested_iterations": 40,
+  "requested_duration_seconds": 0.0,
+  "runs": [
+    {
+      "kind": "measured",
+      "index": 1,
+      "exit_status": 0,
+      "elapsed_seconds": 0.006612,
+      "peak_rss_kib": 5032,
+      "findings": [],
+      "stdout_tail": "tscc compiler lifetime corpus passed 20 iterations",
+      "stderr_tail": "\tCommand being timed: \"./.build/tscc-memory-lifetime 20\"\n\tUser time (seconds): 0.00\n\tSystem time (seconds): 0.00\n\tPercent of CPU this job got: 100%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:00.00\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 5032\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 0\n\tMinor (reclaiming a frame) page faults: 307\n\tVoluntary context switches: 3\n\tInvoluntary context switches: 2\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 0\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "kind": "measured",
+      "index": 2,
+      "exit_status": 0,
+      "elapsed_seconds": 0.006536,
+      "peak_rss_kib": 4984,
+      "findings": [],
+      "stdout_tail": "tscc compiler lifetime corpus passed 20 iterations",
+      "stderr_tail": "\tCommand being timed: \"./.build/tscc-memory-lifetime 20\"\n\tUser time (seconds): 0.00\n\tSystem time (seconds): 0.00\n\tPercent of CPU this job got: 100%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:00.00\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 4984\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 0\n\tMinor (reclaiming a frame) page faults: 308\n\tVoluntary context switches: 3\n\tInvoluntary context switches: 2\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 0\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "kind": "measured",
+      "index": 3,
+      "exit_status": 0,
+      "elapsed_seconds": 0.005702,
+      "peak_rss_kib": 4972,
+      "findings": [],
+      "stdout_tail": "tscc compiler lifetime corpus passed 20 iterations",
+      "stderr_tail": "\tCommand being timed: \"./.build/tscc-memory-lifetime 20\"\n\tUser time (seconds): 0.00\n\tSystem time (seconds): 0.00\n\tPercent of CPU this job got: 100%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:00.00\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 4972\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 0\n\tMinor (reclaiming a frame) page faults: 307\n\tVoluntary context switches: 3\n\tInvoluntary context switches: 0\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 0\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "kind": "measured",
+      "index": 4,
+      "exit_status": 0,
+      "elapsed_seconds": 0.006221,
+      "peak_rss_kib": 5024,
+      "findings": [],
+      "stdout_tail": "tscc compiler lifetime corpus passed 20 iterations",
+      "stderr_tail": "\tCommand being timed: \"./.build/tscc-memory-lifetime 20\"\n\tUser time (seconds): 0.00\n\tSystem time (seconds): 0.00\n\tPercent of CPU this job got: 100%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:00.00\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 5024\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 0\n\tMinor (reclaiming a frame) page faults: 306\n\tVoluntary context switches: 3\n\tInvoluntary context switches: 0\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 0\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "kind": "measured",
+      "index": 5,
+      "exit_status": 0,
+      "elapsed_seconds": 0.006336,
+      "peak_rss_kib": 5032,
+      "findings": [],
+      "stdout_tail": "tscc compiler lifetime corpus passed 20 iterations",
+      "stderr_tail": "\tCommand being timed: \"./.build/tscc-memory-lifetime 20\"\n\tUser time (seconds): 0.00\n\tSystem time (seconds): 0.00\n\tPercent of CPU this job got: 100%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:00.00\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 5032\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 0\n\tMinor (reclaiming a frame) page faults: 306\n\tVoluntary context switches: 3\n\tInvoluntary context switches: 0\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 0\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "kind": "measured",
+      "index": 6,
+      "exit_status": 0,
+      "elapsed_seconds": 0.00583,
+      "peak_rss_kib": 4908,
+      "findings": [],
+      "stdout_tail": "tscc compiler lifetime corpus passed 20 iterations",
+      "stderr_tail": "\tCommand being timed: \"./.build/tscc-memory-lifetime 20\"\n\tUser time (seconds): 0.00\n\tSystem time (seconds): 0.00\n\tPercent of CPU this job got: 100%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:00.00\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 4908\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 0\n\tMinor (reclaiming a frame) page faults: 309\n\tVoluntary context switches: 3\n\tInvoluntary context switches: 0\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 0\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "kind": "measured",
+      "index": 7,
+      "exit_status": 0,
+      "elapsed_seconds": 0.005648,
+      "peak_rss_kib": 5044,
+      "findings": [],
+      "stdout_tail": "tscc compiler lifetime corpus passed 20 iterations",
+      "stderr_tail": "\tCommand being timed: \"./.build/tscc-memory-lifetime 20\"\n\tUser time (seconds): 0.00\n\tSystem time (seconds): 0.00\n\tPercent of CPU this job got: 100%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:00.00\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 5044\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 0\n\tMinor (reclaiming a frame) page faults: 310\n\tVoluntary context switches: 3\n\tInvoluntary context switches: 0\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 0\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "kind": "measured",
+      "index": 8,
+      "exit_status": 0,
+      "elapsed_seconds": 0.005628,
+      "peak_rss_kib": 4968,
+      "findings": [],
+      "stdout_tail": "tscc compiler lifetime corpus passed 20 iterations",
+      "stderr_tail": "\tCommand being timed: \"./.build/tscc-memory-lifetime 20\"\n\tUser time (seconds): 0.00\n\tSystem time (seconds): 0.00\n\tPercent of CPU this job got: 100%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:00.00\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 4968\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 0\n\tMinor (reclaiming a frame) page faults: 306\n\tVoluntary context switches: 3\n\tInvoluntary context switches: 0\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 0\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "kind": "measured",
+      "index": 9,
+      "exit_status": 0,
+      "elapsed_seconds": 0.00583,
+      "peak_rss_kib": 4996,
+      "findings": [],
+      "stdout_tail": "tscc compiler lifetime corpus passed 20 iterations",
+      "stderr_tail": "\tCommand being timed: \"./.build/tscc-memory-lifetime 20\"\n\tUser time (seconds): 0.00\n\tSystem time (seconds): 0.00\n\tPercent of CPU this job got: 100%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:00.00\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 4996\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 0\n\tMinor (reclaiming a frame) page faults: 309\n\tVoluntary context switches: 3\n\tInvoluntary context switches: 0\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 0\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "kind": "measured",
+      "index": 10,
+      "exit_status": 0,
+      "elapsed_seconds": 0.005976,
+      "peak_rss_kib": 4972,
+      "findings": [],
+      "stdout_tail": "tscc compiler lifetime corpus passed 20 iterations",
+      "stderr_tail": "\tCommand being timed: \"./.build/tscc-memory-lifetime 20\"\n\tUser time (seconds): 0.00\n\tSystem time (seconds): 0.00\n\tPercent of CPU this job got: 100%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:00.00\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 4972\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 0\n\tMinor (reclaiming a frame) page faults: 307\n\tVoluntary context switches: 3\n\tInvoluntary context switches: 0\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 0\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "kind": "measured",
+      "index": 11,
+      "exit_status": 0,
+      "elapsed_seconds": 0.005583,
+      "peak_rss_kib": 5040,
+      "findings": [],
+      "stdout_tail": "tscc compiler lifetime corpus passed 20 iterations",
+      "stderr_tail": "\tCommand being timed: \"./.build/tscc-memory-lifetime 20\"\n\tUser time (seconds): 0.00\n\tSystem time (seconds): 0.00\n\tPercent of CPU this job got: 100%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:00.00\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 5040\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 0\n\tMinor (reclaiming a frame) page faults: 307\n\tVoluntary context switches: 3\n\tInvoluntary context switches: 0\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 0\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "kind": "measured",
+      "index": 12,
+      "exit_status": 0,
+      "elapsed_seconds": 0.005767,
+      "peak_rss_kib": 4972,
+      "findings": [],
+      "stdout_tail": "tscc compiler lifetime corpus passed 20 iterations",
+      "stderr_tail": "\tCommand being timed: \"./.build/tscc-memory-lifetime 20\"\n\tUser time (seconds): 0.00\n\tSystem time (seconds): 0.00\n\tPercent of CPU this job got: 100%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:00.00\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 4972\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 0\n\tMinor (reclaiming a frame) page faults: 305\n\tVoluntary context switches: 3\n\tInvoluntary context switches: 0\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 0\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "kind": "measured",
+      "index": 13,
+      "exit_status": 0,
+      "elapsed_seconds": 0.005684,
+      "peak_rss_kib": 4908,
+      "findings": [],
+      "stdout_tail": "tscc compiler lifetime corpus passed 20 iterations",
+      "stderr_tail": "\tCommand being timed: \"./.build/tscc-memory-lifetime 20\"\n\tUser time (seconds): 0.00\n\tSystem time (seconds): 0.00\n\tPercent of CPU this job got: 100%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:00.00\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 4908\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 0\n\tMinor (reclaiming a frame) page faults: 305\n\tVoluntary context switches: 3\n\tInvoluntary context switches: 0\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 0\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "kind": "measured",
+      "index": 14,
+      "exit_status": 0,
+      "elapsed_seconds": 0.006079,
+      "peak_rss_kib": 5024,
+      "findings": [],
+      "stdout_tail": "tscc compiler lifetime corpus passed 20 iterations",
+      "stderr_tail": "\tCommand being timed: \"./.build/tscc-memory-lifetime 20\"\n\tUser time (seconds): 0.00\n\tSystem time (seconds): 0.00\n\tPercent of CPU this job got: 100%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:00.00\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 5024\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 0\n\tMinor (reclaiming a frame) page faults: 305\n\tVoluntary context switches: 3\n\tInvoluntary context switches: 0\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 0\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "kind": "measured",
+      "index": 15,
+      "exit_status": 0,
+      "elapsed_seconds": 0.005924,
+      "peak_rss_kib": 4972,
+      "findings": [],
+      "stdout_tail": "tscc compiler lifetime corpus passed 20 iterations",
+      "stderr_tail": "\tCommand being timed: \"./.build/tscc-memory-lifetime 20\"\n\tUser time (seconds): 0.00\n\tSystem time (seconds): 0.00\n\tPercent of CPU this job got: 100%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:00.00\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 4972\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 0\n\tMinor (reclaiming a frame) page faults: 307\n\tVoluntary context switches: 3\n\tInvoluntary context switches: 0\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 0\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "kind": "measured",
+      "index": 16,
+      "exit_status": 0,
+      "elapsed_seconds": 0.005901,
+      "peak_rss_kib": 5036,
+      "findings": [],
+      "stdout_tail": "tscc compiler lifetime corpus passed 20 iterations",
+      "stderr_tail": "\tCommand being timed: \"./.build/tscc-memory-lifetime 20\"\n\tUser time (seconds): 0.00\n\tSystem time (seconds): 0.00\n\tPercent of CPU this job got: 100%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:00.00\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 5036\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 0\n\tMinor (reclaiming a frame) page faults: 307\n\tVoluntary context switches: 3\n\tInvoluntary context switches: 0\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 0\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "kind": "measured",
+      "index": 17,
+      "exit_status": 0,
+      "elapsed_seconds": 0.005712,
+      "peak_rss_kib": 5048,
+      "findings": [],
+      "stdout_tail": "tscc compiler lifetime corpus passed 20 iterations",
+      "stderr_tail": "\tCommand being timed: \"./.build/tscc-memory-lifetime 20\"\n\tUser time (seconds): 0.00\n\tSystem time (seconds): 0.00\n\tPercent of CPU this job got: 100%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:00.00\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 5048\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 0\n\tMinor (reclaiming a frame) page faults: 306\n\tVoluntary context switches: 3\n\tInvoluntary context switches: 0\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 0\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "kind": "measured",
+      "index": 18,
+      "exit_status": 0,
+      "elapsed_seconds": 0.005945,
+      "peak_rss_kib": 4972,
+      "findings": [],
+      "stdout_tail": "tscc compiler lifetime corpus passed 20 iterations",
+      "stderr_tail": "\tCommand being timed: \"./.build/tscc-memory-lifetime 20\"\n\tUser time (seconds): 0.00\n\tSystem time (seconds): 0.00\n\tPercent of CPU this job got: 100%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:00.00\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 4972\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 0\n\tMinor (reclaiming a frame) page faults: 309\n\tVoluntary context switches: 3\n\tInvoluntary context switches: 0\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 0\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "kind": "measured",
+      "index": 19,
+      "exit_status": 0,
+      "elapsed_seconds": 0.00632,
+      "peak_rss_kib": 4988,
+      "findings": [],
+      "stdout_tail": "tscc compiler lifetime corpus passed 20 iterations",
+      "stderr_tail": "\tCommand being timed: \"./.build/tscc-memory-lifetime 20\"\n\tUser time (seconds): 0.00\n\tSystem time (seconds): 0.00\n\tPercent of CPU this job got: 100%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:00.00\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 4988\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 0\n\tMinor (reclaiming a frame) page faults: 306\n\tVoluntary context switches: 3\n\tInvoluntary context switches: 0\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 0\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "kind": "measured",
+      "index": 20,
+      "exit_status": 0,
+      "elapsed_seconds": 0.005937,
+      "peak_rss_kib": 5112,
+      "findings": [],
+      "stdout_tail": "tscc compiler lifetime corpus passed 20 iterations",
+      "stderr_tail": "\tCommand being timed: \"./.build/tscc-memory-lifetime 20\"\n\tUser time (seconds): 0.00\n\tSystem time (seconds): 0.00\n\tPercent of CPU this job got: 100%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:00.00\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 5112\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 0\n\tMinor (reclaiming a frame) page faults: 306\n\tVoluntary context switches: 3\n\tInvoluntary context switches: 0\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 0\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "kind": "measured",
+      "index": 21,
+      "exit_status": 0,
+      "elapsed_seconds": 0.005858,
+      "peak_rss_kib": 4908,
+      "findings": [],
+      "stdout_tail": "tscc compiler lifetime corpus passed 20 iterations",
+      "stderr_tail": "\tCommand being timed: \"./.build/tscc-memory-lifetime 20\"\n\tUser time (seconds): 0.00\n\tSystem time (seconds): 0.00\n\tPercent of CPU this job got: 100%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:00.00\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 4908\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 0\n\tMinor (reclaiming a frame) page faults: 306\n\tVoluntary context switches: 3\n\tInvoluntary context switches: 0\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 0\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "kind": "measured",
+      "index": 22,
+      "exit_status": 0,
+      "elapsed_seconds": 0.005767,
+      "peak_rss_kib": 5036,
+      "findings": [],
+      "stdout_tail": "tscc compiler lifetime corpus passed 20 iterations",
+      "stderr_tail": "\tCommand being timed: \"./.build/tscc-memory-lifetime 20\"\n\tUser time (seconds): 0.00\n\tSystem time (seconds): 0.00\n\tPercent of CPU this job got: 100%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:00.00\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 5036\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 0\n\tMinor (reclaiming a frame) page faults: 308\n\tVoluntary context switches: 3\n\tInvoluntary context switches: 0\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 0\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "kind": "measured",
+      "index": 23,
+      "exit_status": 0,
+      "elapsed_seconds": 0.005655,
+      "peak_rss_kib": 5108,
+      "findings": [],
+      "stdout_tail": "tscc compiler lifetime corpus passed 20 iterations",
+      "stderr_tail": "\tCommand being timed: \"./.build/tscc-memory-lifetime 20\"\n\tUser time (seconds): 0.00\n\tSystem time (seconds): 0.00\n\tPercent of CPU this job got: 100%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:00.00\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 5108\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 0\n\tMinor (reclaiming a frame) page faults: 306\n\tVoluntary context switches: 3\n\tInvoluntary context switches: 0\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 0\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "kind": "measured",
+      "index": 24,
+      "exit_status": 0,
+      "elapsed_seconds": 0.006916,
+      "peak_rss_kib": 5040,
+      "findings": [],
+      "stdout_tail": "tscc compiler lifetime corpus passed 20 iterations",
+      "stderr_tail": "\tCommand being timed: \"./.build/tscc-memory-lifetime 20\"\n\tUser time (seconds): 0.00\n\tSystem time (seconds): 0.00\n\tPercent of CPU this job got: 100%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:00.00\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 5040\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 0\n\tMinor (reclaiming a frame) page faults: 308\n\tVoluntary context switches: 3\n\tInvoluntary context switches: 1\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 0\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "kind": "measured",
+      "index": 25,
+      "exit_status": 0,
+      "elapsed_seconds": 0.00583,
+      "peak_rss_kib": 4908,
+      "findings": [],
+      "stdout_tail": "tscc compiler lifetime corpus passed 20 iterations",
+      "stderr_tail": "\tCommand being timed: \"./.build/tscc-memory-lifetime 20\"\n\tUser time (seconds): 0.00\n\tSystem time (seconds): 0.00\n\tPercent of CPU this job got: 100%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:00.00\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 4908\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 0\n\tMinor (reclaiming a frame) page faults: 304\n\tVoluntary context switches: 3\n\tInvoluntary context switches: 2\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 0\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "kind": "measured",
+      "index": 26,
+      "exit_status": 0,
+      "elapsed_seconds": 0.005773,
+      "peak_rss_kib": 4908,
+      "findings": [],
+      "stdout_tail": "tscc compiler lifetime corpus passed 20 iterations",
+      "stderr_tail": "\tCommand being timed: \"./.build/tscc-memory-lifetime 20\"\n\tUser time (seconds): 0.00\n\tSystem time (seconds): 0.00\n\tPercent of CPU this job got: 100%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:00.00\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 4908\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 0\n\tMinor (reclaiming a frame) page faults: 308\n\tVoluntary context switches: 3\n\tInvoluntary context switches: 0\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 0\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "kind": "measured",
+      "index": 27,
+      "exit_status": 0,
+      "elapsed_seconds": 0.006983,
+      "peak_rss_kib": 4884,
+      "findings": [],
+      "stdout_tail": "tscc compiler lifetime corpus passed 20 iterations",
+      "stderr_tail": "\tCommand being timed: \"./.build/tscc-memory-lifetime 20\"\n\tUser time (seconds): 0.00\n\tSystem time (seconds): 0.00\n\tPercent of CPU this job got: 80%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:00.00\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 4884\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 0\n\tMinor (reclaiming a frame) page faults: 305\n\tVoluntary context switches: 3\n\tInvoluntary context switches: 2\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 0\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "kind": "measured",
+      "index": 28,
+      "exit_status": 0,
+      "elapsed_seconds": 0.006512,
+      "peak_rss_kib": 4972,
+      "findings": [],
+      "stdout_tail": "tscc compiler lifetime corpus passed 20 iterations",
+      "stderr_tail": "\tCommand being timed: \"./.build/tscc-memory-lifetime 20\"\n\tUser time (seconds): 0.00\n\tSystem time (seconds): 0.00\n\tPercent of CPU this job got: 80%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:00.00\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 4972\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 0\n\tMinor (reclaiming a frame) page faults: 306\n\tVoluntary context switches: 3\n\tInvoluntary context switches: 0\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 0\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "kind": "measured",
+      "index": 29,
+      "exit_status": 0,
+      "elapsed_seconds": 0.00589,
+      "peak_rss_kib": 4920,
+      "findings": [],
+      "stdout_tail": "tscc compiler lifetime corpus passed 20 iterations",
+      "stderr_tail": "\tCommand being timed: \"./.build/tscc-memory-lifetime 20\"\n\tUser time (seconds): 0.00\n\tSystem time (seconds): 0.00\n\tPercent of CPU this job got: 100%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:00.00\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 4920\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 0\n\tMinor (reclaiming a frame) page faults: 307\n\tVoluntary context switches: 3\n\tInvoluntary context switches: 0\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 0\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "kind": "measured",
+      "index": 30,
+      "exit_status": 0,
+      "elapsed_seconds": 0.006107,
+      "peak_rss_kib": 4908,
+      "findings": [],
+      "stdout_tail": "tscc compiler lifetime corpus passed 20 iterations",
+      "stderr_tail": "\tCommand being timed: \"./.build/tscc-memory-lifetime 20\"\n\tUser time (seconds): 0.00\n\tSystem time (seconds): 0.00\n\tPercent of CPU this job got: 100%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:00.00\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 4908\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 0\n\tMinor (reclaiming a frame) page faults: 305\n\tVoluntary context switches: 3\n\tInvoluntary context switches: 1\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 0\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "kind": "measured",
+      "index": 31,
+      "exit_status": 0,
+      "elapsed_seconds": 0.005648,
+      "peak_rss_kib": 5024,
+      "findings": [],
+      "stdout_tail": "tscc compiler lifetime corpus passed 20 iterations",
+      "stderr_tail": "\tCommand being timed: \"./.build/tscc-memory-lifetime 20\"\n\tUser time (seconds): 0.00\n\tSystem time (seconds): 0.00\n\tPercent of CPU this job got: 100%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:00.00\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 5024\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 0\n\tMinor (reclaiming a frame) page faults: 303\n\tVoluntary context switches: 3\n\tInvoluntary context switches: 0\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 0\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "kind": "measured",
+      "index": 32,
+      "exit_status": 0,
+      "elapsed_seconds": 0.005711,
+      "peak_rss_kib": 4876,
+      "findings": [],
+      "stdout_tail": "tscc compiler lifetime corpus passed 20 iterations",
+      "stderr_tail": "\tCommand being timed: \"./.build/tscc-memory-lifetime 20\"\n\tUser time (seconds): 0.00\n\tSystem time (seconds): 0.00\n\tPercent of CPU this job got: 100%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:00.00\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 4876\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 0\n\tMinor (reclaiming a frame) page faults: 304\n\tVoluntary context switches: 3\n\tInvoluntary context switches: 1\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 0\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "kind": "measured",
+      "index": 33,
+      "exit_status": 0,
+      "elapsed_seconds": 0.006357,
+      "peak_rss_kib": 4908,
+      "findings": [],
+      "stdout_tail": "tscc compiler lifetime corpus passed 20 iterations",
+      "stderr_tail": "\tCommand being timed: \"./.build/tscc-memory-lifetime 20\"\n\tUser time (seconds): 0.00\n\tSystem time (seconds): 0.00\n\tPercent of CPU this job got: 100%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:00.00\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 4908\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 0\n\tMinor (reclaiming a frame) page faults: 306\n\tVoluntary context switches: 3\n\tInvoluntary context switches: 0\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 0\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "kind": "measured",
+      "index": 34,
+      "exit_status": 0,
+      "elapsed_seconds": 0.005977,
+      "peak_rss_kib": 4972,
+      "findings": [],
+      "stdout_tail": "tscc compiler lifetime corpus passed 20 iterations",
+      "stderr_tail": "\tCommand being timed: \"./.build/tscc-memory-lifetime 20\"\n\tUser time (seconds): 0.00\n\tSystem time (seconds): 0.00\n\tPercent of CPU this job got: 100%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:00.00\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 4972\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 0\n\tMinor (reclaiming a frame) page faults: 306\n\tVoluntary context switches: 3\n\tInvoluntary context switches: 1\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 0\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "kind": "measured",
+      "index": 35,
+      "exit_status": 0,
+      "elapsed_seconds": 0.006004,
+      "peak_rss_kib": 4976,
+      "findings": [],
+      "stdout_tail": "tscc compiler lifetime corpus passed 20 iterations",
+      "stderr_tail": "\tCommand being timed: \"./.build/tscc-memory-lifetime 20\"\n\tUser time (seconds): 0.00\n\tSystem time (seconds): 0.00\n\tPercent of CPU this job got: 100%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:00.00\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 4976\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 0\n\tMinor (reclaiming a frame) page faults: 307\n\tVoluntary context switches: 3\n\tInvoluntary context switches: 0\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 0\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "kind": "measured",
+      "index": 36,
+      "exit_status": 0,
+      "elapsed_seconds": 0.006298,
+      "peak_rss_kib": 4964,
+      "findings": [],
+      "stdout_tail": "tscc compiler lifetime corpus passed 20 iterations",
+      "stderr_tail": "\tCommand being timed: \"./.build/tscc-memory-lifetime 20\"\n\tUser time (seconds): 0.00\n\tSystem time (seconds): 0.00\n\tPercent of CPU this job got: 100%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:00.00\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 4964\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 0\n\tMinor (reclaiming a frame) page faults: 308\n\tVoluntary context switches: 3\n\tInvoluntary context switches: 1\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 0\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "kind": "measured",
+      "index": 37,
+      "exit_status": 0,
+      "elapsed_seconds": 0.005809,
+      "peak_rss_kib": 4972,
+      "findings": [],
+      "stdout_tail": "tscc compiler lifetime corpus passed 20 iterations",
+      "stderr_tail": "\tCommand being timed: \"./.build/tscc-memory-lifetime 20\"\n\tUser time (seconds): 0.00\n\tSystem time (seconds): 0.00\n\tPercent of CPU this job got: 100%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:00.00\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 4972\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 0\n\tMinor (reclaiming a frame) page faults: 312\n\tVoluntary context switches: 3\n\tInvoluntary context switches: 0\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 0\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "kind": "measured",
+      "index": 38,
+      "exit_status": 0,
+      "elapsed_seconds": 0.00582,
+      "peak_rss_kib": 5044,
+      "findings": [],
+      "stdout_tail": "tscc compiler lifetime corpus passed 20 iterations",
+      "stderr_tail": "\tCommand being timed: \"./.build/tscc-memory-lifetime 20\"\n\tUser time (seconds): 0.00\n\tSystem time (seconds): 0.00\n\tPercent of CPU this job got: 100%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:00.00\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 5044\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 0\n\tMinor (reclaiming a frame) page faults: 308\n\tVoluntary context switches: 3\n\tInvoluntary context switches: 0\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 0\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "kind": "measured",
+      "index": 39,
+      "exit_status": 0,
+      "elapsed_seconds": 0.005867,
+      "peak_rss_kib": 5040,
+      "findings": [],
+      "stdout_tail": "tscc compiler lifetime corpus passed 20 iterations",
+      "stderr_tail": "\tCommand being timed: \"./.build/tscc-memory-lifetime 20\"\n\tUser time (seconds): 0.00\n\tSystem time (seconds): 0.00\n\tPercent of CPU this job got: 100%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:00.00\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 5040\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 0\n\tMinor (reclaiming a frame) page faults: 309\n\tVoluntary context switches: 3\n\tInvoluntary context switches: 0\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 0\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "kind": "measured",
+      "index": 40,
+      "exit_status": 0,
+      "elapsed_seconds": 0.007169,
+      "peak_rss_kib": 4972,
+      "findings": [],
+      "stdout_tail": "tscc compiler lifetime corpus passed 20 iterations",
+      "stderr_tail": "\tCommand being timed: \"./.build/tscc-memory-lifetime 20\"\n\tUser time (seconds): 0.00\n\tSystem time (seconds): 0.00\n\tPercent of CPU this job got: 80%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:00.00\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 4972\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 0\n\tMinor (reclaiming a frame) page faults: 308\n\tVoluntary context switches: 3\n\tInvoluntary context switches: 1\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 0\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    }
+  ],
+  "summary": {
+    "completed_iterations": 40,
+    "duration_seconds": 0.241122,
+    "peak_rss_kib": 5112,
+    "rss_samples_kib": [
+      5032,
+      4984,
+      4972,
+      5024,
+      5032,
+      4908,
+      5044,
+      4968,
+      4996,
+      4972,
+      5040,
+      4972,
+      4908,
+      5024,
+      4972,
+      5036,
+      5048,
+      4972,
+      4988,
+      5112,
+      4908,
+      5036,
+      5108,
+      5040,
+      4908,
+      4908,
+      4884,
+      4972,
+      4920,
+      4908,
+      5024,
+      4876,
+      4908,
+      4972,
+      4976,
+      4964,
+      4972,
+      5044,
+      5040,
+      4972
+    ],
+    "findings": [],
+    "pass": true,
+    "note": "RSS samples are process-level observations, not a leak oracle. Long-run settled-memory analysis is workload-specific."
+  }
+}

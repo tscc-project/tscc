@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "checkpoint": "5-project",
+  "commit": "a05d3d86609486c793b309460bb942be96ba6ed5",
+  "platform": "Linux-6.18.35-x86_64-with-glibc2.41",
+  "rounds": 8,
+  "files": 120,
+  "elapsed_seconds": 0.514,
+  "phases": 16,
+  "pass": true,
+  "runs": [
+    {
+      "round": 0,
+      "kind": "graph",
+      "exit": 0,
+      "elapsed_seconds": 0.039602
+    },
+    {
+      "round": 0,
+      "kind": "missing-module",
+      "exit": 2
+    },
+    {
+      "round": 1,
+      "kind": "graph",
+      "exit": 0,
+      "elapsed_seconds": 0.037146
+    },
+    {
+      "round": 1,
+      "kind": "missing-module",
+      "exit": 2
+    },
+    {
+      "round": 2,
+      "kind": "graph",
+      "exit": 0,
+      "elapsed_seconds": 0.034626
+    },
+    {
+      "round": 2,
+      "kind": "missing-module",
+      "exit": 2
+    },
+    {
+      "round": 3,
+      "kind": "graph",
+      "exit": 0,
+      "elapsed_seconds": 0.034878
+    },
+    {
+      "round": 3,
+      "kind": "missing-module",
+      "exit": 2
+    },
+    {
+      "round": 4,
+      "kind": "graph",
+      "exit": 0,
+      "elapsed_seconds": 0.034526
+    },
+    {
+      "round": 4,
+      "kind": "missing-module",
+      "exit": 2
+    },
+    {
+      "round": 5,
+      "kind": "graph",
+      "exit": 0,
+      "elapsed_seconds": 0.034952
+    },
+    {
+      "round": 5,
+      "kind": "missing-module",
+      "exit": 2
+    },
+    {
+      "round": 6,
+      "kind": "graph",
+      "exit": 0,
+      "elapsed_seconds": 0.035055
+    },
+    {
+      "round": 6,
+      "kind": "missing-module",
+      "exit": 2
+    },
+    {
+      "round": 7,
+      "kind": "graph",
+      "exit": 0,
+      "elapsed_seconds": 0.036497
+    },
+    {
+      "round": 7,
+      "kind": "missing-module",
+      "exit": 2
+    }
+  ]
+}

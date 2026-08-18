@@ -154,3 +154,12 @@ These documents are living infrastructure. Review them whenever architecture,
 language scope, compatibility, tests/corpus, build/release workflow, website
 claims, or durable compiler lessons change. Consolidate rather than append a
 diary. Every substantial checkpoint must review handover and roadmap impact.
+
+## Memory-safety Checkpoint 5A (2026-08-18)
+
+- Maintained compiler lifetime corpus added at `tests/memory_lifetime.cpp`, with Make targets for sanitizer, native RSS/project pressure and independent Valgrind confirmation.
+- At commit `a05d3d8`, 80 ASan/LSan/UBSan in-process lifetime iterations passed with no finding across parser/AST, semantic, binder, type, checker, emitter, CommonJS, TSX, malformed input and success-after-failure paths.
+- Native lifetime evidence used 5 warm-ups plus 40 measured × 20-iteration runs; RSS samples stayed within 4,908–5,108 KiB (5,108 KiB peak) rather than increasing monotonically.
+- Project/module pressure passed 8 sanitizer rounds and 20 native rounds over a 120-file graph with a cycle, missing-module failure and immediate repaired compile.
+- Full `make test` remains green (independent corpus 492 pass / 0 fail / 27 intentional semantic skips) and `make check-regression-sync` passes.
+- Checkpoint 5B remains external Valgrind confirmation: run `make valgrind-memory-safety-checkpoint-5` on Linux with Valgrind and return `.build/memory-safety/checkpoint-5-valgrind.json`.
