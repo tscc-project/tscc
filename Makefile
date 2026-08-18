@@ -85,3 +85,31 @@ $(MEMORY_SMOKE): tests/parser_smoke.cpp src/tscc/Diagnostic.cpp src/tscc/Source.
 memory-safety-smoke: $(MEMORY_SMOKE)
 	mkdir -p .build/memory-safety
 	python3 scripts/memory_safety.py --project tscc --mode sanitizer --output .build/memory-safety/checkpoint-0.json --iterations 2 --command './$(MEMORY_SMOKE)'
+
+MEMORY_LIFETIME := .build/tscc-memory-lifetime
+MEMORY_LIFETIME_SAN := .build/tscc-memory-lifetime-san
+MEMORY_LIFETIME_SOURCES := tests/memory_lifetime.cpp src/tscc/Diagnostic.cpp src/tscc/Source.cpp src/tscc/Lexer.cpp src/tscc/Parser.cpp src/tscc/Semantic.cpp src/tscc/Binder.cpp src/tscc/Type.cpp src/tscc/Checker.cpp src/tscc/SourceEdit.cpp src/tscc/Transpiler.cpp
+
+$(MEMORY_LIFETIME):
+	mkdir -p .build
+	$(CXX) $(CPPFLAGS) -std=c++17 -O2 -Wall -Wextra -pedantic $(MEMORY_LIFETIME_SOURCES) -o $(MEMORY_LIFETIME)
+
+$(MEMORY_LIFETIME_SAN):
+	mkdir -p .build
+	$(CXX) $(CPPFLAGS) -std=c++17 -O1 -g -fno-omit-frame-pointer -fsanitize=address,undefined -Wall -Wextra -pedantic $(MEMORY_LIFETIME_SOURCES) -o $(MEMORY_LIFETIME_SAN)
+
+memory-safety-checkpoint-5: $(MEMORY_LIFETIME_SAN) $(SAN_TARGET)
+	mkdir -p .build/memory-safety
+	env -u LD_PRELOAD python3 scripts/memory_safety.py --project tscc --mode sanitizer --output .build/memory-safety/checkpoint-5-lifetime.json --iterations 1 --command './$(MEMORY_LIFETIME_SAN) 80'
+	env -u LD_PRELOAD python3 scripts/checkpoint5_project_lifetime.py --tscc "$(CURDIR)/$(SAN_TARGET)" --rounds 8 --files 120 --output .build/memory-safety/checkpoint-5-project-sanitizer.json
+
+memory-safety-checkpoint-5-rss: $(MEMORY_LIFETIME) tscc
+	mkdir -p .build/memory-safety
+	python3 scripts/memory_safety.py --project tscc --mode rss --output .build/memory-safety/checkpoint-5-rss.json --warmup-iterations 5 --iterations 40 --command './$(MEMORY_LIFETIME) 20'
+	python3 scripts/checkpoint5_project_lifetime.py --tscc "$(CURDIR)/tscc" --rounds 20 --files 120 --output .build/memory-safety/checkpoint-5-project.json
+
+valgrind-memory-safety-checkpoint-5: $(MEMORY_LIFETIME)
+	mkdir -p .build/memory-safety
+	python3 scripts/memory_safety.py --project tscc --mode valgrind --output .build/memory-safety/checkpoint-5-valgrind.json --iterations 1 --command './$(MEMORY_LIFETIME) 40'
+
+.PHONY: memory-safety-checkpoint-5 memory-safety-checkpoint-5-rss valgrind-memory-safety-checkpoint-5
