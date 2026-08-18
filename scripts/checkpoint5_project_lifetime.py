@@ -47,6 +47,6 @@ outp=pathlib.Path(a.output); outp.parent.mkdir(parents=True,exist_ok=True)
 data={"schema_version":1,"checkpoint":"5-project","commit":git_commit(),"platform":platform.platform(),
       "rounds":a.rounds,"files":a.files,"elapsed_seconds":round(time.monotonic()-started,3),
       "phases":len(runs),"pass":True,"runs":runs}
-outp.write_text(json.dumps(data,indent=2)+"\\n")
+outp.write_text(json.dumps(data,indent=2)+"\n")
 print(f"tscc checkpoint 5 project lifecycle: PASS ({a.rounds} rounds, {a.files}-file graph)")
 print("evidence="+str(outp))
