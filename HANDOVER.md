@@ -163,3 +163,11 @@ diary. Every substantial checkpoint must review handover and roadmap impact.
 - Project/module pressure passed 8 sanitizer rounds and 20 native rounds over a 120-file graph with a cycle, missing-module failure and immediate repaired compile.
 - Full `make test` remains green (independent corpus 492 pass / 0 fail / 27 intentional semantic skips) and `make check-regression-sync` passes.
 - Checkpoint 5B remains external Valgrind confirmation: run `make valgrind-memory-safety-checkpoint-5` on Linux with Valgrind and return `.build/memory-safety/checkpoint-5-valgrind.json`.
+
+## Memory-safety Checkpoint 5 complete (2026-08-18)
+
+- Checkpoint 5B passed independently on Linux 7.0.0-29 x86-64 at tscc commit `d96419e`.
+- Valgrind 3.26.0 completed 40 maintained compiler-lifetime iterations with 0 errors, 0 bytes in use at exit, and 25,003 allocations matched by 25,003 frees; peak Valgrind process RSS was 166,512 KiB.
+- Exact evidence is retained at `docs/evidence/memory-safety/checkpoint-5-valgrind.json`.
+- Combined with Checkpoint 5A's sanitizer lifetime corpus, settled native RSS, repeated 120-file graph/cycle/failure/recovery workloads, full regression pass and mirror sync, the tscc compiler-lifetime baseline is complete.
+- The cross-project campaign now advances to Checkpoint 6; do not treat this baseline as a claim of complete TypeScript semantic compatibility.
