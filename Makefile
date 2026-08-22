@@ -19,7 +19,7 @@ test-smoke: tscc
 clean:
 	rm -f $(OBJECTS) $(DEPS) tscc
 	rm -rf .build
-.PHONY: all test test-smoke test-parser test-binder test-types test-edits test-checker test-runtime test-project test-regression test-tsx test-commonjs check-regression-sync test-sanitize memory-safety-smoke clean
+.PHONY: all test test-core test-smoke test-parser test-binder test-types test-edits test-checker test-runtime test-project test-regression test-tsx test-commonjs check-regression-sync test-sanitize memory-safety-smoke clean
 
 
 test-parser:
@@ -63,6 +63,11 @@ test-commonjs: tscc
 	bash tests/commonjs_modules.sh
 
 test: test-smoke test-parser test-binder test-types test-edits test-checker test-runtime test-project test-regression test-tsx test-commonjs
+
+# Everything in `test` except the Python-driven external regression corpus.
+# CI runs this on Windows where the runner's native Python cannot resolve the
+# npm-installed tsc from the msys2 PATH; the corpus runs there as a native step.
+test-core: test-smoke test-parser test-binder test-types test-edits test-checker test-runtime test-project test-tsx test-commonjs
 
 -include $(DEPS)
 

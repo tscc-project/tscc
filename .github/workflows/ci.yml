@@ -45,12 +45,14 @@ jobs:
           update: true
           path-type: inherit
           install: make mingw-w64-ucrt-x86_64-gcc diffutils
-      - name: Build and test (msys2)
+      - name: Build and core tests (msys2)
         shell: msys2 {0}
         run: |
           npm install -g typescript
-          # The regression suite's native Python subprocesses need tsc on the
-          # PATH in Windows form; msys-form entries do not survive conversion.
-          export PATH="$(cygpath -w "$(npm prefix -g)"):$PATH"
           make -j2
-          make test
+          make test-core
+      - name: Regression corpus (native)
+        shell: pwsh
+        run: |
+          npm install -g typescript
+          python regression/run.py --tscc "$PWD\tscc.exe"
