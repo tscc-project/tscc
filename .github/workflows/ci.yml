@@ -40,11 +40,11 @@ jobs:
         with:
           msystem: UCRT64
           update: true
+          path-type: inherit
           install: make mingw-w64-ucrt-x86_64-gcc diffutils
       - name: Build and test (msys2)
         shell: msys2 {0}
         run: |
-          export PATH="$PATH:/c/Program Files/nodejs"
           npm install -g typescript
           export PATH="$(npm prefix -g):$PATH"
           make -j2
