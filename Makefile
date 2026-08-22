@@ -76,7 +76,7 @@ $(SAN_TARGET): $(SAN_OBJECTS)
 	$(CXX) -std=c++17 $(SANITIZER_FLAGS) $(SAN_OBJECTS) -o $(SAN_TARGET)
 
 test-sanitize: $(SAN_TARGET)
-	ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 UBSAN_OPTIONS=halt_on_error=1 ./$(SAN_TARGET) --version
+	ASAN_OPTIONS="$${ASAN_OPTIONS:-detect_leaks=1:halt_on_error=1}" UBSAN_OPTIONS=halt_on_error=1 ./$(SAN_TARGET) --version
 
 $(MEMORY_SMOKE): tests/parser_smoke.cpp src/tscc/Diagnostic.cpp src/tscc/Source.cpp src/tscc/Lexer.cpp src/tscc/Parser.cpp src/tscc/Semantic.cpp
 	mkdir -p .build

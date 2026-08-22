@@ -14,7 +14,9 @@ jobs:
       matrix:
         include:
           - runner: ubuntu-latest
+            asan_options: "detect_leaks=1:halt_on_error=1"
           - runner: macos-latest
+            asan_options: "detect_leaks=0:halt_on_error=1"
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
@@ -27,6 +29,8 @@ jobs:
         run: make test
       - name: Sanitize build
         run: make test-sanitize
+        env:
+          ASAN_OPTIONS: ${{ matrix.asan_options }}
 
   windows:
     runs-on: windows-latest
@@ -36,11 +40,12 @@ jobs:
         with:
           msystem: UCRT64
           update: true
-          install: make mingw-w64-ucrt-x86_64-gcc
+          install: make mingw-w64-ucrt-x86_64-gcc diffutils
       - name: Build and test (msys2)
         shell: msys2 {0}
         run: |
           export PATH="$PATH:/c/Program Files/nodejs"
           npm install -g typescript
+          export PATH="$(npm prefix -g):$PATH"
           make -j2
           make test
