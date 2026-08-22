@@ -1,0 +1,127 @@
+name: Release artifacts
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  unix:
+    strategy:
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            platform: linux-x86_64
+          - runner: macos-15
+            platform: macos-arm64
+          - runner: macos-15-intel
+            platform: macos-x86_64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and smoke test
+        run: |
+          make -j2
+          ./tscc --version
+      - name: Stage archive
+        shell: bash
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          test "$(./tscc --version | sed -E 's/^tscc ([^ ]+)$/\1/')" = "$version"
+          root="tscc-$version-${{ matrix.platform }}"
+          mkdir "$root"
+          cp tscc README.md LICENSE "$root/"
+          tar -czf "$root.tar.gz" "$root"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.platform }}
+          path: tscc-*.tar.gz
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: make mingw-w64-ucrt-x86_64-gcc
+      - name: Build and stage archive
+        shell: msys2 {0}
+        run: |
+          make -j2 LDFLAGS='-static -static-libgcc -static-libstdc++'
+          if objdump -p tscc.exe | sed -n 's/.*DLL Name: //p' | grep -Eiq '^(libgcc|libstdc\+\+|libwinpthread)'; then
+            echo "Windows release executable still depends on a MinGW runtime DLL" >&2
+            exit 1
+          fi
+          version="${GITHUB_REF_NAME#v}"
+          test "$(./tscc.exe --version | sed -E 's/^tscc ([^ ]+)$/\1/')" = "$version"
+          root="tscc-$version-windows-x86_64"
+          mkdir "$root"
+          cp tscc.exe README.md LICENSE "$root/"
+          powershell.exe -NoProfile -Command "Compress-Archive -Path '$root' -DestinationPath '$root.zip'"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-x86_64
+          path: tscc-*.zip
+
+  installer-preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate installer
+        run: |
+          sh -n packaging/install.sh
+
+  publish:
+    needs: [unix, windows, installer-preflight]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Create checksums
+        working-directory: dist
+        run: sha256sum tscc-* > SHA256SUMS
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            echo "GitHub release $GITHUB_REF_NAME already exists; leaving its published assets unchanged"
+          else
+            gh release create "$GITHUB_REF_NAME" dist/* --verify-tag --generate-notes
+          fi
+
+  installer-public-smoke:
+    needs: publish
+    strategy:
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            platform: linux-x86_64
+          - runner: macos-15
+            platform: macos-arm64
+          - runner: macos-15-intel
+            platform: macos-x86_64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch and verify public installer
+        shell: bash
+        run: |
+          curl --retry 5 --retry-all-errors --retry-delay 2 -fsSL https://nift-dev.github.io/tscc-website/install -o /tmp/tscc-install.sh
+          cmp packaging/install.sh /tmp/tscc-install.sh
+          sh -n /tmp/tscc-install.sh
+      - name: Install tagged release through public installer
+        shell: bash
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          install_dir="$RUNNER_TEMP/tscc-bin"
+          TSCC_VERSION="$version" TSCC_INSTALL_DIR="$install_dir" sh /tmp/tscc-install.sh
+          test "$("$install_dir/tscc" --version | sed -E 's/^tscc ([^ ]+)$/\1/')" = "$version"

@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  unix:
+    strategy:
+      matrix:
+        include:
+          - runner: ubuntu-latest
+          - runner: macos-latest
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install test oracles
+        run: |
+          npm install -g typescript
+      - name: Build
+        run: make -j2
+      - name: Test
+        run: make test
+      - name: Sanitize build
+        run: make test-sanitize
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: make mingw-w64-ucrt-x86_64-gcc
+      - name: Build and test (msys2)
+        shell: msys2 {0}
+        run: |
+          export PATH="$PATH:/c/Program Files/nodejs"
+          npm install -g typescript
+          make -j2
+          make test
