@@ -54,6 +54,8 @@ jobs:
       - name: Regression corpus (native)
         shell: pwsh
         run: |
-          npm install -g typescript
-          $env:PATH = "$(npm prefix -g);$env:PATH"
+          npm install typescript
+          $env:PATH = "$PWD\node_modules\.bin;$env:PATH"
+          Write-Host "tsc at: $((Get-Command tsc).Source)"
+          python -c "import shutil; print('python sees tsc at:', shutil.which('tsc'))"
           python regression/run.py --tscc "$PWD\tscc.exe"
