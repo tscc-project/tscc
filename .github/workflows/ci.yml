@@ -55,4 +55,5 @@ jobs:
         shell: pwsh
         run: |
           npm install -g typescript
+          $env:PATH = "$(npm prefix -g);$env:PATH"
           python regression/run.py --tscc "$PWD\tscc.exe"
