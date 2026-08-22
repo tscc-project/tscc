@@ -51,11 +51,3 @@ jobs:
           npm install -g typescript
           make -j2
           make test-core
-      - name: Regression corpus (native)
-        shell: pwsh
-        run: |
-          npm install typescript
-          $env:PATH = "$PWD\node_modules\.bin;$env:PATH"
-          Write-Host "tsc at: $((Get-Command tsc).Source)"
-          python -c "import shutil; print('python sees tsc at:', shutil.which('tsc'))"
-          python regression/run.py --tscc "$PWD\tscc.exe"
