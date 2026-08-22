@@ -36,6 +36,9 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
       - uses: msys2/setup-msys2@v2
         with:
           msystem: UCRT64
@@ -46,6 +49,5 @@ jobs:
         shell: msys2 {0}
         run: |
           npm install -g typescript
-          export PATH="$(npm prefix -g):$PATH"
           make -j2
           make test
