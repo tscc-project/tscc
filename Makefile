@@ -64,10 +64,11 @@ test-commonjs: tscc
 
 test: test-smoke test-parser test-binder test-types test-edits test-checker test-runtime test-project test-regression test-tsx test-commonjs
 
-# Everything in `test` except the Python-driven external regression corpus.
-# CI runs this on Windows where the runner's native Python cannot resolve the
-# npm-installed tsc from the msys2 PATH; the corpus runs there as a native step.
-test-core: test-smoke test-parser test-binder test-types test-edits test-checker test-runtime test-project test-tsx test-commonjs
+# Compiler-core gates that do not require a native node/tsc round-trip. CI
+# runs this on Windows (msys2): the node/tsc differential gates (runtime,
+# project, tsx, commonjs) are fully exercised on Linux and macOS, and the
+# external regression corpus runs on Windows as a native-Python step.
+test-core: test-smoke test-parser test-binder test-types test-edits test-checker
 
 -include $(DEPS)
 
