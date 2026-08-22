@@ -49,5 +49,8 @@ jobs:
         shell: msys2 {0}
         run: |
           npm install -g typescript
+          # The regression suite's native Python subprocesses need tsc on the
+          # PATH in Windows form; msys-form entries do not survive conversion.
+          export PATH="$(cygpath -w "$(npm prefix -g)"):$PATH"
           make -j2
           make test
