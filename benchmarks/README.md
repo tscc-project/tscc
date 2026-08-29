@@ -3,7 +3,7 @@
 The benchmark corpus grows with compiler coverage. It currently measures a small single-file program and 100 independent TypeScript files.
 
 Three rows are kept separate:
-- `tscc`: current tscc transpile+emit path (no semantic type checking yet).
+- `tscc`: current tscc compile+emit path with its bounded primitive semantic checker.
 - `tsc --noCheck`: the fairest current TypeScript emit-only comparison.
 - `tsc full`: normal TypeScript checking+emit with `--skipLibCheck`.
 
