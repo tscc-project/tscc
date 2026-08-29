@@ -25,8 +25,8 @@ class PrimitiveExpressionTyper {
 public:
     PrimitiveExpressionTyper(const std::vector<Token>& tokens, std::size_t begin,
                              std::size_t end, const BindingModel& binding,
-                             const TypeModel& types,const std::unordered_map<std::size_t,TypeId>*facts=nullptr)
-        : tokens_(tokens), binding_(binding), types_(types), facts_(facts),sig_(significant_tokens(tokens, begin, end)) {}
+                             const TypeModel& types,const std::unordered_map<std::size_t,TypeId>*facts=nullptr,bool allow_object=false)
+        : tokens_(tokens), binding_(binding), types_(types), facts_(facts),sig_(significant_tokens(tokens, begin, end)),allow_object_(allow_object) {}
 
     ExpressionResult run() {
         ExpressionResult result;
@@ -47,6 +47,7 @@ private:
     std::size_t pos_ = 0;
     std::size_t error_token_ = static_cast<std::size_t>(-1);
     std::string error_;
+    bool allow_object_ = false;
 
     bool accept(const char* text) {
         if (pos_ >= sig_.size() || tokens_[sig_[pos_]].text != text) return false;
@@ -55,6 +56,16 @@ private:
     }
     TypeId primary() {
         if (pos_ >= sig_.size()) return types_.store.unknown();
+        if (allow_object_ && accept("{")) {
+            std::vector<TypeProperty> properties;
+            if (pos_ < sig_.size() && tokens_[sig_[pos_]].text != "}") for (;;) {
+                if (pos_ >= sig_.size() || tokens_[sig_[pos_]].kind != TokenKind::Identifier) return types_.store.unknown();
+                const auto name=tokens_[sig_[pos_++]].text;if(!accept(":"))return types_.store.unknown();
+                const auto value=additive();properties.push_back({name,value,false,false});if(!accept(","))break;
+            }
+            if(!accept("}"))return types_.store.unknown();
+            return types_.store.object_of(std::move(properties));
+        }
         if (accept("(")) {
             const auto value = additive();
             if (!accept(")")) return types_.store.unknown();
@@ -105,7 +116,15 @@ private:
                 }
                 return types_.store.unknown();
             }
-            if (symbol < types_.symbol_types.size()) return types_.symbol_types[symbol];
+            if (symbol < types_.symbol_types.size()) {
+                auto value=types_.symbol_types[symbol];
+                while(accept(".")){
+                    if(pos_>=sig_.size()||tokens_[sig_[pos_]].kind!=TokenKind::Identifier)return types_.store.unknown();
+                    const auto property_token=sig_[pos_++];const auto*property=types_.store.property(value,tokens_[property_token].text);
+                    if(!property){if(value!=types_.store.unknown()&&error_.empty()){error_token_=property_token;error_="Property '"+tokens_[property_token].text+"' does not exist on type '"+types_.store.name(value)+"'.";}return types_.store.unknown();}value=property->type;
+                }
+                return value;
+            }
         }
         return types_.store.unknown();
     }
@@ -179,8 +198,8 @@ private:
 
 ExpressionResult expression_type(const std::vector<Token>& tokens, std::size_t begin,
                                  std::size_t end, const BindingModel& binding,
-                                 const TypeModel& types,const std::unordered_map<std::size_t,TypeId>*facts=nullptr) {
-    return PrimitiveExpressionTyper(tokens, begin, end, binding, types,facts).run();
+                                 const TypeModel& types,const std::unordered_map<std::size_t,TypeId>*facts=nullptr,bool allow_object=false) {
+    return PrimitiveExpressionTyper(tokens, begin, end, binding, types,facts,allow_object).run();
 }
 
 void report_expression_error(const SourceFile& source, const std::vector<Token>& tokens,
@@ -244,7 +263,7 @@ bool check_program(const SourceFile& source, const std::vector<Token>& tokens,
         std::unordered_map<std::size_t,TypeId>facts;std::size_t best=tokens.size();for(const auto&fact:flow)if(declaration.initializer_begin_token>=fact.begin&&declaration.initializer_end_token<=fact.end&&fact.end-fact.begin<=best){facts[fact.symbol]=fact.type;best=fact.end-fact.begin;}
         const auto expression = expression_type(tokens, declaration.initializer_begin_token,
                                                 declaration.initializer_end_token,
-                                                binding, types,facts.empty()?nullptr:&facts);
+                                                binding, types,facts.empty()?nullptr:&facts,true);
         report_expression_error(source, tokens, expression, diagnostics);
         const auto actual = expression.type;
         if (!expression.error.empty() || expected == types.store.unknown() ||
@@ -305,6 +324,9 @@ bool check_program(const SourceFile& source, const std::vector<Token>& tokens,
         if (left == 0) continue;
         --left;
         if (tokens[left].kind != TokenKind::Identifier || declaration_names.count(left)) continue;
+        if(left>=2&&tokens[left-1].text=="."&&tokens[left-2].kind==TokenKind::Identifier){
+            const auto owner=binding.symbol_for_reference(left-2);if(owner<types.symbol_types.size())if(const auto*property=types.store.property(types.symbol_types[owner],tokens[left].text);property&&property->readonly){const auto[line,column]=source.line_col(tokens[left].begin);diagnostics.error(source.path,line,column,"Cannot assign to '"+tokens[left].text+"' because it is a read-only property.",source.line_text(line));}continue;
+        }
         const auto target_symbol = binding.symbol_for_reference(left);
         if (target_symbol >= types.symbol_types.size()) continue;
         if (binding.symbols[target_symbol].variable_kind == VariableKind::Const) {

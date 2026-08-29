@@ -65,7 +65,7 @@ erasure, generics, enums, namespaces, parameter properties, project/relative
 module discovery, TSX preserve mode, CommonJS lowering with live imported reads,
 module grammar hardening, scope/shadowing work, and import attributes.
 
-The independent corpus currently contains 525 cases: 499 pass, zero fail, and 26
+The independent corpus currently contains 525 cases: 501 pass, zero fail, and 24
 semantic-checker-only skips at the retained checkpoint. Counts are evidence, not
 the product definition. Ten semantic cases are implemented; the project is not
 implicitly a drop-in replacement for all `tsc` behavior.
@@ -83,6 +83,12 @@ CP19/TC8A establishes canonical structural object shapes in the durable type
 store. Properties retain name, type, optionality and readonly metadata and can
 be looked up by name. This is infrastructure only; source-facing object checks
 belong to CP20.
+
+CP20/TC8B activates a bounded structural slice: flat object type annotations,
+object-literal inference in variable initializers, named property reads,
+required/optional structural assignment, and readonly property-write errors.
+Nested/index/call properties, excess-property freshness, interfaces/classes and
+general contextual object typing remain future work.
 
 ## Build and validation
 

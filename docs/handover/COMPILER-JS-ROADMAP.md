@@ -160,6 +160,10 @@ CP19/TC8A is complete: the canonical type store interns structural object
 shapes and retains optional/readonly property metadata with stable lookup.
 CP20/TC8B activates the first bounded source-facing structural checks.
 
+CP20/TC8B is complete for flat variable annotations and literals, property
+reads, required/optional structural assignment and readonly writes. Nested and
+indexed shapes, freshness/excess checks and class/interface integration remain.
+
 Add object type literals, property lookup, optional/readonly properties, object
 literal checking, property access, structural assignment, and an explicit
 excess-property compatibility decision.
