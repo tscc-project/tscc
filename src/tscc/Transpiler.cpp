@@ -1,4 +1,5 @@
 #include "Transpiler.h"
+#include "CompilationUnit.h"
 #include "Checker.h"
 #include "Lexer.h"
 #include "Parser.h"
@@ -823,20 +824,21 @@ static void add_live_import_reference_replacements(
     }
 }
 
-bool transpile_tokens(const SourceFile& source, const std::vector<Token>& tokens,
-                      const TranspileOptions& options,
-                      std::string& out, Diagnostics& diagnostics) {
+bool transpile_unit(CompilationUnit& unit, const TranspileOptions& options) {
+    unit.options={options.target,options.module,options.remove_comments};
+    const auto& source = unit.source;
+    const auto& tokens = unit.tokens;
+    auto& diagnostics = unit.diagnostics;
+    auto& out = unit.emitted_text;
+    const auto& program = unit.program;
+    const auto& binding = unit.binding;
     const bool tsx_source = source.path.size() >= 4 &&
                             source.path.substr(source.path.size()-4) == ".tsx";
     if (tsx_source && !validate_tsx_structure(source,tokens,diagnostics)) return false;
 
-    Program program;
-    Parser parser(source, tokens, diagnostics);
-    if (!parser.parse(program)) return false;
-    const auto semantic = build_semantic_model(tokens, program);
-    const auto binding = bind_semantic_model(tokens, program, semantic);
-    const auto types = build_type_model(tokens, program, semantic, binding);
-    if (!check_program(source, tokens, program, semantic, binding, types, diagnostics)) return false;
+    if (unit.stage == CompilationStage::Source || unit.stage == CompilationStage::Lexed)
+        if (!unit.analyze()) return false;
+    if (unit.stage != CompilationStage::Checked) return false;
 
     out = source.text;
     for (const auto& range : program.erasures)
@@ -984,15 +986,27 @@ bool transpile_tokens(const SourceFile& source, const std::vector<Token>& tokens
         a = newline + 1;
     }
     out.swap(clean);
+    if (!diagnostics.has_errors()) unit.stage = CompilationStage::Emitted;
     return !diagnostics.has_errors();
+}
+
+bool transpile_tokens(const SourceFile& source, const std::vector<Token>& tokens,
+                      const TranspileOptions& options,
+                      std::string& out, Diagnostics& diagnostics) {
+    CompilationUnit unit(source, tokens);
+    const bool ok = transpile_unit(unit, options);
+    out = std::move(unit.emitted_text);
+    diagnostics.append(unit.diagnostics);
+    return ok;
 }
 
 bool transpile(const SourceFile& source, const TranspileOptions& options,
                std::string& out, Diagnostics& diagnostics) {
-    Lexer lexer(source, diagnostics);
-    const auto tokens=lexer.lex();
-    if (diagnostics.has_errors()) return false;
-    return transpile_tokens(source,tokens,options,out,diagnostics);
+    CompilationUnit unit(source);
+    const bool ok = transpile_unit(unit, options);
+    out = std::move(unit.emitted_text);
+    diagnostics.append(unit.diagnostics);
+    return ok;
 }
 
 } // namespace tscc

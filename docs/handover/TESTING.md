@@ -27,7 +27,8 @@ semantic oracle. The smoke differential uses the supported `preserve` mode in
 place of TypeScript 7's removed `none` mode.
 
 `make test` is the complete local correctness entry point and runs smoke, parser,
-primitive-checker, runtime/generics, project/module, regression, TSX-preserve, and CommonJS targets.
+primitive-checker, durable-compilation-unit, runtime/generics, project/module,
+regression, TSX-preserve, and CommonJS targets.
 Keep focused targets available for iteration, but require the aggregate target at
 checkpoints.
 

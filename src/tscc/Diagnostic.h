@@ -20,6 +20,7 @@ public:
                  const std::string& message, const std::string& source_line = {});
     bool has_errors() const;
     void append(Diagnostics&& other);
+    void append(const Diagnostics& other);
     void print(bool color = true) const;
 private:
     std::vector<Diagnostic> items_;

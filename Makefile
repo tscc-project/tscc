@@ -5,7 +5,7 @@ CPPFLAGS ?= -Isrc
 SANITIZER_FLAGS ?= -O1 -g -fno-omit-frame-pointer -fsanitize=address,undefined
 SAN_TARGET := .build/tscc-sanitize
 MEMORY_SMOKE := .build/tscc-parser-memory-san
-SOURCES := src/main.cpp src/tscc/Diagnostic.cpp src/tscc/Source.cpp src/tscc/Lexer.cpp src/tscc/Parser.cpp src/tscc/Semantic.cpp src/tscc/Binder.cpp src/tscc/Type.cpp src/tscc/Checker.cpp src/tscc/SourceEdit.cpp src/tscc/Transpiler.cpp src/tscc/Project.cpp src/tscc/Config.cpp src/tscc/Compiler.cpp
+SOURCES := src/main.cpp src/tscc/Diagnostic.cpp src/tscc/Source.cpp src/tscc/Lexer.cpp src/tscc/Parser.cpp src/tscc/Semantic.cpp src/tscc/Binder.cpp src/tscc/Type.cpp src/tscc/Checker.cpp src/tscc/CompilationUnit.cpp src/tscc/SourceEdit.cpp src/tscc/Transpiler.cpp src/tscc/Project.cpp src/tscc/Config.cpp src/tscc/Compiler.cpp
 SAN_OBJECTS := $(patsubst %.cpp,.build/san/%.o,$(SOURCES))
 OBJECTS := $(SOURCES:.cpp=.o)
 DEPS := $(OBJECTS:.o=.d)
@@ -19,7 +19,7 @@ test-smoke: tscc
 clean:
 	rm -f $(OBJECTS) $(DEPS) tscc
 	rm -rf .build
-.PHONY: all test test-core test-smoke test-parser test-binder test-types test-edits test-checker test-runtime test-project test-regression test-tsx test-commonjs test-product-boundary test-feature-matrix check-regression-sync test-sanitize memory-safety-smoke clean
+.PHONY: all test test-core test-smoke test-parser test-binder test-types test-edits test-checker test-compilation-unit test-runtime test-project test-regression test-tsx test-commonjs test-product-boundary test-feature-matrix check-regression-sync test-sanitize memory-safety-smoke clean
 
 
 test-parser:
@@ -45,6 +45,11 @@ test-types:
 test-checker: tscc
 	bash tests/typecheck_variables.sh
 
+test-compilation-unit:
+	$(CXX) -Isrc $(CXXFLAGS) tests/compilation_unit_smoke.cpp src/tscc/Diagnostic.cpp src/tscc/Source.cpp src/tscc/Lexer.cpp src/tscc/Parser.cpp src/tscc/Semantic.cpp src/tscc/Binder.cpp src/tscc/Type.cpp src/tscc/Checker.cpp src/tscc/CompilationUnit.cpp src/tscc/SourceEdit.cpp src/tscc/Transpiler.cpp -o .compilation-unit-smoke
+	./.compilation-unit-smoke
+	rm -f .compilation-unit-smoke
+
 test-runtime: tscc
 	bash tests/runtime_features.sh
 test-project: tscc
@@ -68,13 +73,13 @@ test-product-boundary:
 test-feature-matrix:
 	python3 tools/check_feature_matrix.py
 
-test: test-product-boundary test-feature-matrix test-smoke test-parser test-binder test-types test-edits test-checker test-runtime test-project test-regression test-tsx test-commonjs
+test: test-product-boundary test-feature-matrix test-smoke test-parser test-binder test-types test-edits test-checker test-compilation-unit test-runtime test-project test-regression test-tsx test-commonjs
 
 # Compiler-core gates that do not require a native node/tsc round-trip. CI
 # runs this on Windows (msys2): the node/tsc differential gates (runtime,
 # project, tsx, commonjs) are fully exercised on Linux and macOS, and the
 # external regression corpus runs on Windows as a native-Python step.
-test-core: test-product-boundary test-feature-matrix test-smoke test-parser test-binder test-types test-edits test-checker
+test-core: test-product-boundary test-feature-matrix test-smoke test-parser test-binder test-types test-edits test-checker test-compilation-unit
 
 -include $(DEPS)
 
@@ -100,7 +105,7 @@ memory-safety-smoke: $(MEMORY_SMOKE)
 
 MEMORY_LIFETIME := .build/tscc-memory-lifetime
 MEMORY_LIFETIME_SAN := .build/tscc-memory-lifetime-san
-MEMORY_LIFETIME_SOURCES := tests/memory_lifetime.cpp src/tscc/Diagnostic.cpp src/tscc/Source.cpp src/tscc/Lexer.cpp src/tscc/Parser.cpp src/tscc/Semantic.cpp src/tscc/Binder.cpp src/tscc/Type.cpp src/tscc/Checker.cpp src/tscc/SourceEdit.cpp src/tscc/Transpiler.cpp
+MEMORY_LIFETIME_SOURCES := tests/memory_lifetime.cpp src/tscc/Diagnostic.cpp src/tscc/Source.cpp src/tscc/Lexer.cpp src/tscc/Parser.cpp src/tscc/Semantic.cpp src/tscc/Binder.cpp src/tscc/Type.cpp src/tscc/Checker.cpp src/tscc/CompilationUnit.cpp src/tscc/SourceEdit.cpp src/tscc/Transpiler.cpp
 
 $(MEMORY_LIFETIME):
 	mkdir -p .build

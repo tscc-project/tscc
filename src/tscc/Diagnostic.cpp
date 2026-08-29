@@ -11,6 +11,9 @@ void Diagnostics::append(Diagnostics&& other) {
                   std::make_move_iterator(other.items_.end()));
     other.items_.clear();
 }
+void Diagnostics::append(const Diagnostics& other) {
+    items_.insert(items_.end(), other.items_.begin(), other.items_.end());
+}
 void Diagnostics::print(bool color) const {
     for(const auto& d:items_){
         const char* label=d.severity==Severity::Error?"error":"warning";

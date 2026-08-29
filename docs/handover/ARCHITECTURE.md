@@ -10,7 +10,7 @@ artifacts, and current documentation remain authoritative. Exact names and curre
 capabilities must be verified against the live repository. Never reshape the
 compiler merely to make it resemble this handover.
 
-## Reconciled implementation snapshot (2026-08-17)
+## Reconciled implementation snapshot (2026-08-30)
 
 The inherited model has now been checked against the compiler and the standalone
 suite. The executable pipeline is concretely:
@@ -18,7 +18,7 @@ suite. The executable pipeline is concretely:
 ~~~text
 main.cpp CLI parsing / optional tsconfig loading
 → compile_files queue of absolute root paths
-→ SourceFile load and line map
+→ durable CompilationUnit owning source and every following per-file stage
 → byte-oriented Lexer producing owned token strings plus byte ranges
 → optional relative import/export discovery
 → Parser producing a small Program of syntax nodes, declaration facts, erasures, and replacements
@@ -53,7 +53,10 @@ driver does not instantiate it. Relative resolution is deliberately small: `.ts`
 `.tsx`, `index.ts`, `index.tsx`, and `.js`/`.jsx` source substitution; packages,
 path aliases, declaration files, and Node resolution are outside this implementation.
 
-Every file now prepares with its own diagnostic collection before program output
+Every file is now retained as a `CompilationUnit` through output commit. It owns
+source, tokens, parsed `Program`, semantic model, binding, type facts, diagnostics,
+stage and emitted text, so later compiler work no longer has to reconstruct
+anonymous stage-local state. Every file prepares with its own diagnostic collection before program output
 policy is applied. Default emit-on-error commits successfully prepared sources;
 `noEmitOnError` suppresses all prepared output if any source fails; `noEmit`
 suppresses all output unconditionally. Sibling staging plus rename avoids exposing
@@ -129,7 +132,8 @@ guessing when a structural parser decision is required.
 
 ## Transpiler
 
-`transpile`/`transpile_tokens` coordinate parser/token information and emission.
+`transpile_unit` consumes a checked durable unit and retains its emitted text;
+`transpile`/`transpile_tokens` remain compatibility entry points.
 Transform ownership must be explicit enough that overlapping passes do not rewrite
 one another's syntax. Historical module/import bugs demonstrate that individually
 valid transforms can corrupt output when their ranges overlap.

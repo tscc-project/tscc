@@ -14,8 +14,8 @@ assessed from current evidence rather than the old label.
 
 ## Compatibility contract
 
-The current README calls tscc experimental and explicitly states that it lacks a
-semantic type checker. That makes its current strongest contract a fast native
+The current compiler has a deliberately bounded primitive semantic checker, not
+a general TypeScript type system. Its strongest current contract remains a fast native
 transpilation/compiler subset with selected runtime-bearing TypeScript transforms,
 project handling, TSX preservation, and CommonJS module behavior.
 
@@ -62,6 +62,10 @@ against TypeScript. The retained baseline is 492 pass, zero fail, and 27
 intentional semantic-only skips under TypeScript 7.0.2. Historical performance JSON tracks many checkpoints and
 workloads. Current website/README ratios are local transpile-oriented comparisons,
 not equivalent-work claims because `tsc` performs a much broader job.
+
+CP3/TC1 adds a durable per-file compilation unit retaining source, tokens, syntax,
+semantic/binding/type state, diagnostics and emitted text for one compiler
+invocation. This is an ownership foundation, not a broadened language claim.
 
 ## Performance philosophy
 

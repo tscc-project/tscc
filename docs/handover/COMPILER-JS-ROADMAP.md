@@ -82,10 +82,15 @@ and every named external evidence case.
 
 ## tscc compiler checkpoints
 
-### TC1 - Durable compilation unit
+### TC1 - Durable compilation unit - completed 2026-08-30
 
 Create stable per-file ownership for source, tokens, syntax, semantic structure,
 binding, type facts, diagnostics, options, and output while preserving behaviour.
+
+Completed with `CompilationUnit`, an explicit source-to-emitted lifecycle, retained
+front-end/semantic state after emission, per-unit diagnostics, and a focused
+lifetime regression. The compiler driver retains every discovered unit through
+the output commit phase; the source-edit emitter remains the compatibility path.
 
 ### TC2 - One program and module graph
 
