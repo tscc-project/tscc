@@ -12,7 +12,7 @@ int main(){
  if(!unit.analyze()||unit.stage!=CompilationStage::Checked)fail("unit did not reach checked stage");
  if(unit.tokens.empty()||unit.program.variables.size()!=1||unit.semantic.nodes.empty())fail("front-end state was not retained");
  if(unit.binding.symbols.empty()||unit.types.symbol_types.empty())fail("semantic state was not retained");
- if(unit.expressions.nodes().empty()||unit.expressions.nodes().front().significant_tokens.empty())fail("durable expression identity was not retained");
+ if(unit.expressions.nodes().empty()||unit.expressions.nodes().front().kind!=ExpressionKind::Literal||unit.expressions.nodes().front().begin_token>=unit.expressions.nodes().front().end_token)fail("durable expression identity was not retained");
  const auto token_count=unit.tokens.size(),symbol_count=unit.binding.symbols.size();
  TranspileOptions options;if(!transpile_unit(unit,options))fail("checked unit did not emit");
  if(unit.stage!=CompilationStage::Emitted||unit.emitted_text.find(": number")!=std::string::npos)fail("unit did not retain emitted JavaScript");

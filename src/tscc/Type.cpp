@@ -136,12 +136,13 @@ TypeModel build_type_model(const std::vector<Token>& tokens, const Program& prog
             signature.rest = signature.rest || rest;
             if (!optional && !rest) ++signature.required_parameters;
         }
-        std::size_t close = function.begin_token;
+        std::size_t open = function.begin_token, close = function.begin_token;
         int depth = 0; bool seen = false;
         for (auto i = function.begin_token; i < function.scope_token; ++i) {
-            if (tokens[i].text == "(") { ++depth; seen = true; }
+            if (tokens[i].text == "(") { if(!seen)open=i;++depth; seen = true; }
             else if (tokens[i].text == ")" && depth && --depth == 0) { close = i; break; }
         }
+        if(parameters.empty()&&seen){std::size_t count=0;bool content=false;int nested=0;for(auto i=open+1;i<close;++i){if(tokens[i].kind==TokenKind::Comment)continue;const auto&t=tokens[i].text;if(t=="("||t=="{"||t=="["){++nested;content=true;}else if(t==")"||t=="}"||t=="]"){if(nested)--nested;}else if(t==","&&nested==0){++count;}else content=true;}if(content){++count;signature.parameters.assign(count,model.store.unknown());signature.required_parameters=count;}}
         for (auto i = close + 1; seen && i < function.scope_token; ++i) {
             if (tokens[i].kind == TokenKind::Comment) continue;
             if (tokens[i].text == ":") {

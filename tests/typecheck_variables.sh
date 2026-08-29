@@ -140,6 +140,45 @@ grep -Fq "Type 'string' is not assignable to type 'number'." "$TMP/return.err"
 
 printf 'tscc bounded function signature test passed\n'
 
+cat >"$TMP/contextual-functions-valid.ts" <<'TS'
+type Mapper = (value: number) => number;
+const double: Mapper = value => value * 2;
+const increment: Mapper = function (value) { return value + 1; };
+const doubled: number = double(21);
+const incremented: number = increment(41);
+TS
+"$ROOT/tscc" --pretty false --noEmit "$TMP/contextual-functions-valid.ts" >/dev/null
+
+printf '%s\n' "type F=(x:number)=>number;const f:F=x=>x;const y:number=f('bad');" >"$TMP/callable-variable-argument.ts"
+if "$ROOT/tscc" --pretty false --noEmit "$TMP/callable-variable-argument.ts" >"$TMP/callable-argument.out" 2>"$TMP/callable-argument.err"; then
+    echo "invalid callable variable argument unexpectedly succeeded" >&2
+    exit 1
+fi
+grep -Fq "Argument of type 'string' is not assignable to parameter of type 'number'." "$TMP/callable-argument.err"
+
+printf '%s\n' 'type F=(x:number)=>number;const f:F=x=>x;const y:number=f();' >"$TMP/callable-variable-arity.ts"
+if "$ROOT/tscc" --pretty false --noEmit "$TMP/callable-variable-arity.ts" >"$TMP/callable-arity.out" 2>"$TMP/callable-arity.err"; then
+    echo "invalid callable variable arity unexpectedly succeeded" >&2
+    exit 1
+fi
+grep -Fq "Expected 1 arguments, but got 0." "$TMP/callable-arity.err"
+
+printf '%s\n' "type F=(x:number)=>number;const f:F=x=>'bad';" >"$TMP/contextual-arrow-return.ts"
+if "$ROOT/tscc" --pretty false --noEmit "$TMP/contextual-arrow-return.ts" >"$TMP/contextual-arrow.out" 2>"$TMP/contextual-arrow.err"; then
+    echo "invalid contextual arrow return unexpectedly succeeded" >&2
+    exit 1
+fi
+grep -Fq "Type 'string' is not assignable to type 'number'." "$TMP/contextual-arrow.err"
+
+printf '%s\n' "type F=(x:number)=>number;const f:F=function(x){return 'bad';};" >"$TMP/contextual-function-return.ts"
+if "$ROOT/tscc" --pretty false --noEmit "$TMP/contextual-function-return.ts" >"$TMP/contextual-function.out" 2>"$TMP/contextual-function.err"; then
+    echo "invalid contextual function return unexpectedly succeeded" >&2
+    exit 1
+fi
+grep -Fq "Type 'string' is not assignable to type 'number'." "$TMP/contextual-function.err"
+
+printf 'tscc contextual function expression test passed\n'
+
 cat >"$TMP/type-algebra-valid.ts" <<'TS'
 const mode: "on" | "off" = "on";
 const answer: 42 | string = 42;

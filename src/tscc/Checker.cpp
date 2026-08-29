@@ -24,12 +24,12 @@ struct ExpressionResult {
 class NodeExpressionTyper {
 public:
     NodeExpressionTyper(const std::vector<Token>& tokens, const ExpressionModel&expressions,const ExpressionNode&expression, const BindingModel& binding,
-                             const TypeModel& types,const std::unordered_map<std::size_t,TypeId>*facts=nullptr,bool allow_object=false)
-        : tokens_(tokens),expressions_(expressions),root_(expression.id),binding_(binding), types_(types), facts_(facts),allow_object_(allow_object) {}
+                             const TypeModel& types,const std::unordered_map<std::size_t,TypeId>*facts=nullptr,bool allow_object=false,TypeId expected=0)
+        : tokens_(tokens),expressions_(expressions),root_(expression.id),binding_(binding), types_(types), facts_(facts),allow_object_(allow_object),expected_(expected) {}
 
     ExpressionResult run() {
         ExpressionResult result;
-        result.type = type(root_);
+        result.type = type(root_, expected_);
         result.complete = expressions_.node(root_).kind != ExpressionKind::Unknown;
         result.error_token = error_token_;
         result.error = error_;
@@ -47,16 +47,19 @@ private:
     std::size_t error_token_ = static_cast<std::size_t>(-1);
     std::string error_;
     bool allow_object_ = false;
+    TypeId expected_ = 0;
+    std::unordered_map<std::size_t,TypeId>contextual_facts_;
 
-    TypeId type(ExpressionId id) {
+    TypeId type(ExpressionId id, TypeId contextual = 0) {
         const auto&node=expressions_.node(id);
         if(node.kind==ExpressionKind::Unknown)return types_.store.unknown();
         if(node.kind==ExpressionKind::Parenthesized)return node.children.size()==1?type(node.children[0]):types_.store.unknown();
         if(node.kind==ExpressionKind::Literal){const auto&token=tokens_[node.operator_token];if(token.kind==TokenKind::Number)return types_.store.literal(!token.text.empty()&&token.text.back()=='n'?types_.store.bigint():types_.store.number(),token.text);if(token.kind==TokenKind::String||token.kind==TokenKind::Template)return types_.store.literal(types_.store.string(),literal_value(token.text));if(token.text=="true"||token.text=="false")return types_.store.literal(types_.store.boolean(),token.text);if(token.text=="null")return types_.store.null();return types_.store.unknown();}
-        if(node.kind==ExpressionKind::Identifier){if(node.text=="undefined")return types_.store.undefined();const auto symbol=binding_.symbol_for_reference(node.operator_token);if(facts_){auto fact=facts_->find(symbol);if(fact!=facts_->end())return fact->second;}return symbol<types_.symbol_types.size()?types_.symbol_types[symbol]:types_.store.unknown();}
+        if(node.kind==ExpressionKind::Identifier){if(node.text=="undefined")return types_.store.undefined();const auto symbol=binding_.symbol_for_reference(node.operator_token);auto contextual=contextual_facts_.find(symbol);if(contextual!=contextual_facts_.end())return contextual->second;if(facts_){auto fact=facts_->find(symbol);if(fact!=facts_->end())return fact->second;}return symbol<types_.symbol_types.size()?types_.symbol_types[symbol]:types_.store.unknown();}
         if(node.kind==ExpressionKind::ObjectLiteral){if(!allow_object_)return types_.store.unknown();std::vector<TypeProperty>properties;for(auto property_id:node.children){const auto&property=expressions_.node(property_id);if(property.kind!=ExpressionKind::Property||property.children.size()!=1)return types_.store.unknown();properties.push_back({property.text,type(property.children[0]),false,false});}return types_.store.object_of(std::move(properties));}
         if(node.kind==ExpressionKind::Property){if(node.children.size()!=1)return types_.store.unknown();const auto value=type(node.children[0]);const auto*property=types_.store.property(value,node.text);if(!property){if(value!=types_.store.unknown()&&error_.empty()){error_token_=node.operator_token;error_="Property '"+node.text+"' does not exist on type '"+types_.store.name(value)+"'.";}return types_.store.unknown();}return property->type;}
-        if(node.kind==ExpressionKind::Call){if(node.children.empty())return types_.store.unknown();const auto&callee=expressions_.node(node.children[0]);if(callee.kind!=ExpressionKind::Identifier)return types_.store.unknown();const auto symbol=binding_.symbol_for_reference(callee.operator_token);if(symbol>=types_.function_signatures.size()||!types_.function_signatures[symbol].valid)return types_.store.unknown();std::vector<TypeId>arguments;for(std::size_t i=1;i<node.children.size();++i)arguments.push_back(type(node.children[i]));const auto&signature=types_.function_signatures[symbol];if((arguments.size()<signature.required_parameters||(!signature.rest&&arguments.size()>signature.parameters.size()))&&error_.empty()){error_token_=callee.operator_token;error_="Expected "+std::to_string(signature.parameters.size())+" arguments, but got "+std::to_string(arguments.size())+".";}else for(std::size_t i=0;i<arguments.size()&&!signature.parameters.empty();++i){const auto parameter=i<signature.parameters.size()?i:signature.parameters.size()-1,expected=signature.parameters[parameter],actual=arguments[i];if(expected!=types_.store.unknown()&&actual!=types_.store.unknown()&&!types_.store.assignable(actual,expected)&&error_.empty()){error_token_=callee.operator_token;error_="Argument of type '"+types_.store.name(types_.store.widen(actual))+"' is not assignable to parameter of type '"+types_.store.name(expected)+"'.";}}return signature.result;}
+        if(node.kind==ExpressionKind::Call){if(node.children.empty())return types_.store.unknown();const auto&callee=expressions_.node(node.children[0]);if(callee.kind!=ExpressionKind::Identifier)return types_.store.unknown();const auto symbol=binding_.symbol_for_reference(callee.operator_token);if(symbol>=types_.symbol_types.size())return types_.store.unknown();TypeModel::FunctionSignature signature;if(symbol<types_.function_signatures.size()&&types_.function_signatures[symbol].valid)signature=types_.function_signatures[symbol];else{const auto*callable=types_.store.callable(types_.symbol_types[symbol]);if(!callable)return types_.store.unknown();signature.parameters=callable->parameters;signature.result=callable->result;signature.required_parameters=callable->required_parameters;signature.rest=callable->rest;signature.valid=true;}std::vector<TypeId>arguments;for(std::size_t i=1;i<node.children.size();++i)arguments.push_back(type(node.children[i]));if((arguments.size()<signature.required_parameters||(!signature.rest&&arguments.size()>signature.parameters.size()))&&error_.empty()){error_token_=callee.operator_token;error_="Expected "+std::to_string(signature.parameters.size())+" arguments, but got "+std::to_string(arguments.size())+".";}else for(std::size_t i=0;i<arguments.size()&&!signature.parameters.empty();++i){const auto parameter=i<signature.parameters.size()?i:signature.parameters.size()-1,expected=signature.parameters[parameter],actual=arguments[i];if(expected!=types_.store.unknown()&&actual!=types_.store.unknown()&&!types_.store.assignable(actual,expected)&&error_.empty()){error_token_=callee.operator_token;error_="Argument of type '"+types_.store.name(types_.store.widen(actual))+"' is not assignable to parameter of type '"+types_.store.name(expected)+"'.";}}return signature.result;}
+        if(node.kind==ExpressionKind::Function){const auto*expected=types_.store.callable(contextual);if(!expected)return types_.store.unknown();if(node.parameter_tokens.size()!=expected->parameters.size()){if(error_.empty()){error_token_=node.operator_token;error_="Function provides "+std::to_string(node.parameter_tokens.size())+" parameters but the target requires "+std::to_string(expected->parameters.size())+".";}return types_.store.unknown();}std::vector<std::size_t>symbols;for(std::size_t i=0;i<node.parameter_tokens.size();++i){std::size_t symbol=binding_.symbols.size();for(std::size_t s=0;s<binding_.symbols.size();++s)if(binding_.symbols[s].declaration_token==node.parameter_tokens[i]){symbol=s;break;}if(symbol<binding_.symbols.size()){contextual_facts_[symbol]=expected->parameters[i];symbols.push_back(symbol);}}for(auto child:node.children){const auto actual=type(child,expected->result);if(actual!=types_.store.unknown()&&expected->result!=types_.store.unknown()&&!types_.store.assignable(actual,expected->result)&&error_.empty()){error_token_=expressions_.node(child).begin_token;error_="Type '"+types_.store.name(types_.store.widen(actual))+"' is not assignable to type '"+types_.store.name(expected->result)+"'.";}}for(auto symbol:symbols)contextual_facts_.erase(symbol);return contextual;}
         if(node.kind==ExpressionKind::Unary){if(node.children.size()!=1)return types_.store.unknown();const auto value=type(node.children[0]);const auto&op=node.text;
         const auto kind = types_.store.kind(types_.store.widen(value));
         if (value == types_.store.unknown()) return value;
@@ -100,9 +103,9 @@ private:
 
 ExpressionResult expression_type(const std::vector<Token>& tokens, ExpressionModel&expressions,std::size_t begin,
                                  std::size_t end, const BindingModel& binding,
-                                 const TypeModel& types,const std::unordered_map<std::size_t,TypeId>*facts=nullptr,bool allow_object=false) {
+                                 const TypeModel& types,const std::unordered_map<std::size_t,TypeId>*facts=nullptr,bool allow_object=false,TypeId expected=0) {
     const auto&root=expressions.intern(tokens,begin,end);
-    return NodeExpressionTyper(tokens,expressions,root,binding,types,facts,allow_object).run();
+    return NodeExpressionTyper(tokens,expressions,root,binding,types,facts,allow_object,expected).run();
 }
 
 void report_expression_error(const SourceFile& source, const std::vector<Token>& tokens,
@@ -168,7 +171,7 @@ bool check_program(const SourceFile& source, const std::vector<Token>& tokens,
         std::unordered_map<std::size_t,TypeId>facts;std::size_t best=tokens.size();for(const auto&fact:flow)if(declaration.initializer_begin_token>=fact.begin&&declaration.initializer_end_token<=fact.end&&fact.end-fact.begin<=best){facts[fact.symbol]=fact.type;best=fact.end-fact.begin;}
         const auto expression = expression_type(tokens, expressions, declaration.initializer_begin_token,
                                                 declaration.initializer_end_token,
-                                                binding, types,facts.empty()?nullptr:&facts,true);
+                                                binding, types,facts.empty()?nullptr:&facts,true,expected);
         report_expression_error(source, tokens, expression, diagnostics);
         const auto actual = expression.type;
         if (!expression.error.empty() || expected == types.store.unknown() ||

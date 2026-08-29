@@ -279,3 +279,14 @@ resolve to those identities, and function declarations publish the same shape.
 Assignability uses contravariant parameters and covariant results for this bounded
 slice. Calls through variables and contextual function-expression typing remain
 CP32 work; the external contract remains 509/0/24.
+
+## CP32 callable variables and contextual functions (2026-08-30)
+
+Annotated callable variables now participate in argument and arity checking, and
+their expected type contextually types simple arrow and function expressions,
+including nested expression-bodied arrows. Direct block `return` expressions are
+checked against the contextual result. Destructured declaration parameters retain
+bounded unknown parameter slots rather than producing false zero-arity errors.
+The external corpus is 539 cases: 515 pass, 0 fail and 24 deliberate skips.
+Calls in arbitrary standalone expression statements and full contextual inference,
+overloads and generics remain outside this slice.

@@ -238,6 +238,13 @@ convert green infrastructure evidence into a compatibility claim.
 
 ## Roadmap response to evidence
 
+CP32 completes the first bounded callable-expression slice: annotated callable
+variables, contextual arrow/function parameters and results, and calls inside
+checker-owned initializer expressions. The next decision gate should compare
+broader function inference/overloads with object methods, index signatures,
+inheritance and classes; neither should bypass durable expression and type-model
+ownership. Standalone expression-statement checking is also an explicit gap.
+
 If a feature reveals a binding/transform-ownership deficiency, prioritize that
 architecture before planned grammar features. If a real corpus demonstrates a
 high-value missing slice, reorder accordingly. Remove speculative work when a
