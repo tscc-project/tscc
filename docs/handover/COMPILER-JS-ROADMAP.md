@@ -186,22 +186,27 @@ transpiler and production checker milestones independently.
 Create the C++17 layout, Make build, `include/js.h`, CLI/library targets, tests,
 handovers, and independent regression runner.
 
-### JS1 - Embedding lifecycle
+### JS1 - Embedding lifecycle - completed 2026-08-30
 
 Implement opaque runtime/value types, creation/destruction, evaluation, errors,
 versioning, allocator policy, value lifetime, runtime affinity, and an explicit
 thread-safety contract.
 
-### JS2 - Source, diagnostics, lexer, and parser
+### JS2 - Source, diagnostics, lexer, and parser - completed 2026-08-30
 
 Implement UTF-8 source ownership, locations, ECMAScript tokens, comments,
 literals, semicolon rules, executable syntax, and controlled recovery. Parsing
 is independently testable before execution.
 
-### JS3 - Bytecode and primitive execution
+### JS3 - Bytecode and primitive execution - completed 2026-08-30
 
 Implement an inspectable unoptimized VM for primitive values, variables,
 arithmetic, comparisons, expression completion, and bytecode disassembly.
+
+JS0–JS3 now provide the C++17 build, opaque `js.h` lifecycle, attributed bounded
+frontend, inspectable stack bytecode and a 17-case primitive execution/embedding
+contract. This does not yet activate tscc dual-runtime testing; INT0 remains a
+separate future checkpoint with an explicitly selected emitted-JavaScript subset.
 
 ### JS4 - Control flow
 

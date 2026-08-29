@@ -46,7 +46,8 @@ grammar productions without end-to-end meaning.
   identity (including static value imports), durable primitive types, and the
   currently protected semantic slice.
 - `Transpiler`: parser/token transforms and JavaScript emission.
-- `Project`/`ModuleGraph`: source loading, relative dependency discovery, and
+- `Project`/`ProgramGraph`: canonical roots/files, relative dependency discovery,
+  dependency edges, durable compilation-unit ownership, and
   graph/project work.
 - `Config`: current `tsconfig.json` subset.
 - `Compiler`: file-local preparation, program-wide emit policy, and staged output
