@@ -30,6 +30,7 @@ public:
     bool assignable(TypeId actual,TypeId expected) const;
     TypeId object_of(std::vector<TypeProperty>)const;
     const TypeProperty* property(TypeId,const std::string&)const;
+    const std::vector<TypeProperty>& properties(TypeId)const;
     TypeKind kind(TypeId) const;
     TypeId widen(TypeId) const;
     std::string name(TypeId) const;

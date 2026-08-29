@@ -371,3 +371,5 @@ become multi-engine. Output validation may later use a public JS++ parser. Gener
 source/diagnostic facilities are reconsidered only after comparative evidence.
 CommonJS lowering remains tscc-owned because it is a compiler transform; JS++
 separately owns ECMAScript module runtime semantics.
+CP22/TC8C completes nested structural shapes, chained reads and path-specific
+diagnostics. Extra source properties remain compatible by explicit policy.

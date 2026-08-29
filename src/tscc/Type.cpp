@@ -5,23 +5,13 @@ namespace tscc {
 namespace {
 std::string literal_value(const std::string&text){return text.size()>=2&&(text.front()=='\''||text.front()=='"')?text.substr(1,text.size()-2):text;}
 TypeId named_type(const std::string& text, const TypeStore& store);
+void skip_type_noise(const std::vector<Token>&tokens,std::size_t&i,std::size_t end){while(i<end&&tokens[i].kind==TokenKind::Comment)++i;}
+TypeId parse_annotation(const std::vector<Token>&tokens,std::size_t&i,std::size_t end,const TypeStore&store){skip_type_noise(tokens,i,end);if(i>=end)return store.unknown();if(tokens[i].text!="{")return named_type(tokens[i++].text,store);++i;std::vector<TypeProperty>properties;while(i<end){skip_type_noise(tokens,i,end);while(i<end&&(tokens[i].text==";"||tokens[i].text==",")){++i;skip_type_noise(tokens,i,end);}if(i<end&&tokens[i].text=="}"){++i;return store.object_of(std::move(properties));}bool readonly=false,optional=false;if(i<end&&tokens[i].text=="readonly"){readonly=true;++i;skip_type_noise(tokens,i,end);}if(i>=end||tokens[i].kind!=TokenKind::Identifier)return store.unknown();auto name=tokens[i++].text;skip_type_noise(tokens,i,end);if(i<end&&tokens[i].text=="?"){optional=true;++i;skip_type_noise(tokens,i,end);}if(i>=end||tokens[i++].text!=":")return store.unknown();auto type=parse_annotation(tokens,i,end,store);if(type==store.unknown())return type;properties.push_back({std::move(name),type,optional,readonly});}return store.unknown();}
 TypeId annotation_type(const std::vector<Token>& tokens,
                        const VariableDeclaration& declaration,
                        const TypeStore& store) {
     auto first=declaration.type_begin_token;while(first<declaration.type_end_token&&tokens[first].kind==TokenKind::Comment)++first;
-    if(first<declaration.type_end_token&&tokens[first].text=="{"){
-        std::vector<TypeProperty>properties;std::size_t i=first+1;
-        while(i<declaration.type_end_token&&tokens[i].text!="}"){
-            while(i<declaration.type_end_token&&(tokens[i].kind==TokenKind::Comment||tokens[i].text==";"||tokens[i].text==","))++i;
-            bool readonly=false,optional=false;if(i<declaration.type_end_token&&tokens[i].text=="readonly"){readonly=true;++i;}
-            if(i>=declaration.type_end_token||tokens[i].kind!=TokenKind::Identifier)return store.unknown();
-            const auto name=tokens[i++].text;
-            if(i<declaration.type_end_token&&tokens[i].text=="?"){optional=true;++i;}if(i>=declaration.type_end_token||tokens[i++].text!=":")return store.unknown();
-            if(i>=declaration.type_end_token)return store.unknown();
-            const auto type=named_type(tokens[i++].text,store);if(type==store.unknown())return type;properties.push_back({name,type,optional,readonly});
-        }
-        return store.object_of(std::move(properties));
-    }
+    if(first<declaration.type_end_token&&tokens[first].text=="{")return parse_annotation(tokens,first,declaration.type_end_token,store);
     std::vector<TypeId> members;
     for (auto i = declaration.type_begin_token; i < declaration.type_end_token; ++i) {
         if (tokens[i].kind == TokenKind::Comment || tokens[i].text == "|") continue;
@@ -94,6 +84,7 @@ TypeId TypeStore::union_of(std::vector<TypeId> members)const{std::vector<TypeId>
 bool TypeStore::assignable(TypeId actual,TypeId expected)const{if(actual==unknown()||expected==unknown()||actual==expected)return true;if(kind(expected)==TypeKind::Union){for(auto member:types_[expected].members)if(assignable(actual,member))return true;return false;}if(kind(actual)==TypeKind::Union){for(auto member:types_[actual].members)if(!assignable(member,expected))return false;return true;}if(kind(actual)==TypeKind::Literal)return types_[actual].base==expected;if(kind(actual)==TypeKind::Object&&kind(expected)==TypeKind::Object){for(const auto&wanted:types_[expected].properties){const auto*got=property(actual,wanted.name);if(!got){if(wanted.optional)continue;return false;}if(!assignable(got->type,wanted.type))return false;}return true;}return false;}
 TypeId TypeStore::object_of(std::vector<TypeProperty>properties)const{std::sort(properties.begin(),properties.end(),[](const auto&a,const auto&b){return a.name<b.name;});for(TypeId i=8;i<types_.size();++i)if(types_[i].kind==TypeKind::Object&&types_[i].properties.size()==properties.size()){bool same=true;for(std::size_t p=0;p<properties.size();++p){const auto&a=types_[i].properties[p];const auto&b=properties[p];same= same&&a.name==b.name&&a.type==b.type&&a.optional==b.optional&&a.readonly==b.readonly;}if(same)return i;}types_.push_back({TypeKind::Object,0,"",{},std::move(properties)});return types_.size()-1;}
 const TypeProperty*TypeStore::property(TypeId id,const std::string&name)const{if(kind(id)!=TypeKind::Object)return nullptr;for(const auto&property:types_[id].properties)if(property.name==name)return &property;return nullptr;}
+const std::vector<TypeProperty>&TypeStore::properties(TypeId id)const{static const std::vector<TypeProperty>empty;return kind(id)==TypeKind::Object?types_[id].properties:empty;}
 
 TypeModel build_type_model(const std::vector<Token>& tokens, const Program& program,
                            const SemanticModel& semantic, const BindingModel& binding) {

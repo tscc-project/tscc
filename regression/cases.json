@@ -451,7 +451,7 @@
     "src": "const x:{a:number}={};",
     "expect": null,
     "tscc_check": true,
-    "diagnostic_contains": "is not assignable to type"
+    "diagnostic_contains": "Property 'a' is missing"
   },
   {
     "name": "semantic-call-type",
@@ -4253,5 +4253,9 @@
     "kind": "syntax-negative",
     "src": "export {x} from './m' with ;",
     "expect": ""
-  }
+  },
+  {"name":"semantic-nested-object-missing","kind":"semantic-only","src":"const x:{meta:{answer:number}}={meta:{wrong:1}};","expect":null,"tscc_check":true,"diagnostic_contains":"Property 'meta.answer' is missing"},
+  {"name":"semantic-nested-object-property-type","kind":"semantic-only","src":"const x:{meta:{answer:number}}={meta:{answer:'no'}};","expect":null,"tscc_check":true,"diagnostic_contains":"property 'meta.answer' is not assignable"},
+  {"name":"nested-object-property-read","kind":"runtime","src":"const x:{meta:{answer:number}}={meta:{answer:42}};console.log(x.meta.answer);","expect":"42"},
+  {"name":"object-excess-property-compatible","kind":"runtime","src":"const x:{answer:number}={answer:42,label:'kept'};console.log(x.answer);","expect":"42"}
 ]

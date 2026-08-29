@@ -209,14 +209,16 @@ void report_expression_error(const SourceFile& source, const std::vector<Token>&
     diagnostics.error(source.path, line, column, result.error, source.line_text(line));
 }
 
+std::string structural_mismatch(TypeId actual,TypeId expected,const TypeStore&types,const std::string&path={}){if(types.kind(actual)!=TypeKind::Object||types.kind(expected)!=TypeKind::Object)return {};for(const auto&wanted:types.properties(expected)){const auto next=path.empty()?wanted.name:path+"."+wanted.name;const auto*got=types.property(actual,wanted.name);if(!got&&!wanted.optional)return "Property '"+next+"' is missing in source object but required in target type.";if(got&&!types.assignable(got->type,wanted.type)){if(auto nested=structural_mismatch(got->type,wanted.type,types,next);!nested.empty())return nested;return "Type '"+types.name(types.widen(got->type))+"' of property '"+next+"' is not assignable to type '"+types.name(wanted.type)+"'.";}}return {};}
 void report_mismatch(const SourceFile& source, const std::vector<Token>& tokens,
                      std::size_t token, TypeId actual, TypeId expected,
                      const TypeStore& types,
                      Diagnostics& diagnostics) {
     const auto [line, column] = source.line_col(tokens[token].begin);
-    diagnostics.error(source.path, line, column,
-        std::string("Type '") + types.name(types.widen(actual)) + "' is not assignable to type '" +
-        types.name(expected) + "'.", source.line_text(line));
+    std::string message;
+    message=structural_mismatch(actual,expected,types);
+    if(message.empty())message=std::string("Type '") + types.name(types.widen(actual)) + "' is not assignable to type '" + types.name(expected) + "'.";
+    diagnostics.error(source.path, line, column,message, source.line_text(line));
 }
 
 TypeId compound_result(const std::string& op, TypeId left, TypeId right,

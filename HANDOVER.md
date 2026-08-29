@@ -233,3 +233,9 @@ binding families that remain outside this contract.
 - Exact evidence is retained at `docs/evidence/memory-safety/checkpoint-5-valgrind.json`.
 - Combined with Checkpoint 5A's sanitizer lifetime corpus, settled native RSS, repeated 120-file graph/cycle/failure/recovery workloads, full regression pass and mirror sync, the tscc compiler-lifetime baseline is complete.
 - The cross-project campaign now advances to Checkpoint 6; do not treat this baseline as a claim of complete TypeScript semantic compatibility.
+## CP22 / TC8C nested structural objects (2026-08-30)
+
+Nested object annotations and literals, chained property reads and path-specific
+missing/incompatible-property diagnostics are active. Structural assignment
+intentionally permits extra source properties; freshness/excess-property errors
+remain deferred. The external corpus is 529 cases: 505 pass, 0 fail, 24 skips.
