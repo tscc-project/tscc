@@ -455,7 +455,25 @@
     "name": "semantic-call-type",
     "kind": "semantic-only",
     "src": "function f(x:number){} f(\"s\");",
-    "expect": null
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "Argument of type 'string' is not assignable to parameter of type 'number'."
+  },
+  {
+    "name": "semantic-call-arity",
+    "kind": "semantic-only",
+    "src": "function f(x:number,y:number){} f(1);",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "Expected 2 arguments, but got 1."
+  },
+  {
+    "name": "semantic-return-type",
+    "kind": "semantic-only",
+    "src": "function f():number{return 'wrong';}",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "Type 'string' is not assignable to type 'number'."
   },
   {
     "name": "semantic-readonly-write",

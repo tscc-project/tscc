@@ -13,9 +13,9 @@ This is the entry point for developers and coding agents working on tscc. Read
 - Current default target: `es2022`; default module mode: `preserve`.
 - Build: Make.
 - A deliberately bounded semantic checker slice is active: durable primitive facts
-  flow through precedence-aware arithmetic expressions and direct/compound
-  assignment, with const-reassignment checks. This is not yet a general TypeScript
-  type checker.
+  flow through expressions, assignment and ordinary-function signatures/calls,
+  with const, argument, arity and annotated-return checks. This is not yet a
+  general TypeScript type checker.
 
 Source and tests define current behavior. The internal and standalone regression
 corpora define executable compatibility evidence. README/website claims must stay
@@ -65,9 +65,9 @@ erasure, generics, enums, namespaces, parameter properties, project/relative
 module discovery, TSX preserve mode, CommonJS lowering with live imported reads,
 module grammar hardening, scope/shadowing work, and import attributes.
 
-The independent corpus currently contains 519 cases: 492 pass, zero fail, and 27
+The independent corpus currently contains 521 cases: 495 pass, zero fail, and 26
 semantic-checker-only skips at the retained checkpoint. Counts are evidence, not
-the product definition. Seven semantic cases are implemented; the project is not
+the product definition. Ten semantic cases are implemented; the project is not
 implicitly a drop-in replacement for all `tsc` behavior.
 
 ## Build and validation

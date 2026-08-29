@@ -110,3 +110,32 @@ fi
 grep -Fq "Cannot assign to 'fixed' because it is a constant." "$TMP/const.err"
 
 printf 'tscc primitive variable type-check test passed\n'
+
+cat >"$TMP/functions-valid.ts" <<'TS'
+function add(left: number, right: number): number { return left + right; }
+const answer: number = add(20, 22);
+TS
+"$ROOT/tscc" --pretty false --noEmit "$TMP/functions-valid.ts" >/dev/null
+
+printf '%s\n' 'function add(left:number,right:number):number{return left+right;}const value=add(1);' >"$TMP/function-arity.ts"
+if "$ROOT/tscc" --pretty false --noEmit "$TMP/function-arity.ts" >"$TMP/arity.out" 2>"$TMP/arity.err"; then
+    echo "invalid function arity unexpectedly succeeded" >&2
+    exit 1
+fi
+grep -Fq "Expected 2 arguments, but got 1." "$TMP/arity.err"
+
+printf '%s\n' 'function add(left:number,right:number):number{return left+right;}const value=add("wrong",2);' >"$TMP/function-argument.ts"
+if "$ROOT/tscc" --pretty false --noEmit "$TMP/function-argument.ts" >"$TMP/argument.out" 2>"$TMP/argument.err"; then
+    echo "invalid function argument unexpectedly succeeded" >&2
+    exit 1
+fi
+grep -Fq "Argument of type 'string' is not assignable to parameter of type 'number'." "$TMP/argument.err"
+
+printf '%s\n' 'function wrong():number{return "wrong";}' >"$TMP/function-return.ts"
+if "$ROOT/tscc" --pretty false --noEmit "$TMP/function-return.ts" >"$TMP/return.out" 2>"$TMP/return.err"; then
+    echo "invalid function return unexpectedly succeeded" >&2
+    exit 1
+fi
+grep -Fq "Type 'string' is not assignable to type 'number'." "$TMP/return.err"
+
+printf 'tscc bounded function signature test passed\n'

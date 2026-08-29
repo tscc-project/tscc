@@ -67,6 +67,38 @@ private:
         if (token.text == "true" || token.text == "false") return types_.store.boolean();
         if (token.kind == TokenKind::Identifier) {
             const auto symbol = binding_.symbol_for_reference(token_index);
+            if (pos_ < sig_.size() && tokens_[sig_[pos_]].text == "(") {
+                ++pos_; std::vector<TypeId> arguments;
+                if (pos_ < sig_.size() && tokens_[sig_[pos_]].text != ")") for (;;) {
+                    arguments.push_back(additive());
+                    if (!accept(",")) break;
+                }
+                if (!accept(")")) return types_.store.unknown();
+                if (symbol < types_.function_signatures.size() &&
+                    types_.function_signatures[symbol].valid) {
+                    const auto& signature = types_.function_signatures[symbol];
+                    if ((arguments.size() < signature.required_parameters ||
+                         (!signature.rest && arguments.size() > signature.parameters.size())) &&
+                        error_.empty()) {
+                        error_token_ = token_index;
+                        error_ = "Expected " + std::to_string(signature.parameters.size()) +
+                                 " arguments, but got " + std::to_string(arguments.size()) + ".";
+                    } else for (std::size_t i = 0; i < arguments.size(); ++i) {
+                        if (signature.parameters.empty()) break;
+                        const auto parameter = i < signature.parameters.size() ? i : signature.parameters.size()-1;
+                        const auto expected = signature.parameters[parameter], actual = arguments[i];
+                        if (expected != types_.store.unknown() && actual != types_.store.unknown() &&
+                            expected != actual && error_.empty()) {
+                            error_token_ = token_index;
+                            error_ = std::string("Argument of type '") + types_.store.name(actual) +
+                                     "' is not assignable to parameter of type '" +
+                                     types_.store.name(expected) + "'.";
+                        }
+                    }
+                    return signature.result;
+                }
+                return types_.store.unknown();
+            }
             if (symbol < types_.symbol_types.size()) return types_.symbol_types[symbol];
         }
         return types_.store.unknown();
@@ -207,6 +239,46 @@ bool check_program(const SourceFile& source, const std::vector<Token>& tokens,
             actual == types.store.unknown() || actual == expected) continue;
         report_mismatch(source, tokens, declaration.initializer_begin_token,
                         actual, expected, types.store, diagnostics);
+    }
+
+    for (const auto& node : model.nodes) {
+        if (node.kind != SemanticNodeKind::ReturnStatement ||
+            node.begin_token + 1 >= node.end_token) continue;
+        std::size_t owner = static_cast<std::size_t>(-1), owner_span = static_cast<std::size_t>(-1);
+        for (std::size_t i = 0; i < binding.symbols.size(); ++i) {
+            if (binding.symbols[i].kind != SymbolKind::Function ||
+                binding.symbols[i].semantic_node >= model.nodes.size()) continue;
+            const auto& function = model.nodes[binding.symbols[i].semantic_node];
+            if (node.begin_token <= function.begin_token || node.end_token > function.end_token) continue;
+            const auto span = function.end_token - function.begin_token;
+            if (span < owner_span) { owner = i; owner_span = span; }
+        }
+        if (owner >= types.function_signatures.size()) continue;
+        const auto expected = types.function_signatures[owner].result;
+        if (expected == types.store.unknown()) continue;
+        const auto expression = expression_type(tokens, node.begin_token + 1, node.end_token,
+                                                binding, types);
+        report_expression_error(source, tokens, expression, diagnostics);
+        if (expression.error.empty() && expression.type != types.store.unknown() &&
+            expression.type != expected)
+            report_mismatch(source, tokens, node.begin_token + 1,
+                            expression.type, expected, types.store, diagnostics);
+    }
+
+    for (const auto& reference : binding.references) {
+        if (reference.symbol >= binding.symbols.size() ||
+            binding.symbols[reference.symbol].kind != SymbolKind::Function) continue;
+        std::size_t open = reference.token + 1;
+        while (open < tokens.size() && tokens[open].kind == TokenKind::Comment) ++open;
+        if (open >= tokens.size() || tokens[open].text != "(") continue;
+        std::size_t end = open + 1; int depth = 1;
+        for (; end < tokens.size() && depth; ++end) {
+            if (tokens[end].text == "(") ++depth;
+            else if (tokens[end].text == ")") --depth;
+        }
+        if (depth) continue;
+        const auto expression = expression_type(tokens, reference.token, end, binding, types);
+        report_expression_error(source, tokens, expression, diagnostics);
     }
 
     std::unordered_set<std::size_t> declaration_names;

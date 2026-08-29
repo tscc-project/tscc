@@ -54,13 +54,17 @@ in production CommonJS emission: a function-local `var` must not be rewritten as
 the homonymous imported live binding. Legacy shadow-range coverage remains for
 binding forms outside the bounded binder contract.
 
-Seven semantic-only cases are now active checker contracts: direct literal
+Ten semantic-only cases are now active checker contracts: direct literal
 initializer mismatch, bound identifier initializer mismatch, and direct bound
 assignment mismatch, additive result mismatch, and invalid primitive arithmetic.
 Positive focused tests cover matching types, precedence, parentheses, unary
 operators, lexical shadowing, const reassignment, and primitive compound
 assignment. Unsupported expression/type forms continue to skip rather than being
 rejected by syntax-shaped heuristics.
+
+CP13 adds focused signature-model and checker cases plus three external cases for
+typed call arguments, bounded arity and annotated returns. Compatibility cases
+also protect optional/default/rest calls from false exact-arity rejection.
 
 ## Feature test dimensions
 

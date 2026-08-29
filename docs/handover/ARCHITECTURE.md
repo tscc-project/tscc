@@ -266,6 +266,12 @@ assignment. Private names are explicitly excluded from ordinary lexical referenc
 resolution; the full corpus caught the otherwise possible `#x` → unrelated `x`
 false binding during this checkpoint.
 
+CP13 adds a canonical function type identity and symbol-indexed ordinary-function
+signatures. Parameter facts include primitive annotations and required/rest
+arity; call typing consumes those signatures and return annotations feed both
+call results and bounded return checking. This intentionally does not infer
+callable variable/function-expression types or model overloads and generics.
+
 Simple catch identifiers and simple `for`-header variable declarations now have
 explicit lexical-region ownership. Brace scopes nested inside those regions link
 back to the catch/loop scope, so header and body references share symbol identity.

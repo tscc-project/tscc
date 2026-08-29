@@ -142,9 +142,11 @@ slices rather than inferred from this checkpoint.
 
 ### TC6 - Function signatures and calls
 
-Add parameter and return types, optional/rest parameters, callable types,
-function declarations/expressions, arguments, return checking, and diagnostics.
-Establish explicit signatures before overloads or generic inference.
+Completed as CP13 on 2026-08-30 for typed ordinary declarations: durable
+parameter/result signatures, optional/default/rest arity boundaries, direct
+calls, argument compatibility, exact ordinary arity diagnostics and annotated
+return-expression checking. Callable variable types, function expressions,
+overloads, generics and contextual typing remain later TC6 expansions.
 
 ### TC7 - Literal, union, null, and undefined types
 

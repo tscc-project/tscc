@@ -14,7 +14,7 @@ static void fail(const char* message) { std::cerr << message << '\n'; std::exit(
 int main() {
     SourceFile source;
     source.path = "types.ts";
-    source.text = "const n:number=1;const s:string='x';let b:boolean=true;const complex:number|string=1;";
+    source.text = "const n:number=1;const s:string='x';let b:boolean=true;const complex:number|string=1;function add(left:number,right:number):number{return left+right;}";
     source.line_starts = {0};
     Diagnostics diagnostics;
     Lexer lexer(source, diagnostics);
@@ -33,6 +33,15 @@ int main() {
         if (name == "s" && kind != TypeKind::String) fail("string fact missing");
         if (name == "b" && kind != TypeKind::Boolean) fail("boolean fact missing");
         if (name == "complex" && kind != TypeKind::Unknown) fail("unsupported type was guessed");
+        if (name == "add") {
+            if (kind != TypeKind::Function) fail("function type fact missing");
+            const auto& signature = types.function_signatures[i];
+            if (!signature.valid || signature.parameters.size() != 2 ||
+                signature.parameters[0] != types.store.number() ||
+                signature.parameters[1] != types.store.number() ||
+                signature.result != types.store.number())
+                fail("function signature fact missing");
+        }
     }
     std::cout << "tscc durable type-model smoke test passed\n";
 }

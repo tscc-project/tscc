@@ -21,7 +21,7 @@ This historical first checkpoint was intentionally not a type checker. Later che
 
 tscc now has a separate `Checker` pass and a deliberately narrow type contract. For simple variable declarations, explicit `number`, `string`, and `boolean` annotations are checked against direct primitive literal initializers (including signed numeric literals). Those annotated primitive facts also flow through bound identifier initializers and direct assignments, so `const text: string = "x"; const value: number = text` is rejected with a source-positioned diagnostic.
 
-This is the beginning of type checking, not a general TypeScript type system. A bounded primitive expression grammar covers parentheses, unary operators, additive and multiplicative arithmetic over literals and bound identifiers. The checker also owns const reassignment and primitive compound assignment for this bounded symbol/type subset. Unions, object types, inference, destructuring, calls, functions, properties, generics, logical/conditional expressions and narrowing remain unchecked. The independent 519-case corpus records 492 passes, no failures, and 27 explicit semantic skips.
+This is the beginning of type checking, not a general TypeScript type system. A bounded primitive expression grammar covers parentheses, unary operators, additive and multiplicative arithmetic over literals and bound identifiers. The checker also owns const/compound assignment plus typed ordinary-function arguments, bounded arity and annotated returns. Unions, object types, inference, callable variables/function expressions, overloads, generics, logical/conditional expressions and narrowing remain unchecked. The independent 521-case corpus records 495 passes, no failures, and 26 explicit semantic skips.
 
 Static default, namespace, and named value imports now have binder-owned root
 symbols. This identity protects ordinary CommonJS live reads from supported local
@@ -32,7 +32,7 @@ files, `--noEmitOnError` suppresses the whole prepared set after any error, and
 `--noEmit` suppresses output unconditionally.
 
 The 17 August 2026 campaign checkpoint passed clean optimized, ASan+UBSan, full
-519-case, and clean committed-archive builds. Five-run medians on this machine were
+521-case, and clean committed-archive builds. Five-run medians on this machine were
 1.575 ms (small), 6.827 ms (100 basic files), 25.529 ms (500 basic files),
 8.480 ms (100 feature-heavy files), and 9.391 ms (100 advanced files). These are
 dated transpilation-oriented measurements, not equivalent-work or cross-machine
