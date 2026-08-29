@@ -347,3 +347,27 @@ fi
 grep -Fq "Type 'string' is not assignable to type 'number'." "$TMP/object-callback.err"
 
 printf 'tscc nested expression ownership test passed\n'
+
+cat > "$TMP/index-call-signatures-valid.ts" <<'EOF'
+type Dictionary = { [key: string]: number };
+const dictionary: Dictionary = {answer: 42};
+const answer: number = dictionary.answer;
+type Parser = { (text: string): number };
+const parse: Parser = text => 42;
+const parsed: number = parse("answer");
+EOF
+"$ROOT/tscc" --pretty false --noEmit "$TMP/index-call-signatures-valid.ts" >/dev/null
+
+printf '%s\n' 'type Dictionary={[key:string]:number};const bad:Dictionary={answer:"wrong"};' >"$TMP/index-signature-invalid.ts"
+if "$ROOT/tscc" --pretty false --noEmit "$TMP/index-signature-invalid.ts" >"$TMP/index.out" 2>"$TMP/index.err"; then
+    echo "invalid index signature value unexpectedly succeeded" >&2; exit 1
+fi
+grep -Fq "is not assignable to type 'object'" "$TMP/index.err"
+
+printf '%s\n' 'type Parser={(text:string):number};const parse:Parser=text=>42;parse(42);' >"$TMP/call-signature-invalid.ts"
+if "$ROOT/tscc" --pretty false --noEmit "$TMP/call-signature-invalid.ts" >"$TMP/call-signature.out" 2>"$TMP/call-signature.err"; then
+    echo "invalid callable object argument unexpectedly succeeded" >&2; exit 1
+fi
+grep -Fq "Argument of type 'number' is not assignable to parameter of type 'string'." "$TMP/call-signature.err"
+
+printf 'tscc index and callable object signature test passed\n'

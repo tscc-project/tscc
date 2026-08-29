@@ -274,6 +274,11 @@ expressions. This materially reduces cursor-coupled parsing, but statement forms
 still need explicit expression-child identities before the global call-root
 discovery pass can be removed safely.
 
+CP38 stores index and call signatures directly on canonical structural object
+identities. Callable objects deliberately delegate to the existing function
+variance/checking path. Computed element access and overload sets should extend
+this identity rather than create another checker-specific representation.
+
 If a feature reveals a binding/transform-ownership deficiency, prioritize that
 architecture before planned grammar features. If a real corpus demonstrates a
 high-value missing slice, reorder accordingly. Remove speculative work when a

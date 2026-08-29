@@ -338,3 +338,12 @@ through parentheses and structural object properties, enabling contextual
 callbacks in both positions. The corpus is 563 cases at 539/0/24. Statement
 call-root discovery is still retained for constructs without durable statement
 expression children; replacing that final discovery layer remains future work.
+
+## CP38 index and callable object signatures (2026-08-29)
+
+Structural object identities now retain bounded string/number index signatures
+and one call signature. String-indexed properties participate in lookup and
+object-literal assignability; callable objects reuse canonical function
+variance, contextual typing, argument, arity and result checks. The corpus is
+569 cases at 545/0/24. Computed element-access typing, multiple overload
+signatures, mapped types and generic signatures remain deferred.
