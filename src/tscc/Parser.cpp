@@ -9,8 +9,9 @@
 
 namespace tscc {
 
-Parser::Parser(const SourceFile& source, const std::vector<Token>& tokens, Diagnostics& diagnostics)
-    : source_(source), tokens_(tokens), diagnostics_(diagnostics) {}
+Parser::Parser(const SourceFile& source, const std::vector<Token>& tokens, Diagnostics& diagnostics,
+               ParserLimits limits)
+    : source_(source), tokens_(tokens), diagnostics_(diagnostics), limits_(limits) {}
 
 bool Parser::at_end() const { return i_ >= tokens_.size() || tokens_[i_].kind == TokenKind::End; }
 const Token& Parser::token(std::size_t offset) const {
@@ -223,6 +224,22 @@ std::size_t Parser::find_statement_end(std::size_t start) const {
         if (tokens_[p].kind == TokenKind::End) return p;
     }
     return tokens_.size() - 1;
+}
+
+std::size_t Parser::recovery_boundary(std::size_t start) const {
+    bool separator = false;
+    for (std::size_t p = start; p < tokens_.size(); ++p) {
+        if (tokens_[p].kind == TokenKind::End) break;
+        if (tokens_[p].kind == TokenKind::Comment) continue;
+        if (tokens_[p].text == ";" || tokens_[p].text == "}") { separator = true; continue; }
+        if (!separator) continue;
+        const auto& x = tokens_[p].text;
+        if (x == "export" || x == "declare" || x == "interface" || x == "type" ||
+            x == "function" || x == "class" || x == "enum" || x == "namespace" ||
+            x == "module" || x == "const" || x == "let" || x == "var") return p;
+        separator = false;
+    }
+    return tokens_.size();
 }
 
 void Parser::erase_type_annotation(std::size_t colon, std::size_t limit,
@@ -1431,9 +1448,23 @@ bool Parser::parse(Program& program) {
     program.variables.clear();
     recovery_tokens_.clear();
     i_ = 0;
+    std::size_t top_level_nodes = 0;
     while (!at_end()) {
+        if (top_level_nodes++ >= limits_.max_top_level_nodes) {
+            error_at(i_, "parser top-level work limit exceeded");
+            break;
+        }
         const std::size_t before = i_;
-        program.root.children.push_back(parse_top_level());
+        const std::size_t diagnostics_before = diagnostics_.size();
+        auto node = parse_top_level();
+        if (diagnostics_.size() > diagnostics_before && at_end()) {
+            const auto boundary = recovery_boundary(before + 1);
+            if (boundary < tokens_.size()) {
+                node.end_token = boundary ? boundary - 1 : boundary;
+                i_ = boundary;
+            }
+        }
+        program.root.children.push_back(std::move(node));
         if (i_ <= before) ++i_; // parser progress invariant
     }
     for(const auto token_index:recovery_tokens_){SyntaxNode recovery{SyntaxKind::Recovery,token_index,token_index,{}};recovery.recovered=true;program.root.children.push_back(std::move(recovery));}

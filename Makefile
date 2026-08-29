@@ -20,13 +20,18 @@ test-smoke: tscc
 clean:
 	rm -f $(OBJECTS) $(DEPS) tscc
 	rm -rf .build
-.PHONY: all test test-core test-smoke test-parser test-syntax-identity test-binder test-types test-edits test-checker test-compilation-unit test-program-graph test-runtime test-project test-regression test-tsx test-commonjs test-product-boundary test-feature-matrix check-regression-sync test-sanitize memory-safety-smoke clean
+.PHONY: all test test-core test-smoke test-parser test-parser-recovery test-syntax-identity test-binder test-types test-edits test-checker test-compilation-unit test-program-graph test-runtime test-project test-regression test-tsx test-commonjs test-product-boundary test-feature-matrix check-regression-sync test-sanitize memory-safety-smoke clean
 
 
 test-parser:
 	$(CXX) -Isrc $(CXXFLAGS) tests/parser_smoke.cpp src/tscc/Diagnostic.cpp src/tscc/Source.cpp src/tscc/Lexer.cpp src/tscc/Parser.cpp src/tscc/Semantic.cpp -o .parser-smoke
 	./.parser-smoke
 	rm -f .parser-smoke
+
+test-parser-recovery:
+	$(CXX) -Isrc $(CXXFLAGS) tests/parser_recovery.cpp src/tscc/Diagnostic.cpp src/tscc/Source.cpp src/tscc/Lexer.cpp src/tscc/Parser.cpp -o .parser-recovery
+	./.parser-recovery
+	rm -f .parser-recovery
 
 test-syntax-identity:
 	$(CXX) -Isrc $(CXXFLAGS) tests/syntax_identity.cpp src/tscc/Diagnostic.cpp src/tscc/Source.cpp src/tscc/Lexer.cpp src/tscc/Parser.cpp src/tscc/Semantic.cpp src/tscc/Binder.cpp src/tscc/Type.cpp src/tscc/Checker.cpp src/tscc/CompilationUnit.cpp src/tscc/SourceEdit.cpp src/tscc/Transpiler.cpp -o .syntax-identity
@@ -84,13 +89,13 @@ test-product-boundary:
 test-feature-matrix:
 	python3 tools/check_feature_matrix.py
 
-test: test-product-boundary test-feature-matrix test-smoke test-parser test-syntax-identity test-binder test-types test-edits test-checker test-compilation-unit test-program-graph test-runtime test-project test-regression test-tsx test-commonjs
+test: test-product-boundary test-feature-matrix test-smoke test-parser test-parser-recovery test-syntax-identity test-binder test-types test-edits test-checker test-compilation-unit test-program-graph test-runtime test-project test-regression test-tsx test-commonjs
 
 # Compiler-core gates that do not require a native node/tsc round-trip. CI
 # runs this on Windows (msys2): the node/tsc differential gates (runtime,
 # project, tsx, commonjs) are fully exercised on Linux and macOS, and the
 # external regression corpus runs on Windows as a native-Python step.
-test-core: test-product-boundary test-feature-matrix test-smoke test-parser test-syntax-identity test-binder test-types test-edits test-checker test-compilation-unit test-program-graph
+test-core: test-product-boundary test-feature-matrix test-smoke test-parser test-parser-recovery test-syntax-identity test-binder test-types test-edits test-checker test-compilation-unit test-program-graph
 
 -include $(DEPS)
 

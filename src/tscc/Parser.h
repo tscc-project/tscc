@@ -7,9 +7,14 @@
 
 namespace tscc {
 
+struct ParserLimits {
+    std::size_t max_top_level_nodes = 100000;
+};
+
 class Parser {
 public:
-    Parser(const SourceFile& source, const std::vector<Token>& tokens, Diagnostics& diagnostics);
+    Parser(const SourceFile& source, const std::vector<Token>& tokens, Diagnostics& diagnostics,
+           ParserLimits limits = {});
     bool parse(Program& program);
 
 private:
@@ -19,6 +24,7 @@ private:
     std::size_t i_ = 0;
     Program* program_ = nullptr;
     std::vector<std::size_t> recovery_tokens_;
+    ParserLimits limits_;
 
     bool at_end() const;
     const Token& token(std::size_t offset = 0) const;
@@ -39,6 +45,7 @@ private:
 
     std::size_t find_matching(std::size_t open_index, const char* open, const char* close) const;
     std::size_t find_statement_end(std::size_t start) const;
+    std::size_t recovery_boundary(std::size_t start) const;
     void parse_parameter_list(std::size_t open_index, std::size_t close_index);
     void erase_type_annotation(std::size_t colon_index, std::size_t limit_index,
                                const std::vector<std::string>& terminators);

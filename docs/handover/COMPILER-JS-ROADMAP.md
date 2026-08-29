@@ -118,6 +118,14 @@ Harden EOF, delimiters, generic/relational and TSX ambiguity, comments, semicolo
 boundaries, and recovery without consuming following declarations. Add
 deterministic fuzz-ready parser entry points.
 
+Completed as CP8 on 2026-08-30. Failed top-level constructs now resynchronize at
+explicit declaration boundaries after semicolons/braces, retaining subsequent
+declarations and stable recovery identities. `ParserLimits` gives fuzzers and
+adversarial callers a deterministic top-level work ceiling. Focused tests repeat
+the same malformed parse, compare diagnostic/tree identity, exercise EOF and
+delimiter failures, and prove the work limit fails closed. This is a recovery
+foundation, not a claim that every TypeScript/TSX ambiguity is fully solved.
+
 ### TC5 - Declaration and scope completion
 
 Bind arrows, destructuring, defaults/rest, classes and members, remaining

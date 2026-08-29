@@ -33,6 +33,10 @@ The focused program-graph test proves canonical cycle identity, root ownership,
 dependency edges, durable checked units and `--noResolve` policy.
 The durable-syntax test proves unique IDs, parents, exact spans, recovery nodes
 and identity stability after emission.
+`test-parser-recovery` parses the same malformed EOF/delimiter corpus twice and
+compares diagnostics plus stable syntax identity. It proves declarations after
+recovery boundaries remain visible and separately exercises the deterministic
+`ParserLimits` failure path.
 Keep focused targets available for iteration, but require the aggregate target at
 checkpoints.
 

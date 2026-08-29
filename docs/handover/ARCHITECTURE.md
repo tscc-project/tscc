@@ -135,6 +135,12 @@ token span and byte span. Parser errors create explicit recovery nodes. This
 identity remains valid through binding, checking and emission while the
 range/replacement emitter continues to own changed bytes.
 
+TC4 adds declaration-boundary resynchronization when a failed construct otherwise
+consumes EOF. Following top-level declarations remain structural nodes with
+stable IDs. A configurable top-level node ceiling bounds adversarial/fuzz entry;
+the ordinary default is intentionally high. Recovery remains conservative and
+does not guess arbitrary delimiter repairs or change source-edit emission.
+
 ## Transpiler
 
 `transpile_unit` consumes a checked durable unit and retains its emitted text;
