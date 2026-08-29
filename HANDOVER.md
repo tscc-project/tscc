@@ -320,3 +320,12 @@ ranges suppress duplicate whole-program call diagnostics. The corpus is 553
 cases at 529/0/24. This is intentionally a call-argument slice; general nested
 expression ownership in every parenthesized, array and object context remains
 future architecture work.
+
+## CP36 callable object members and interface inheritance (2026-08-29)
+
+Object annotations now canonicalize method signatures as the same callable type
+used by function-valued properties. Property-call nodes therefore share argument,
+arity and contextual result checking with ordinary calls. Interfaces may extend
+already-declared object interfaces and merge inherited required properties. The
+corpus is 559 cases at 535/0/24. Call signatures, index signatures, generic
+methods, forward inheritance and classes remain deferred.

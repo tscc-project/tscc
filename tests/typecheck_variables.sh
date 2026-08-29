@@ -301,3 +301,25 @@ if "$ROOT/tscc" --pretty false --noEmit "$TMP/named-object.ts" 2>"$TMP/named-obj
 fi
 grep -Fq "property 'user.address.city'" "$TMP/named-object.err"
 printf 'tscc named object declaration test passed\n'
+
+cat > "$TMP/callable-members-valid.ts" <<'EOF'
+interface Base { value: number }
+interface Service extends Base { map(input: number): string }
+const service: Service = {value: 42, map(input) { return "" + input; }};
+const result: string = service.map(service.value);
+EOF
+"$ROOT/tscc" --pretty false --noEmit "$TMP/callable-members-valid.ts" >/dev/null
+
+printf '%s\n' 'interface Service{map(input:number):string}const service:Service={map(input){return ""+input;}};service.map("bad");' >"$TMP/callable-member-argument.ts"
+if "$ROOT/tscc" --pretty false --noEmit "$TMP/callable-member-argument.ts" >"$TMP/member.out" 2>"$TMP/member.err"; then
+    echo "invalid callable member argument unexpectedly succeeded" >&2; exit 1
+fi
+grep -Fq "Argument of type 'string' is not assignable to parameter of type 'number'." "$TMP/member.err"
+
+printf '%s\n' 'interface Base{value:number}interface Derived extends Base{label:string}const bad:Derived={label:"x"};' >"$TMP/interface-extends-required.ts"
+if "$ROOT/tscc" --pretty false --noEmit "$TMP/interface-extends-required.ts" >"$TMP/extends.out" 2>"$TMP/extends.err"; then
+    echo "missing inherited property unexpectedly succeeded" >&2; exit 1
+fi
+grep -Fq "Property 'value' is missing" "$TMP/extends.err"
+
+printf 'tscc callable member and interface inheritance test passed\n'

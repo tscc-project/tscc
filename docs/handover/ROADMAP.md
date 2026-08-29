@@ -262,6 +262,12 @@ inside checker-owned initializer/return roots. Continue replacing token-range
 discovery as durable statement and nested-expression ownership expands; do not
 describe this bounded call-argument result as a complete expression grammar.
 
+CP36 reuses canonical callable identities for object methods/function-valued
+properties and adds bounded interface inheritance. Evidence supports member-call
+argument and arity checks without a second method typer. The next object-model
+work should add index/call signatures or classes only after selecting a durable
+representation for those shapes.
+
 If a feature reveals a binding/transform-ownership deficiency, prioritize that
 architecture before planned grammar features. If a real corpus demonstrates a
 high-value missing slice, reorder accordingly. Remove speculative work when a
