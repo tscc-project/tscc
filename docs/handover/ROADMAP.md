@@ -136,8 +136,11 @@ deliberate trade-offs rather than hidden inside semantic progress.
 - Decide whether `ModuleGraph` should become the driver implementation or remain
   separately tested infrastructure; avoid maintaining two traversal paths without
   an explicit reason.
-- Specify multi-file partial-output and atomic-write behavior. Current emission is
-  sequential and truncates each output before the invocation's final status is known.
+- Continue hardening multi-file output transactions. Current compilation prepares
+  all successful sources before emission and stages each file beside its target.
+  `noEmitOnError` suppresses the whole prepared set after any compile error, while
+  default emit-on-error commits only successful sources. A failure during the
+  final sequence of filesystem renames is still not an atomic project-wide commit.
 - Replace broad architectural wording about binding/semantic phases with the exact
   compact syntax/range model unless those phases are genuinely introduced.
 

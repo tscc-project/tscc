@@ -57,8 +57,9 @@ new parser productions.
 ## Current evidence
 
 The project has focused C++/shell integration tests, runtime comparisons, project
-and CommonJS differential fixtures, and a 511-case independent corpus classified
-against TypeScript. Historical performance JSON tracks many checkpoints and
+and CommonJS differential fixtures, and a 519-case independent corpus classified
+against TypeScript. The retained baseline is 492 pass, zero fail, and 27
+intentional semantic-only skips under TypeScript 7.0.2. Historical performance JSON tracks many checkpoints and
 workloads. Current website/README ratios are local transpile-oriented comparisons,
 not equivalent-work claims because `tsc` performs a much broader job.
 
@@ -79,4 +80,3 @@ diagnostics, stable performance, and repeatable validation/release processes.
 The most important product question remains:
 
 > What exact compiler scope is tscc promising at production?
-

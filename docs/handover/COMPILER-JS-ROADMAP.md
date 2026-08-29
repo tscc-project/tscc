@@ -50,11 +50,15 @@ release or public compatibility claim.
 
 ## Foundation checkpoints
 
-### F0 - Reconcile the retained baseline
+### F0 - Reconcile the retained baseline - completed 2026-08-30
 
 Correct stale statements about aggregate tests, sanitizers, the bounded checker,
 corpus counts, and prepared/staged output. Record the verified 519-case baseline
 without changing behaviour.
+
+Completed at the retained 519-case baseline: 492 pass, zero fail, and 27
+intentional semantic-only skips under TypeScript 7.0.2. The aggregate test,
+sanitizer, bounded-checker, corpus, and staged-output descriptions were reconciled.
 
 ### F1 - Freeze the product boundary
 

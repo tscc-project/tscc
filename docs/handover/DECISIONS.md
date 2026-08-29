@@ -11,8 +11,9 @@ product suite.
 
 **Status:** CURRENT
 
-The project is not currently documented as a complete drop-in `tsc` replacement
-and has only a first bounded primitive-initializer checker slice. Compatibility
+The project is not currently documented as a complete drop-in `tsc` replacement.
+It has a deliberately bounded checker for annotated primitive facts, primitive
+expressions, direct/compound assignment, and const reassignment. Compatibility
 promises must remain explicit.
 
 ## Feature support definition
@@ -38,10 +39,12 @@ automatically the specification for deliberate divergences.
 
 ## Semantic type checker
 
-**Status:** ABSENT / FUTURE PRODUCT DECISION
+**Status:** BOUNDED ACTIVE FOUNDATION
 
-Do not fake semantic restrictions through parser heuristics. Decide checker scope
-and architecture deliberately before implementation.
+The semantic checker is real and participates in normal compilation, but covers
+only the protected primitive-expression and assignment slices. Do not inflate
+that foundation into a general TypeScript-checker claim or fake unsupported
+semantics through parser heuristics. Expand it through complete vertical slices.
 
 ## TSX
 
