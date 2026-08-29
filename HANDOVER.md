@@ -151,6 +151,8 @@ without explicit approval.
   a compiler, building JS++, and integrating them through explicit boundaries.
 - `PRODUCT-BOUNDARY.md`: settled ownership and dependency contract between tscc
   and JS++, protected by `make test-product-boundary`.
+- `../feature-matrix.json`: machine-checked support dimensions and evidence cases,
+  protected by `make test-feature-matrix`.
 - `PROJECT-HISTORY.md`: detailed tscc history and institutional context,
   including compiler semantics, production definition, and roadmap evolution.
 

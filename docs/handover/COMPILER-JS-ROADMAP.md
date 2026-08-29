@@ -69,12 +69,16 @@ required JS++ runtime dependency.
 Completed with `PRODUCT-BOUNDARY.md` and an aggregate repository check that
 rejects accidental JS++ headers, sources, or linkage in the normal compiler.
 
-### F2 - Establish executable feature matrices
+### F2 - Establish executable feature matrices - completed 2026-08-30
 
 Classify JS++ features as tokenized, parsed, compiled, executed, error-tested,
 embedding-tested, and conformance-tested. Classify tscc features as parsed,
 bound, typed, lowered, emitted, runtime-tested, diagnostic-tested, and
 project-tested. Use explicit versioned targets rather than broad language claims.
+
+Completed with versioned JSON matrices and validators in both product and
+independent-suite repositories. The tscc matrix checks its 519-case oracle totals
+and every named external evidence case.
 
 ## tscc compiler checkpoints
 
