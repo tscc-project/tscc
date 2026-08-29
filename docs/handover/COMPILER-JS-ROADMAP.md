@@ -373,3 +373,6 @@ CommonJS lowering remains tscc-owned because it is a compiler transform; JS++
 separately owns ECMAScript module runtime semantics.
 CP22/TC8C completes nested structural shapes, chained reads and path-specific
 diagnostics. Extra source properties remain compatible by explicit policy.
+CP24 establishes CompilationUnit-owned expression identity and routes checker
+entry through interned expression nodes. Rich operator-node migration can now
+proceed incrementally without creating parallel range identities.

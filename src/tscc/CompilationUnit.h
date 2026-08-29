@@ -1,6 +1,7 @@
 #pragma once
 #include "Binder.h"
 #include "Diagnostic.h"
+#include "Expression.h"
 #include "Lexer.h"
 #include "Semantic.h"
 #include "Source.h"
@@ -25,6 +26,7 @@ public:
     SemanticModel semantic;
     BindingModel binding;
     TypeModel types;
+    ExpressionModel expressions;
     Diagnostics diagnostics;
     UnitOptions options;
     std::string emitted_text;

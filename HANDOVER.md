@@ -239,3 +239,11 @@ Nested object annotations and literals, chained property reads and path-specific
 missing/incompatible-property diagnostics are active. Structural assignment
 intentionally permits extra source properties; freshness/excess-property errors
 remain deferred. The external corpus is 529 cases: 505 pass, 0 fail, 24 skips.
+## CP24 durable expression identity (2026-08-30)
+
+Every expression range requested by checking is now interned once into the
+CompilationUnit-owned `ExpressionModel`, with a stable ID, token span and
+canonical significant-token sequence retained through emission. The typer
+consumes that owned representation rather than rescanning raw ranges. This is
+the migration seam for richer operator/property nodes; it is not yet a complete
+TypeScript expression AST.

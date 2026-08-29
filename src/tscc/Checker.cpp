@@ -23,10 +23,9 @@ struct ExpressionResult {
 
 class PrimitiveExpressionTyper {
 public:
-    PrimitiveExpressionTyper(const std::vector<Token>& tokens, std::size_t begin,
-                             std::size_t end, const BindingModel& binding,
+    PrimitiveExpressionTyper(const std::vector<Token>& tokens, const ExpressionNode&expression, const BindingModel& binding,
                              const TypeModel& types,const std::unordered_map<std::size_t,TypeId>*facts=nullptr,bool allow_object=false)
-        : tokens_(tokens), binding_(binding), types_(types), facts_(facts),sig_(significant_tokens(tokens, begin, end)),allow_object_(allow_object) {}
+        : tokens_(tokens), binding_(binding), types_(types), facts_(facts),sig_(expression.significant_tokens),allow_object_(allow_object) {}
 
     ExpressionResult run() {
         ExpressionResult result;
@@ -196,10 +195,10 @@ private:
     }
 };
 
-ExpressionResult expression_type(const std::vector<Token>& tokens, std::size_t begin,
+ExpressionResult expression_type(const std::vector<Token>& tokens, ExpressionModel&expressions,std::size_t begin,
                                  std::size_t end, const BindingModel& binding,
                                  const TypeModel& types,const std::unordered_map<std::size_t,TypeId>*facts=nullptr,bool allow_object=false) {
-    return PrimitiveExpressionTyper(tokens, begin, end, binding, types,facts,allow_object).run();
+    return PrimitiveExpressionTyper(tokens, expressions.intern(tokens,begin,end), binding, types,facts,allow_object).run();
 }
 
 void report_expression_error(const SourceFile& source, const std::vector<Token>& tokens,
@@ -246,7 +245,7 @@ void report_operator_error(const SourceFile& source, const std::vector<Token>& t
 bool check_program(const SourceFile& source, const std::vector<Token>& tokens,
                    const Program& program, const SemanticModel& model,
                    const BindingModel& binding, const TypeModel& types,
-                   Diagnostics& diagnostics) {
+                   ExpressionModel& expressions, Diagnostics& diagnostics) {
     struct FlowFact{std::size_t begin,end,symbol;TypeId type;};std::vector<FlowFact>flow;
     auto next_sig=[&](std::size_t i){while(i<tokens.size()&&tokens[i].kind==TokenKind::Comment)++i;return i;};
     auto match=[&](std::size_t open,const char*l,const char*r){int depth=0;for(std::size_t i=open;i<tokens.size();++i){if(tokens[i].text==l)++depth;else if(tokens[i].text==r&&--depth==0)return i;}return tokens.size();};
@@ -263,7 +262,7 @@ bool check_program(const SourceFile& source, const std::vector<Token>& tokens,
         if (declaration.initializer_end_token <= declaration.initializer_begin_token)
             continue;
         std::unordered_map<std::size_t,TypeId>facts;std::size_t best=tokens.size();for(const auto&fact:flow)if(declaration.initializer_begin_token>=fact.begin&&declaration.initializer_end_token<=fact.end&&fact.end-fact.begin<=best){facts[fact.symbol]=fact.type;best=fact.end-fact.begin;}
-        const auto expression = expression_type(tokens, declaration.initializer_begin_token,
+        const auto expression = expression_type(tokens, expressions, declaration.initializer_begin_token,
                                                 declaration.initializer_end_token,
                                                 binding, types,facts.empty()?nullptr:&facts,true);
         report_expression_error(source, tokens, expression, diagnostics);
@@ -290,7 +289,7 @@ bool check_program(const SourceFile& source, const std::vector<Token>& tokens,
         std::size_t same_name=0;for(const auto&symbol:binding.symbols)if(symbol.kind==SymbolKind::Function&&symbol.name==binding.symbols[owner].name&&symbol.scope==binding.symbols[owner].scope)++same_name;if(same_name>1)continue;
         const auto expected = types.function_signatures[owner].result;
         if (expected == types.store.unknown()) continue;
-        const auto expression = expression_type(tokens, node.begin_token + 1, node.end_token,
+        const auto expression = expression_type(tokens, expressions, node.begin_token + 1, node.end_token,
                                                 binding, types);
         report_expression_error(source, tokens, expression, diagnostics);
         if (expression.error.empty() && expression.type != types.store.unknown() &&
@@ -311,7 +310,7 @@ bool check_program(const SourceFile& source, const std::vector<Token>& tokens,
             else if (tokens[end].text == ")") --depth;
         }
         if (depth) continue;
-        const auto expression = expression_type(tokens, reference.token, end, binding, types);
+        const auto expression = expression_type(tokens, expressions, reference.token, end, binding, types);
         report_expression_error(source, tokens, expression, diagnostics);
     }
 
@@ -345,7 +344,7 @@ bool check_program(const SourceFile& source, const std::vector<Token>& tokens,
         std::size_t end = begin;
         while (end < tokens.size() && tokens[end].text != ";" &&
                tokens[end].text != "," && tokens[end].kind != TokenKind::End) ++end;
-        const auto expression = expression_type(tokens, begin, end, binding, types);
+        const auto expression = expression_type(tokens, expressions, begin, end, binding, types);
         report_expression_error(source, tokens, expression, diagnostics);
         const auto rhs = expression.type;
         if (!expression.error.empty() || rhs == types.store.unknown()) continue;

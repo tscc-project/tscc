@@ -30,7 +30,7 @@ static void compile_memory(const std::string& text,const std::string& path,
         auto semantic=build_semantic_model(tokens,program);
         auto binding=bind_semantic_model(tokens,program,semantic);
         auto types=build_type_model(tokens,program,semantic,binding);
-        check_program(source,tokens,program,semantic,binding,types,diagnostics);
+        ExpressionModel expressions;check_program(source,tokens,program,semantic,binding,types,expressions,diagnostics);
         std::string js; TranspileOptions opts; opts.module=module;
         if(!transpile_tokens(source,tokens,opts,js,diagnostics)) parsed=false;
     }
