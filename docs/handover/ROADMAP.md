@@ -245,6 +245,11 @@ broader function inference/overloads with object methods, index signatures,
 inheritance and classes; neither should bypass durable expression and type-model
 ownership. Standalone expression-statement checking is also an explicit gap.
 
+CP33 closes that callable-expression coverage gap by discovering callable roots
+across the complete source token stream while retaining node-owned argument
+typing. Future work should replace discovery scans as statement/control-flow
+nodes gain durable expression-child identities; do not add a second typer.
+
 If a feature reveals a binding/transform-ownership deficiency, prioritize that
 architecture before planned grammar features. If a real corpus demonstrates a
 high-value missing slice, reorder accordingly. Remove speculative work when a

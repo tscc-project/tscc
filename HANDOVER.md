@@ -290,3 +290,11 @@ bounded unknown parameter slots rather than producing false zero-arity errors.
 The external corpus is 539 cases: 515 pass, 0 fail and 24 deliberate skips.
 Calls in arbitrary standalone expression statements and full contextual inference,
 overloads and generics remain outside this slice.
+
+## CP33 whole-program callable checking (2026-08-30)
+
+Callable references are now discovered and checked in every source context, not
+only variable initializers and ordinary function declarations. Standalone,
+branch-nested and throw-expression calls use the retained call-expression node
+for argument and arity typing. Broader non-call operator checking in every
+statement form remains incremental work. The corpus is 543 cases at 519/0/24.

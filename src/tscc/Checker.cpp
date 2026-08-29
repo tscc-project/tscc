@@ -205,9 +205,14 @@ bool check_program(const SourceFile& source, const std::vector<Token>& tokens,
                             expression.type, expected, types.store, diagnostics);
     }
 
+    // Calls are checked wherever they occur, including standalone statements,
+    // loop/branch headers and throw expressions. The retained call node remains
+    // the sole owner of argument typing; this scan only discovers source roots.
     for (const auto& reference : binding.references) {
-        if (reference.symbol >= binding.symbols.size() ||
-            binding.symbols[reference.symbol].kind != SymbolKind::Function) continue;
+        if (reference.symbol >= types.symbol_types.size()) continue;
+        const bool declared_function = reference.symbol < types.function_signatures.size() &&
+                                       types.function_signatures[reference.symbol].valid;
+        if (!declared_function && !types.store.callable(types.symbol_types[reference.symbol])) continue;
         std::size_t open = reference.token + 1;
         while (open < tokens.size() && tokens[open].kind == TokenKind::Comment) ++open;
         if (open >= tokens.size() || tokens[open].text != "(") continue;

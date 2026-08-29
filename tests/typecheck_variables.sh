@@ -179,6 +179,29 @@ grep -Fq "Type 'string' is not assignable to type 'number'." "$TMP/contextual-fu
 
 printf 'tscc contextual function expression test passed\n'
 
+for context in statement branch throw; do
+    case "$context" in
+        statement) source="type F=(x:number)=>number;const f:F=x=>x;f('bad');" ;;
+        branch) source="type F=(x:number)=>number;const f:F=x=>x;if(true){f('bad');}" ;;
+        throw) source="type F=(x:number)=>number;const f:F=x=>x;throw f('bad');" ;;
+    esac
+    printf '%s\n' "$source" >"$TMP/call-$context.ts"
+    if "$ROOT/tscc" --pretty false --noEmit "$TMP/call-$context.ts" >"$TMP/call-$context.out" 2>"$TMP/call-$context.err"; then
+        echo "invalid callable $context context unexpectedly succeeded" >&2
+        exit 1
+    fi
+    grep -Fq "Argument of type 'string' is not assignable to parameter of type 'number'." "$TMP/call-$context.err"
+done
+
+printf '%s\n' 'type F=(x:number)=>number;const f:F=x=>x;f();' >"$TMP/call-statement-arity.ts"
+if "$ROOT/tscc" --pretty false --noEmit "$TMP/call-statement-arity.ts" >"$TMP/call-statement-arity.out" 2>"$TMP/call-statement-arity.err"; then
+    echo "invalid standalone callable arity unexpectedly succeeded" >&2
+    exit 1
+fi
+grep -Fq "Expected 1 arguments, but got 0." "$TMP/call-statement-arity.err"
+
+printf 'tscc whole-program call checking test passed\n'
+
 cat >"$TMP/type-algebra-valid.ts" <<'TS'
 const mode: "on" | "off" = "on";
 const answer: 42 | string = 42;
