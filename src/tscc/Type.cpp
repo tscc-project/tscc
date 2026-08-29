@@ -36,14 +36,14 @@ TypeId named_type(const std::string& text, const TypeStore& store,const std::uno
     if(named){auto found=named->find(text);if(found!=named->end())return found->second;}return store.unknown();
 }
 TypeId node_annotation(const std::vector<Token>& tokens, const SemanticNode& node,
-                       const TypeStore& store) {
+                       const TypeStore& store,const std::unordered_map<std::string,TypeId>*named=nullptr) {
     bool colon = false;std::vector<TypeId>members;
     for (auto i = node.name_token + 1; i < node.end_token && i < tokens.size(); ++i) {
         if (tokens[i].kind == TokenKind::Comment) continue;
         if (tokens[i].text == ":") { colon = true; continue; }
         if (!colon||tokens[i].text=="|"||tokens[i].text=="?"||tokens[i].text=="...") continue;
         if(tokens[i].text=="=")break;
-        TypeId type=named_type(tokens[i].text,store);
+        TypeId type=named_type(tokens[i].text,store,named);
         if(tokens[i].kind==TokenKind::String)type=store.literal(store.string(),literal_value(tokens[i].text));
         else if(tokens[i].kind==TokenKind::Number)type=store.literal(tokens[i].text.back()=='n'?store.bigint():store.number(),tokens[i].text);
         else if(tokens[i].text=="true"||tokens[i].text=="false")type=store.literal(store.boolean(),tokens[i].text);
@@ -104,7 +104,7 @@ TypeModel build_type_model(const std::vector<Token>& tokens, const Program& prog
             model.symbol_types[i] = annotation_type(tokens, program.variables[node.variable_index],
                                                     model.store,&model.named_types);
         else if (node.kind == SemanticNodeKind::ParameterDeclaration)
-            model.symbol_types[i] = node_annotation(tokens, node, model.store);
+            model.symbol_types[i] = node_annotation(tokens, node, model.store,&model.named_types);
         else if (binding.symbols[i].kind == SymbolKind::Function)
             model.symbol_types[i] = model.store.function();
     }

@@ -256,6 +256,12 @@ variables. The evidence exposed nested callback arrows inside call arguments as
 the next expression-grammar seam. Solve that through recursive expression nodes,
 not a callback-specific token parser, before claiming general contextual typing.
 
+CP35 gives each call argument a delimiter-aware recursive expression subtree.
+That closes direct inline callback contextual typing and removes duplicate scans
+inside checker-owned initializer/return roots. Continue replacing token-range
+discovery as durable statement and nested-expression ownership expands; do not
+describe this bounded call-argument result as a complete expression grammar.
+
 If a feature reveals a binding/transform-ownership deficiency, prioritize that
 architecture before planned grammar features. If a real corpus demonstrates a
 high-value missing slice, reorder accordingly. Remove speculative work when a

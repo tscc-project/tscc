@@ -168,7 +168,7 @@ bool check_program(const SourceFile& source, const std::vector<Token>& tokens,
                    const Program& program, const SemanticModel& model,
                    const BindingModel& binding, TypeModel& types,
                    ExpressionModel& expressions, Diagnostics& diagnostics) {
-    struct FlowFact{std::size_t begin,end,symbol;TypeId type;};std::vector<FlowFact>flow;
+    struct FlowFact{std::size_t begin,end,symbol;TypeId type;};std::vector<FlowFact>flow;std::vector<std::pair<std::size_t,std::size_t>>owned_expression_ranges;
     auto next_sig=[&](std::size_t i){while(i<tokens.size()&&tokens[i].kind==TokenKind::Comment)++i;return i;};
     auto match=[&](std::size_t open,const char*l,const char*r){int depth=0;for(std::size_t i=open;i<tokens.size();++i){if(tokens[i].text==l)++depth;else if(tokens[i].text==r&&--depth==0)return i;}return tokens.size();};
     for(std::size_t i=0;i<tokens.size();++i){if(tokens[i].text!="if")continue;auto open=next_sig(i+1);if(open>=tokens.size()||tokens[open].text!="(")continue;auto close=match(open,"(",")");if(close>=tokens.size())continue;auto sig=significant_tokens(tokens,open+1,close);std::size_t ref=static_cast<std::size_t>(-1);TypeId narrowed=types.store.unknown();if(sig.size()==4&&tokens[sig[0]].text=="typeof"&&tokens[sig[1]].kind==TokenKind::Identifier&&tokens[sig[2]].text=="==="&&tokens[sig[3]].kind==TokenKind::String){ref=sig[1];const auto t=literal_value(tokens[sig[3]].text);if(t=="string")narrowed=types.store.string();else if(t=="number")narrowed=types.store.number();else if(t=="boolean")narrowed=types.store.boolean();}else if(sig.size()==3&&tokens[sig[0]].kind==TokenKind::Identifier&&tokens[sig[1]].text=="==="){ref=sig[0];const auto&v=tokens[sig[2]];if(v.text=="null")narrowed=types.store.null();else if(v.text=="undefined")narrowed=types.store.undefined();else if(v.kind==TokenKind::String)narrowed=types.store.literal(types.store.string(),literal_value(v.text));else if(v.kind==TokenKind::Number)narrowed=types.store.literal(v.text.back()=='n'?types.store.bigint():types.store.number(),v.text);else if(v.text=="true"||v.text=="false")narrowed=types.store.literal(types.store.boolean(),v.text);}auto body=next_sig(close+1);if(ref==static_cast<std::size_t>(-1)||narrowed==types.store.unknown()||body>=tokens.size()||tokens[body].text!="{")continue;auto body_end=match(body,"{","}");const auto symbol=binding.symbol_for_reference(ref);if(symbol<binding.symbols.size()&&body_end<tokens.size())flow.push_back({body+1,body_end,symbol,narrowed});}
@@ -183,6 +183,7 @@ bool check_program(const SourceFile& source, const std::vector<Token>& tokens,
             }
         if (declaration.initializer_end_token <= declaration.initializer_begin_token)
             continue;
+        owned_expression_ranges.push_back({declaration.initializer_begin_token,declaration.initializer_end_token});
         std::unordered_map<std::size_t,TypeId>facts;std::size_t best=tokens.size();for(const auto&fact:flow)if(declaration.initializer_begin_token>=fact.begin&&declaration.initializer_end_token<=fact.end&&fact.end-fact.begin<=best){facts[fact.symbol]=fact.type;best=fact.end-fact.begin;}
         const auto expression = expression_type(tokens, expressions, declaration.initializer_begin_token,
                                                 declaration.initializer_end_token,
@@ -212,6 +213,7 @@ bool check_program(const SourceFile& source, const std::vector<Token>& tokens,
         std::size_t same_name=0;for(const auto&symbol:binding.symbols)if(symbol.kind==SymbolKind::Function&&symbol.name==binding.symbols[owner].name&&symbol.scope==binding.symbols[owner].scope)++same_name;if(same_name>1)continue;
         const auto expected = types.function_signatures[owner].result;
         if (expected == types.store.unknown()) continue;
+        owned_expression_ranges.push_back({node.begin_token+1,node.end_token});
         const auto expression = expression_type(tokens, expressions, node.begin_token + 1, node.end_token,
                                                 binding, types);
         report_expression_error(source, tokens, expression, diagnostics);
@@ -225,6 +227,7 @@ bool check_program(const SourceFile& source, const std::vector<Token>& tokens,
     // loop/branch headers and throw expressions. The retained call node remains
     // the sole owner of argument typing; this scan only discovers source roots.
     for (const auto& reference : binding.references) {
+        bool already_owned=false;for(const auto&range:owned_expression_ranges)if(reference.token>=range.first&&reference.token<range.second){already_owned=true;break;}if(already_owned)continue;
         if (reference.symbol >= types.symbol_types.size()) continue;
         const bool declared_function = reference.symbol < types.function_signatures.size() &&
                                        types.function_signatures[reference.symbol].valid;

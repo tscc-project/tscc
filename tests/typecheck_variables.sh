@@ -230,6 +230,29 @@ grep -Fq "Type 'string' is not assignable to type 'number'." "$TMP/inferred-resu
 
 printf 'tscc inferred/optional/rest callable test passed\n'
 
+cat >"$TMP/contextual-callback-valid.ts" <<'TS'
+type Callback = (value: number) => number;
+function apply(value: number, callback: Callback): number { return callback(value); }
+const answer: number = apply(41, value => value + 1);
+TS
+"$ROOT/tscc" --pretty false --noEmit "$TMP/contextual-callback-valid.ts" >/dev/null
+
+printf '%s\n' "type Callback=(value:number)=>number;function apply(value:number,callback:Callback):number{return callback(value);}const answer:number=apply(41,value=>'wrong');" >"$TMP/contextual-callback-return.ts"
+if "$ROOT/tscc" --pretty false --noEmit "$TMP/contextual-callback-return.ts" >"$TMP/callback-return.out" 2>"$TMP/callback-return.err"; then
+    echo "invalid contextual callback return unexpectedly succeeded" >&2
+    exit 1
+fi
+test "$(grep -Fc "Type 'string' is not assignable to type 'number'." "$TMP/callback-return.err")" -eq 1
+
+printf '%s\n' "type Callback=(value:number)=>number;function apply(value:number,callback:Callback):number{return callback(value);}const answer:number=apply(41,value=>value-'wrong');" >"$TMP/contextual-callback-parameter.ts"
+if "$ROOT/tscc" --pretty false --noEmit "$TMP/contextual-callback-parameter.ts" >"$TMP/callback-parameter.out" 2>"$TMP/callback-parameter.err"; then
+    echo "invalid contextual callback parameter use unexpectedly succeeded" >&2
+    exit 1
+fi
+grep -Fq "Operator '-' cannot be applied to types 'number' and 'string'." "$TMP/callback-parameter.err"
+
+printf 'tscc nested contextual callback test passed\n'
+
 cat >"$TMP/type-algebra-valid.ts" <<'TS'
 const mode: "on" | "off" = "on";
 const answer: 42 | string = 42;

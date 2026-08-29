@@ -309,3 +309,14 @@ results. Typed function-expression parameters are erased during emission.
 The corpus is 549 cases at 525/0/24. Inline callback arrows nested directly in
 call arguments remain blocked on nested-arrow expression grammar; overloads,
 generics and broad return-flow inference remain deferred.
+
+## CP35 nested contextual callbacks (2026-08-29)
+
+Call arguments now own bounded recursive expression subtrees, so inline arrow
+and function-expression callbacks receive the callable parameter context at the
+actual argument site. Named callable annotations on ordinary function parameters
+resolve through the canonical type store, and checker-owned initializer/return
+ranges suppress duplicate whole-program call diagnostics. The corpus is 553
+cases at 529/0/24. This is intentionally a call-argument slice; general nested
+expression ownership in every parenthesized, array and object context remains
+future architecture work.

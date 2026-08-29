@@ -16,7 +16,31 @@ class ExpressionModel {
   ExpressionId add(ExpressionKind kind,std::size_t begin,std::size_t end,std::string text={},std::vector<ExpressionId>children={},std::size_t op=InvalidExpressionId){ExpressionNode n;n.id=model.nodes_.size();n.kind=kind;n.begin_token=begin;n.end_token=end;n.text=std::move(text);n.children=std::move(children);n.operator_token=op;model.nodes_.push_back(std::move(n));return model.nodes_.back().id;}
   bool accept(const char*t){if(pos>=sig.size()||tokens[sig[pos]].text!=t)return false;++pos;return true;}
   ExpressionId primary(){if(pos>=sig.size())return add(ExpressionKind::Unknown,0,0);const auto start=pos;if(accept("(")){auto value=assignment();if(!accept(")"))return add(ExpressionKind::Unknown,sig[start],sig.back()+1);return add(ExpressionKind::Parenthesized,sig[start],sig[pos-1]+1,{}, {value});}if(accept("{")){std::vector<ExpressionId>properties;while(pos<sig.size()&&tokens[sig[pos]].text!="}"){if(tokens[sig[pos]].kind!=TokenKind::Identifier)return add(ExpressionKind::Unknown,sig[start],sig.back()+1);auto key=sig[pos++];if(!accept(":"))return add(ExpressionKind::Unknown,sig[start],sig.back()+1);auto value=assignment();properties.push_back(add(ExpressionKind::Property,key,model.nodes_[value].end_token,tokens[key].text,{value},key));if(!accept(","))break;}if(!accept("}"))return add(ExpressionKind::Unknown,sig[start],sig.back()+1);return add(ExpressionKind::ObjectLiteral,sig[start],sig[pos-1]+1,{},std::move(properties));}auto token=sig[pos++];const auto&item=tokens[token];const bool keyword_literal=item.text=="true"||item.text=="false"||item.text=="null";auto kind=(item.kind==TokenKind::Identifier&&!keyword_literal)||item.text=="undefined"?ExpressionKind::Identifier:ExpressionKind::Literal;return add(kind,token,token+1,item.text,{},token);}
-  ExpressionId postfix(){auto value=primary();for(;;){if(accept(".")){if(pos>=sig.size()||tokens[sig[pos]].kind!=TokenKind::Identifier)return add(ExpressionKind::Unknown,model.nodes_[value].begin_token,model.nodes_[value].end_token);auto property=sig[pos++];value=add(ExpressionKind::Property,model.nodes_[value].begin_token,property+1,tokens[property].text,{value},property);continue;}if(accept("(")){std::vector<ExpressionId>children{value};if(pos<sig.size()&&tokens[sig[pos]].text!=")")for(;;){children.push_back(assignment());if(!accept(","))break;}if(!accept(")"))return add(ExpressionKind::Unknown,model.nodes_[value].begin_token,model.nodes_[value].end_token);value=add(ExpressionKind::Call,model.nodes_[value].begin_token,sig[pos-1]+1,{},std::move(children));continue;}break;}return value;}
+  ExpressionId postfix(){
+   auto value=primary();
+   for(;;){
+    if(accept(".")){if(pos>=sig.size()||tokens[sig[pos]].kind!=TokenKind::Identifier)return add(ExpressionKind::Unknown,model.nodes_[value].begin_token,model.nodes_[value].end_token);auto property=sig[pos++];value=add(ExpressionKind::Property,model.nodes_[value].begin_token,property+1,tokens[property].text,{value},property);continue;}
+    if(accept("(")){
+     std::vector<ExpressionId>children{value};
+     while(pos<sig.size()&&tokens[sig[pos]].text!=")"){
+      const auto begin=pos;int paren=0,square=0,brace=0;
+      while(pos<sig.size()){
+       const auto&t=tokens[sig[pos]].text;
+       if(!paren&&!square&&!brace&&(t==","||t==")"))break;
+       if(t=="(")++paren;else if(t==")"&&paren)--paren;else if(t=="[")++square;else if(t=="]"&&square)--square;else if(t=="{")++brace;else if(t=="}"&&brace)--brace;
+       ++pos;
+      }
+      if(begin==pos)return add(ExpressionKind::Unknown,model.nodes_[value].begin_token,model.nodes_[value].end_token);
+      children.push_back(sub(begin,pos));
+      if(!accept(","))break;
+     }
+     if(!accept(")"))return add(ExpressionKind::Unknown,model.nodes_[value].begin_token,model.nodes_[value].end_token);
+     value=add(ExpressionKind::Call,model.nodes_[value].begin_token,sig[pos-1]+1,{},std::move(children));continue;
+    }
+    break;
+   }
+   return value;
+  }
   ExpressionId unary(){if(pos<sig.size()){const auto op=sig[pos];const auto&t=tokens[op].text;if(t=="+"||t=="-"||t=="~"||t=="!"||t=="typeof"){++pos;auto child=unary();return add(ExpressionKind::Unary,op,model.nodes_[child].end_token,t,{child},op);}}return postfix();}
   ExpressionId binary(int minimum){auto left=unary();for(;;){if(pos>=sig.size())break;const auto op=sig[pos];const auto&t=tokens[op].text;int precedence=t=="**"?30:(t=="*"||t=="/"||t=="%")?20:(t=="+"||t=="-")?10:0;if(precedence<minimum||precedence==0)break;++pos;auto right=binary(precedence+(t=="**"?0:1));left=add(ExpressionKind::Binary,model.nodes_[left].begin_token,model.nodes_[right].end_token,t,{left,right},op);}return left;}
   ExpressionId assignment(){auto left=binary(1);if(pos<sig.size()&&(tokens[sig[pos]].text=="="||tokens[sig[pos]].text=="+="||tokens[sig[pos]].text=="-="||tokens[sig[pos]].text=="*="||tokens[sig[pos]].text=="/=")){auto op=sig[pos++];auto right=assignment();return add(ExpressionKind::Assignment,model.nodes_[left].begin_token,model.nodes_[right].end_token,tokens[op].text,{left,right},op);}return left;}
