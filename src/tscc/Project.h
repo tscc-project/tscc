@@ -1,40 +1,34 @@
 #pragma once
-#include "Diagnostic.h"
-#include "Lexer.h"
-#include "Source.h"
+#include "CompilationUnit.h"
 #include <filesystem>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
 namespace tscc {
+bool discover_module_dependencies(const std::filesystem::path&,const SourceFile&,
+                                  const std::vector<Token>&,
+                                  std::vector<std::filesystem::path>&,Diagnostics&);
 
-struct ModuleFile {
-    std::filesystem::path path;
-    SourceFile source;
-    std::vector<Token> tokens;
-    std::vector<std::filesystem::path> dependencies;
+struct ProgramFile {
+    std::unique_ptr<CompilationUnit> unit;
+    std::vector<std::size_t> dependencies;
+    std::vector<std::filesystem::path> dependency_paths;
 };
 
-bool discover_module_dependencies(const std::filesystem::path& path,
-                                  const SourceFile& source,
-                                  const std::vector<Token>& tokens,
-                                  std::vector<std::filesystem::path>& dependencies,
-                                  Diagnostics& diagnostics);
-
-class ModuleGraph {
+class ProgramGraph {
 public:
-    bool build(const std::vector<std::string>& roots, Diagnostics& diagnostics);
-    const std::vector<ModuleFile>& files() const { return files_; }
-
+    bool build(const std::vector<std::string>& roots,bool follow_imports);
+    std::vector<ProgramFile>& files(){return files_;}
+    const std::vector<ProgramFile>& files()const{return files_;}
+    const std::vector<std::size_t>& roots()const{return roots_;}
+    Diagnostics& diagnostics(){return diagnostics_;}
+    const Diagnostics& diagnostics()const{return diagnostics_;}
 private:
-    std::vector<ModuleFile> files_;
-    std::unordered_map<std::string, std::size_t> seen_;
-
-    bool visit(const std::filesystem::path& path, Diagnostics& diagnostics);
-    bool resolve_relative(const std::filesystem::path& importer,
-                          const std::string& specifier,
-                          std::filesystem::path& resolved) const;
+    std::vector<ProgramFile> files_;
+    std::vector<std::size_t> roots_;
+    std::unordered_map<std::string,std::size_t> identities_;
+    Diagnostics diagnostics_;
 };
-
-} // namespace tscc
+}

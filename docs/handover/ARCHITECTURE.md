@@ -17,7 +17,7 @@ suite. The executable pipeline is concretely:
 
 ~~~text
 main.cpp CLI parsing / optional tsconfig loading
-→ compile_files queue of absolute root paths
+→ ProgramGraph canonical roots, file identities and dependency edges
 → durable CompilationUnit owning source and every following per-file stage
 → byte-oriented Lexer producing owned token strings plus byte ranges
 → optional relative import/export discovery
@@ -47,9 +47,9 @@ control-flow analysis, export table, or cross-module type propagation.
 Transpiler-owned shadow analysis remains only as a compatibility bridge for
 unsupported binding forms.
 
-`compile_files` owns the shipped dependency traversal using a queue and de-duplicated
-absolute path strings. `ModuleGraph` is real, tested infrastructure, but the current
-driver does not instantiate it. Relative resolution is deliberately small: `.ts`,
+`ProgramGraph` owns the shipped dependency traversal, canonical absolute file
+identities, roots, dependency edges, durable units and graph diagnostics. The
+compiler driver no longer has a parallel queue. Relative resolution is deliberately small: `.ts`,
 `.tsx`, `index.ts`, `index.tsx`, and `.js`/`.jsx` source substitution; packages,
 path aliases, declaration files, and Node resolution are outside this implementation.
 
@@ -144,8 +144,8 @@ and nested transforms.
 
 ## Project and module graph
 
-`Project` contains `ModuleFile`, dependency discovery, relative resolution, and a
-`ModuleGraph`. Project/config/compiler code supports current root/out directory,
+`Project` contains dependency discovery, relative resolution and the production
+`ProgramGraph`. Project/config/compiler code supports current root/out directory,
 module discovery, cycle de-duplication, and output orchestration. Avoid expanding
 module resolution into package-manager emulation without a deliberate contract.
 

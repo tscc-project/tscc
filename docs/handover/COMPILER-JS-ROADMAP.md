@@ -92,11 +92,15 @@ front-end/semantic state after emission, per-unit diagnostics, and a focused
 lifetime regression. The compiler driver retains every discovered unit through
 the output commit phase; the source-edit emitter remains the compatibility path.
 
-### TC2 - One program and module graph
+### TC2 - One program and module graph - completed 2026-08-30
 
 Make one program graph own roots, discovered files, identities, dependencies,
 compilation units, program diagnostics, and emission policy. Retire the duplicate
 `Compiler.cpp` traversal after parity evidence.
+
+Completed with `ProgramGraph` as the sole production traversal. It owns canonical
+file identities, root indices, dependency edges, durable compilation units and
+graph diagnostics; `Compiler.cpp` prepares and commits those same units.
 
 ### TC3 - Durable syntax identity
 

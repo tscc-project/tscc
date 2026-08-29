@@ -7,6 +7,7 @@ SAN_TARGET := .build/tscc-sanitize
 MEMORY_SMOKE := .build/tscc-parser-memory-san
 SOURCES := src/main.cpp src/tscc/Diagnostic.cpp src/tscc/Source.cpp src/tscc/Lexer.cpp src/tscc/Parser.cpp src/tscc/Semantic.cpp src/tscc/Binder.cpp src/tscc/Type.cpp src/tscc/Checker.cpp src/tscc/CompilationUnit.cpp src/tscc/SourceEdit.cpp src/tscc/Transpiler.cpp src/tscc/Project.cpp src/tscc/Config.cpp src/tscc/Compiler.cpp
 SAN_OBJECTS := $(patsubst %.cpp,.build/san/%.o,$(SOURCES))
+SAN_DEPS := $(SAN_OBJECTS:.o=.d)
 OBJECTS := $(SOURCES:.cpp=.o)
 DEPS := $(OBJECTS:.o=.d)
 all: tscc
@@ -19,7 +20,7 @@ test-smoke: tscc
 clean:
 	rm -f $(OBJECTS) $(DEPS) tscc
 	rm -rf .build
-.PHONY: all test test-core test-smoke test-parser test-binder test-types test-edits test-checker test-compilation-unit test-runtime test-project test-regression test-tsx test-commonjs test-product-boundary test-feature-matrix check-regression-sync test-sanitize memory-safety-smoke clean
+.PHONY: all test test-core test-smoke test-parser test-binder test-types test-edits test-checker test-compilation-unit test-program-graph test-runtime test-project test-regression test-tsx test-commonjs test-product-boundary test-feature-matrix check-regression-sync test-sanitize memory-safety-smoke clean
 
 
 test-parser:
@@ -50,6 +51,11 @@ test-compilation-unit:
 	./.compilation-unit-smoke
 	rm -f .compilation-unit-smoke
 
+test-program-graph:
+	$(CXX) -Isrc $(CXXFLAGS) tests/program_graph_smoke.cpp src/tscc/Diagnostic.cpp src/tscc/Source.cpp src/tscc/Lexer.cpp src/tscc/Parser.cpp src/tscc/Semantic.cpp src/tscc/Binder.cpp src/tscc/Type.cpp src/tscc/Checker.cpp src/tscc/CompilationUnit.cpp src/tscc/Project.cpp -o .program-graph-smoke
+	./.program-graph-smoke
+	rm -f .program-graph-smoke
+
 test-runtime: tscc
 	bash tests/runtime_features.sh
 test-project: tscc
@@ -73,20 +79,20 @@ test-product-boundary:
 test-feature-matrix:
 	python3 tools/check_feature_matrix.py
 
-test: test-product-boundary test-feature-matrix test-smoke test-parser test-binder test-types test-edits test-checker test-compilation-unit test-runtime test-project test-regression test-tsx test-commonjs
+test: test-product-boundary test-feature-matrix test-smoke test-parser test-binder test-types test-edits test-checker test-compilation-unit test-program-graph test-runtime test-project test-regression test-tsx test-commonjs
 
 # Compiler-core gates that do not require a native node/tsc round-trip. CI
 # runs this on Windows (msys2): the node/tsc differential gates (runtime,
 # project, tsx, commonjs) are fully exercised on Linux and macOS, and the
 # external regression corpus runs on Windows as a native-Python step.
-test-core: test-product-boundary test-feature-matrix test-smoke test-parser test-binder test-types test-edits test-checker test-compilation-unit
+test-core: test-product-boundary test-feature-matrix test-smoke test-parser test-binder test-types test-edits test-checker test-compilation-unit test-program-graph
 
 -include $(DEPS)
 
 
 .build/san/%.o: %.cpp
 	mkdir -p "$(dir $@)"
-	$(CXX) $(CPPFLAGS) -std=c++17 -Wall -Wextra -pedantic $(SANITIZER_FLAGS) -c "$<" -o "$@"
+	$(CXX) $(CPPFLAGS) -std=c++17 -Wall -Wextra -pedantic $(SANITIZER_FLAGS) -MMD -MP -c "$<" -o "$@"
 
 $(SAN_TARGET): $(SAN_OBJECTS)
 	mkdir -p .build
@@ -94,6 +100,8 @@ $(SAN_TARGET): $(SAN_OBJECTS)
 
 test-sanitize: $(SAN_TARGET)
 	ASAN_OPTIONS="$${ASAN_OPTIONS:-detect_leaks=1:halt_on_error=1}" UBSAN_OPTIONS=halt_on_error=1 ./$(SAN_TARGET) --version
+
+-include $(SAN_DEPS)
 
 $(MEMORY_SMOKE): tests/parser_smoke.cpp src/tscc/Diagnostic.cpp src/tscc/Source.cpp src/tscc/Lexer.cpp src/tscc/Parser.cpp src/tscc/Semantic.cpp
 	mkdir -p .build

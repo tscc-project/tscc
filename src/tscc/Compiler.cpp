@@ -6,8 +6,6 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
-#include <memory>
-#include <unordered_set>
 
 namespace fs=std::filesystem;
 namespace tscc {
@@ -29,13 +27,8 @@ static bool commit_outputs(const std::vector<PreparedOutput>&outputs,Diagnostics
  for(const auto&s:staged){std::error_code ec;fs::rename(s.temp,s.target,ec);if(ec){fs::remove(s.target,ec);ec.clear();fs::rename(s.temp,s.target,ec);}if(ec){d.error(s.target.string(),1,1,"cannot commit output file");return false;}++count;}return true;
 }
 int compile_files(const std::vector<std::string>&roots,const CompilerOptions&o){
- Diagnostics d;int emitted=0;std::vector<std::unique_ptr<CompilationUnit>>units;std::vector<PreparedOutput>prepared;const fs::path root=o.root_dir.empty()?common_root(roots):fs::path(o.root_dir);std::vector<fs::path>queue;queue.reserve(roots.size());for(const auto&r:roots)queue.push_back(fs::absolute(r).lexically_normal());std::unordered_set<std::string>seen;seen.reserve(queue.size()*2+16);
- for(std::size_t qi=0;qi<queue.size();++qi){fs::path path=queue[qi];const std::string key=path.string();if(!seen.insert(key).second)continue;SourceFile source;std::string error;if(!load_source(key,source,error)){Diagnostics failed;failed.error(key,1,1,error);d.append(std::move(failed));continue;}auto unit=std::make_unique<CompilationUnit>(std::move(source));if(unit->analyze()){
-   if(o.follow_imports){std::vector<fs::path>deps;if(discover_module_dependencies(path,unit->source,unit->tokens,deps,unit->diagnostics))for(auto&dep:deps)if(!seen.count(dep.string()))queue.push_back(std::move(dep));}
-   if(!unit->diagnostics.has_errors()){PreparedOutput output;if(prepare(*unit,o,root,output))prepared.push_back(std::move(output));}
-  }
-  d.append(unit->diagnostics);units.push_back(std::move(unit));
- }
+ Diagnostics d;int emitted=0;std::vector<PreparedOutput>prepared;const fs::path root=o.root_dir.empty()?common_root(roots):fs::path(o.root_dir);ProgramGraph graph;graph.build(roots,o.follow_imports);d.append(graph.diagnostics());
+ for(auto&file:graph.files()){auto&unit=*file.unit;if(!unit.diagnostics.has_errors()&&unit.stage==CompilationStage::Checked){PreparedOutput output;if(prepare(unit,o,root,output))prepared.push_back(std::move(output));}d.append(unit.diagnostics);}
  const bool compile_errors=d.has_errors();if(!o.no_emit&&(!compile_errors||!o.no_emit_on_error)){Diagnostics emit_d;commit_outputs(prepared,emit_d,emitted);d.append(std::move(emit_d));}d.print(o.pretty);if(d.has_errors())return 2;if(!o.no_emit)std::cout<<"tscc: emitted "<<emitted<<(emitted==1?" file\n":" files\n");return 0;
 }
 }
