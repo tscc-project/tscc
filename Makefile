@@ -19,7 +19,7 @@ test-smoke: tscc
 clean:
 	rm -f $(OBJECTS) $(DEPS) tscc
 	rm -rf .build
-.PHONY: all test test-core test-smoke test-parser test-binder test-types test-edits test-checker test-runtime test-project test-regression test-tsx test-commonjs check-regression-sync test-sanitize memory-safety-smoke clean
+.PHONY: all test test-core test-smoke test-parser test-binder test-types test-edits test-checker test-runtime test-project test-regression test-tsx test-commonjs test-product-boundary check-regression-sync test-sanitize memory-safety-smoke clean
 
 
 test-parser:
@@ -62,13 +62,16 @@ test-tsx: tscc
 test-commonjs: tscc
 	bash tests/commonjs_modules.sh
 
-test: test-smoke test-parser test-binder test-types test-edits test-checker test-runtime test-project test-regression test-tsx test-commonjs
+test-product-boundary:
+	bash tools/check_product_boundary.sh
+
+test: test-product-boundary test-smoke test-parser test-binder test-types test-edits test-checker test-runtime test-project test-regression test-tsx test-commonjs
 
 # Compiler-core gates that do not require a native node/tsc round-trip. CI
 # runs this on Windows (msys2): the node/tsc differential gates (runtime,
 # project, tsx, commonjs) are fully exercised on Linux and macOS, and the
 # external regression corpus runs on Windows as a native-Python step.
-test-core: test-smoke test-parser test-binder test-types test-edits test-checker
+test-core: test-product-boundary test-smoke test-parser test-binder test-types test-edits test-checker
 
 -include $(DEPS)
 

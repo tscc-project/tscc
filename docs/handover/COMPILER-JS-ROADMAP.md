@@ -60,11 +60,14 @@ Completed at the retained 519-case baseline: 492 pass, zero fail, and 27
 intentional semantic-only skips under TypeScript 7.0.2. The aggregate test,
 sanitizer, bounded-checker, corpus, and staged-output descriptions were reconciled.
 
-### F1 - Freeze the product boundary
+### F1 - Freeze the product boundary - completed 2026-08-30
 
 Record the ownership and dependency rules in tscc, JS++, both regression suites,
 and their websites. Reject private cross-repository includes and an implicit
 required JS++ runtime dependency.
+
+Completed with `PRODUCT-BOUNDARY.md` and an aggregate repository check that
+rejects accidental JS++ headers, sources, or linkage in the normal compiler.
 
 ### F2 - Establish executable feature matrices
 

@@ -149,6 +149,8 @@ without explicit approval.
 - `ROADMAP.md`: living production-readiness risk assessment.
 - `COMPILER-JS-ROADMAP.md`: coordinated checkpoint plan for developing tscc as
   a compiler, building JS++, and integrating them through explicit boundaries.
+- `PRODUCT-BOUNDARY.md`: settled ownership and dependency contract between tscc
+  and JS++, protected by `make test-product-boundary`.
 - `PROJECT-HISTORY.md`: detailed tscc history and institutional context,
   including compiler semantics, production definition, and roadmap evolution.
 
@@ -175,6 +177,11 @@ new evidence justifies reopening it:
 - no existing tscc component migrates merely because it is JavaScript-facing.
   Sharing is considered only after both implementations exist and a checkpoint
   proves a stable common contract.
+
+CP1 froze this relationship as an executable repository invariant. Normal tscc
+targets must not include `js.h`, link `libjs`, or compile JS++ private sources.
+Future test-only or optional integration must use an explicit target and a public
+JS++ surface rather than silently entering the compiler core.
 
 ## Memory-safety Checkpoint 5A (2026-08-18)
 
