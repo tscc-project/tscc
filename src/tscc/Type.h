@@ -5,6 +5,7 @@
 #include "Syntax.h"
 #include <cstddef>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace tscc {
@@ -40,6 +41,7 @@ private:
 
 struct TypeModel {
     TypeStore store;
+    std::unordered_map<std::string,TypeId> named_types;
     std::vector<TypeId> symbol_types;
     struct FunctionSignature {
         std::vector<TypeId> parameters;

@@ -65,7 +65,7 @@ erasure, generics, enums, namespaces, parameter properties, project/relative
 module discovery, TSX preserve mode, CommonJS lowering with live imported reads,
 module grammar hardening, scope/shadowing work, and import attributes.
 
-The independent corpus currently contains 525 cases: 501 pass, zero fail, and 24
+The independent corpus currently contains 533 cases: 509 pass, zero fail, and 24
 semantic-checker-only skips at the retained checkpoint. Counts are evidence, not
 the product definition. Ten semantic cases are implemented; the project is not
 implicitly a drop-in replacement for all `tsc` behavior.
@@ -254,3 +254,11 @@ The compilation-unit expression model retains explicit literal, identifier,
 parenthesized, unary, binary, call, property, object-literal and assignment
 nodes with stable child identities and operator tokens. The bounded external
 contract remains 505/0/24; unknown grammar is retained as an unknown node.
+
+## CP28 reusable object declarations (2026-08-30)
+
+Basic object aliases and interfaces now resolve to canonical shapes. Nested named
+properties, optional/readonly metadata and compatible interface merging feed the
+existing structural checks. Indexed/call signatures, inheritance, generics,
+classes and conflicting merges remain outside this slice. The corpus is 533 cases:
+509 pass, 0 fail and 24 skips.

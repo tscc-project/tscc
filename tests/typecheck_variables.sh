@@ -174,3 +174,17 @@ fi
 grep -Fq "Type 'string' is not assignable to type 'number'." "$TMP/narrow.err"
 
 printf 'tscc bounded branch narrowing test passed\n'
+
+cat > "$TMP/named-object.ts" <<'EOF'
+interface Address { city: string }
+interface User { readonly id: number }
+interface User { address?: Address }
+type Envelope = { user: User };
+const valid: Envelope = {user: {id: 1, address: {city: "Rome"}}};
+const invalid: Envelope = {user: {id: 1, address: {city: 42}}};
+EOF
+if "$ROOT/tscc" --pretty false --noEmit "$TMP/named-object.ts" 2>"$TMP/named-object.err"; then
+    echo "named object mismatch accepted" >&2; exit 1
+fi
+grep -Fq "property 'user.address.city'" "$TMP/named-object.err"
+printf 'tscc named object declaration test passed\n'

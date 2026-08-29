@@ -4257,5 +4257,9 @@
   {"name":"semantic-nested-object-missing","kind":"semantic-only","src":"const x:{meta:{answer:number}}={meta:{wrong:1}};","expect":null,"tscc_check":true,"diagnostic_contains":"Property 'meta.answer' is missing"},
   {"name":"semantic-nested-object-property-type","kind":"semantic-only","src":"const x:{meta:{answer:number}}={meta:{answer:'no'}};","expect":null,"tscc_check":true,"diagnostic_contains":"property 'meta.answer' is not assignable"},
   {"name":"nested-object-property-read","kind":"runtime","src":"const x:{meta:{answer:number}}={meta:{answer:42}};console.log(x.meta.answer);","expect":"42"},
-  {"name":"object-excess-property-compatible","kind":"runtime","src":"const x:{answer:number}={answer:42,label:'kept'};console.log(x.answer);","expect":"42"}
+  {"name":"object-excess-property-compatible","kind":"runtime","src":"const x:{answer:number}={answer:42,label:'kept'};console.log(x.answer);","expect":"42"},
+  {"name":"named-object-alias-runtime","kind":"runtime","src":"type Box={value:{answer:number}};const x:Box={value:{answer:42}};console.log(x.value.answer);","expect":"42"},
+  {"name":"merged-interface-runtime","kind":"runtime","src":"interface User{readonly id:number} interface User{name?:string} const x:User={id:42};console.log(x.id);","expect":"42"},
+  {"name":"semantic-named-object-mismatch","kind":"semantic-only","src":"interface Address{city:string} type User={address:Address};const x:User={address:{city:42}};","expect":null,"tscc_check":true,"diagnostic_contains":"property 'address.city'"},
+  {"name":"semantic-merged-interface-readonly","kind":"semantic-only","src":"interface User{id:number} interface User{readonly name:string} const x:User={id:1,name:'a'};x.name='b';","expect":null,"tscc_check":true,"diagnostic_contains":"read-only property"}
 ]

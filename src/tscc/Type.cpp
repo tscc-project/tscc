@@ -1,23 +1,24 @@
 #include "Type.h"
 #include <algorithm>
+#include <unordered_map>
 
 namespace tscc {
 namespace {
 std::string literal_value(const std::string&text){return text.size()>=2&&(text.front()=='\''||text.front()=='"')?text.substr(1,text.size()-2):text;}
-TypeId named_type(const std::string& text, const TypeStore& store);
+TypeId named_type(const std::string& text, const TypeStore& store,const std::unordered_map<std::string,TypeId>*named=nullptr);
 void skip_type_noise(const std::vector<Token>&tokens,std::size_t&i,std::size_t end){while(i<end&&tokens[i].kind==TokenKind::Comment)++i;}
-TypeId parse_annotation(const std::vector<Token>&tokens,std::size_t&i,std::size_t end,const TypeStore&store){skip_type_noise(tokens,i,end);if(i>=end)return store.unknown();if(tokens[i].text!="{")return named_type(tokens[i++].text,store);++i;std::vector<TypeProperty>properties;while(i<end){skip_type_noise(tokens,i,end);while(i<end&&(tokens[i].text==";"||tokens[i].text==",")){++i;skip_type_noise(tokens,i,end);}if(i<end&&tokens[i].text=="}"){++i;return store.object_of(std::move(properties));}bool readonly=false,optional=false;if(i<end&&tokens[i].text=="readonly"){readonly=true;++i;skip_type_noise(tokens,i,end);}if(i>=end||tokens[i].kind!=TokenKind::Identifier)return store.unknown();auto name=tokens[i++].text;skip_type_noise(tokens,i,end);if(i<end&&tokens[i].text=="?"){optional=true;++i;skip_type_noise(tokens,i,end);}if(i>=end||tokens[i++].text!=":")return store.unknown();auto type=parse_annotation(tokens,i,end,store);if(type==store.unknown())return type;properties.push_back({std::move(name),type,optional,readonly});}return store.unknown();}
+TypeId parse_annotation(const std::vector<Token>&tokens,std::size_t&i,std::size_t end,const TypeStore&store,const std::unordered_map<std::string,TypeId>*named=nullptr){skip_type_noise(tokens,i,end);if(i>=end)return store.unknown();if(tokens[i].text!="{")return named_type(tokens[i++].text,store,named);++i;std::vector<TypeProperty>properties;while(i<end){skip_type_noise(tokens,i,end);while(i<end&&(tokens[i].text==";"||tokens[i].text==",")){++i;skip_type_noise(tokens,i,end);}if(i<end&&tokens[i].text=="}"){++i;return store.object_of(std::move(properties));}bool readonly=false,optional=false;if(i<end&&tokens[i].text=="readonly"){readonly=true;++i;skip_type_noise(tokens,i,end);}if(i>=end||tokens[i].kind!=TokenKind::Identifier)return store.unknown();auto name=tokens[i++].text;skip_type_noise(tokens,i,end);if(i<end&&tokens[i].text=="?"){optional=true;++i;skip_type_noise(tokens,i,end);}if(i>=end||tokens[i++].text!=":")return store.unknown();auto type=parse_annotation(tokens,i,end,store,named);if(type==store.unknown())return type;properties.push_back({std::move(name),type,optional,readonly});}return store.unknown();}
 TypeId annotation_type(const std::vector<Token>& tokens,
                        const VariableDeclaration& declaration,
-                       const TypeStore& store) {
+                       const TypeStore& store,const std::unordered_map<std::string,TypeId>*named=nullptr) {
     auto first=declaration.type_begin_token;while(first<declaration.type_end_token&&tokens[first].kind==TokenKind::Comment)++first;
-    if(first<declaration.type_end_token&&tokens[first].text=="{")return parse_annotation(tokens,first,declaration.type_end_token,store);
+    if(first<declaration.type_end_token&&tokens[first].text=="{")return parse_annotation(tokens,first,declaration.type_end_token,store,named);
     std::vector<TypeId> members;
     for (auto i = declaration.type_begin_token; i < declaration.type_end_token; ++i) {
         if (tokens[i].kind == TokenKind::Comment || tokens[i].text == "|") continue;
         TypeId type=store.unknown();
-        if(tokens[i].text=="number")type=store.number();else if(tokens[i].text=="string")type=store.string();else if(tokens[i].text=="boolean")type=store.boolean();else if(tokens[i].text=="bigint")type=store.bigint();else if(tokens[i].text=="null")type=store.null();else if(tokens[i].text=="undefined")type=store.undefined();
-        else if(tokens[i].kind==TokenKind::String)type=store.literal(store.string(),literal_value(tokens[i].text));
+        type=named_type(tokens[i].text,store,named);
+        if(tokens[i].kind==TokenKind::String)type=store.literal(store.string(),literal_value(tokens[i].text));
         else if(tokens[i].kind==TokenKind::Number)type=store.literal(tokens[i].text.back()=='n'?store.bigint():store.number(),tokens[i].text);
         else if(tokens[i].text=="true"||tokens[i].text=="false")type=store.literal(store.boolean(),tokens[i].text);
         if(type==store.unknown())return type;
@@ -25,14 +26,14 @@ TypeId annotation_type(const std::vector<Token>& tokens,
     }
     return store.union_of(std::move(members));
 }
-TypeId named_type(const std::string& text, const TypeStore& store) {
+TypeId named_type(const std::string& text, const TypeStore& store,const std::unordered_map<std::string,TypeId>*named) {
     if (text == "number") return store.number();
     if (text == "string") return store.string();
     if (text == "boolean") return store.boolean();
     if (text == "bigint") return store.bigint();
     if (text == "null") return store.null();
     if (text == "undefined") return store.undefined();
-    return store.unknown();
+    if(named){auto found=named->find(text);if(found!=named->end())return found->second;}return store.unknown();
 }
 TypeId node_annotation(const std::vector<Token>& tokens, const SemanticNode& node,
                        const TypeStore& store) {
@@ -89,6 +90,7 @@ const std::vector<TypeProperty>&TypeStore::properties(TypeId id)const{static con
 TypeModel build_type_model(const std::vector<Token>& tokens, const Program& program,
                            const SemanticModel& semantic, const BindingModel& binding) {
     TypeModel model;
+    for(const auto&node:program.root.children){if(node.kind!=SyntaxKind::InterfaceDeclaration&&node.kind!=SyntaxKind::TypeAliasDeclaration)continue;auto name=node.begin_token+1;while(name<tokens.size()&&tokens[name].kind==TokenKind::Comment)++name;if(name>=tokens.size()||tokens[name].kind!=TokenKind::Identifier)continue;std::size_t begin=name+1;if(node.kind==SyntaxKind::InterfaceDeclaration){while(begin<=node.end_token&&tokens[begin].text!="{")++begin;}else{while(begin<=node.end_token&&tokens[begin].text!="=")++begin;if(begin<=node.end_token)++begin;}if(begin>node.end_token)continue;auto at=begin;auto shape=parse_annotation(tokens,at,node.end_token+1,model.store,&model.named_types);while(at<=node.end_token&&(tokens[at].kind==TokenKind::Comment||tokens[at].text==";"))++at;if(shape==model.store.unknown()||at<=node.end_token)continue;auto found=model.named_types.find(tokens[name].text);if(found!=model.named_types.end()&&node.kind==SyntaxKind::InterfaceDeclaration&&model.store.kind(found->second)==TypeKind::Object&&model.store.kind(shape)==TypeKind::Object){auto merged=model.store.properties(found->second);for(const auto&property:model.store.properties(shape)){auto existing=std::find_if(merged.begin(),merged.end(),[&](const auto&p){return p.name==property.name;});if(existing==merged.end())merged.push_back(property);else if(existing->type==property.type&&existing->optional==property.optional&&existing->readonly==property.readonly){}else{merged.clear();break;}}if(!merged.empty())shape=model.store.object_of(std::move(merged));else continue;}model.named_types[tokens[name].text]=shape;}
     model.symbol_types.assign(binding.symbols.size(), model.store.unknown());
     model.function_signatures.resize(binding.symbols.size());
     for (std::size_t i = 0; i < binding.symbols.size(); ++i) {
@@ -98,7 +100,7 @@ TypeModel build_type_model(const std::vector<Token>& tokens, const Program& prog
         if (node.kind == SemanticNodeKind::VariableDeclaration &&
             node.variable_index < program.variables.size())
             model.symbol_types[i] = annotation_type(tokens, program.variables[node.variable_index],
-                                                    model.store);
+                                                    model.store,&model.named_types);
         else if (node.kind == SemanticNodeKind::ParameterDeclaration)
             model.symbol_types[i] = node_annotation(tokens, node, model.store);
         else if (binding.symbols[i].kind == SymbolKind::Function)

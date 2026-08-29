@@ -379,3 +379,6 @@ proceed incrementally without creating parallel range identities.
 CP26 gives that owned model explicit structural kinds, child IDs and operator
 tokens for the bounded grammar. This is an architecture checkpoint rather than
 a wider TypeScript compatibility claim.
+CP28 adds reusable object aliases/interfaces and a deliberately compatible-only
+interface merge policy. More expressive member signatures, inheritance,
+generics and classes remain decision-gated follow-on work.
