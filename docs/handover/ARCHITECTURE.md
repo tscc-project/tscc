@@ -254,7 +254,10 @@ number, string, boolean, and bigint identities. This removes checker-private typ
 identity without pretending to establish unions, literals, objects, functions,
 or inference.
 
-`PrimitiveExpressionTyper` is the first expression-semantic consumer. It parses a
+`NodeExpressionTyper` is the expression-semantic consumer. It walks the durable
+expression graph built once by the compilation unit; it does not reparse token
+ranges. The bounded operator/type rules remain deliberately incomplete. Previously,
+`PrimitiveExpressionTyper` parsed a
 bounded grammar of literals, bound identifiers, parentheses, unary `+ - ~ !
 typeof`, and additive/multiplicative arithmetic with precedence. Unknown or
 unconsumed expression forms remain outside the slice; known invalid primitive

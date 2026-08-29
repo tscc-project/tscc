@@ -382,3 +382,6 @@ a wider TypeScript compatibility claim.
 CP28 adds reusable object aliases/interfaces and a deliberately compatible-only
 interface merge policy. More expressive member signatures, inheritance,
 generics and classes remain decision-gated follow-on work.
+CP30 removes the checker compatibility token view: semantic expression typing
+now walks retained node kinds and child identities directly. Broader callable
+semantics can build on that graph without introducing another parser.

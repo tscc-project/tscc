@@ -9,7 +9,7 @@ namespace tscc {
 using ExpressionId=std::size_t;
 inline constexpr ExpressionId InvalidExpressionId=static_cast<ExpressionId>(-1);
 enum class ExpressionKind { Unknown,Identifier,Literal,Parenthesized,Unary,Binary,Call,Property,ObjectLiteral,Assignment };
-struct ExpressionNode { ExpressionId id=InvalidExpressionId;ExpressionKind kind=ExpressionKind::Unknown;std::size_t begin_token=0,end_token=0,operator_token=InvalidExpressionId;std::string text;std::vector<ExpressionId>children;std::vector<std::size_t>significant_tokens; };
+struct ExpressionNode { ExpressionId id=InvalidExpressionId;ExpressionKind kind=ExpressionKind::Unknown;std::size_t begin_token=0,end_token=0,operator_token=InvalidExpressionId;std::string text;std::vector<ExpressionId>children; };
 class ExpressionModel {
  struct Builder {
   ExpressionModel&model;const std::vector<Token>&tokens;std::vector<std::size_t>sig;std::size_t pos=0;
@@ -23,7 +23,7 @@ class ExpressionModel {
   ExpressionId build(){if(sig.empty())return add(ExpressionKind::Unknown,0,0);auto root=assignment();if(pos!=sig.size())return add(ExpressionKind::Unknown,sig.front(),sig.back()+1,{}, {root});return root;}
  };
 public:
- const ExpressionNode&intern(const std::vector<Token>&tokens,std::size_t begin,std::size_t end){auto key=std::make_pair(begin,end);auto found=index_.find(key);if(found!=index_.end())return nodes_[found->second];Builder builder{*this,tokens,{},0};for(auto i=begin;i<end;++i)if(tokens[i].kind!=TokenKind::Comment)builder.sig.push_back(i);auto root=builder.build();nodes_[root].significant_tokens=builder.sig;index_[key]=root;return nodes_[root];}
+ const ExpressionNode&intern(const std::vector<Token>&tokens,std::size_t begin,std::size_t end){auto key=std::make_pair(begin,end);auto found=index_.find(key);if(found!=index_.end())return nodes_[found->second];Builder builder{*this,tokens,{},0};for(auto i=begin;i<end;++i)if(tokens[i].kind!=TokenKind::Comment)builder.sig.push_back(i);auto root=builder.build();index_[key]=root;return nodes_[root];}
  const ExpressionNode&node(ExpressionId id)const{return nodes_[id];}const std::vector<ExpressionNode>&nodes()const{return nodes_;}
 private:std::vector<ExpressionNode>nodes_;std::map<std::pair<std::size_t,std::size_t>,ExpressionId>index_;
 };

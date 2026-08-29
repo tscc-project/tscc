@@ -262,3 +262,11 @@ properties, optional/readonly metadata and compatible interface merging feed the
 existing structural checks. Indexed/call signatures, inheritance, generics,
 classes and conflicting merges remain outside this slice. The corpus is 533 cases:
 509 pass, 0 fail and 24 skips.
+
+## CP30 expression-typing migration (2026-08-30)
+
+The checker now walks durable expression child IDs directly for literals,
+identifiers, parentheses, unary/binary operators, calls, property access, object
+literals and assignments. The compatibility significant-token view has been
+removed from `ExpressionNode`; precedence parsing exists only in the expression
+builder. This is an ownership change and retains the 509/0/24 contract.

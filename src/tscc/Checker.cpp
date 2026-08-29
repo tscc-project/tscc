@@ -21,16 +21,16 @@ struct ExpressionResult {
     std::string error;
 };
 
-class PrimitiveExpressionTyper {
+class NodeExpressionTyper {
 public:
-    PrimitiveExpressionTyper(const std::vector<Token>& tokens, const ExpressionNode&expression, const BindingModel& binding,
+    NodeExpressionTyper(const std::vector<Token>& tokens, const ExpressionModel&expressions,const ExpressionNode&expression, const BindingModel& binding,
                              const TypeModel& types,const std::unordered_map<std::size_t,TypeId>*facts=nullptr,bool allow_object=false)
-        : tokens_(tokens), binding_(binding), types_(types), facts_(facts),sig_(expression.significant_tokens),allow_object_(allow_object) {}
+        : tokens_(tokens),expressions_(expressions),root_(expression.id),binding_(binding), types_(types), facts_(facts),allow_object_(allow_object) {}
 
     ExpressionResult run() {
         ExpressionResult result;
-        result.type = additive();
-        result.complete = pos_ == sig_.size();
+        result.type = type(root_);
+        result.complete = expressions_.node(root_).kind != ExpressionKind::Unknown;
         result.error_token = error_token_;
         result.error = error_;
         if (!result.complete) result.type = types_.store.unknown();
@@ -39,138 +39,41 @@ public:
 
 private:
     const std::vector<Token>& tokens_;
+    const ExpressionModel&expressions_;
+    ExpressionId root_;
     const BindingModel& binding_;
     const TypeModel& types_;
     const std::unordered_map<std::size_t,TypeId>*facts_;
-    std::vector<std::size_t> sig_;
-    std::size_t pos_ = 0;
     std::size_t error_token_ = static_cast<std::size_t>(-1);
     std::string error_;
     bool allow_object_ = false;
 
-    bool accept(const char* text) {
-        if (pos_ >= sig_.size() || tokens_[sig_[pos_]].text != text) return false;
-        ++pos_;
-        return true;
-    }
-    TypeId primary() {
-        if (pos_ >= sig_.size()) return types_.store.unknown();
-        if (allow_object_ && accept("{")) {
-            std::vector<TypeProperty> properties;
-            if (pos_ < sig_.size() && tokens_[sig_[pos_]].text != "}") for (;;) {
-                if (pos_ >= sig_.size() || tokens_[sig_[pos_]].kind != TokenKind::Identifier) return types_.store.unknown();
-                const auto name=tokens_[sig_[pos_++]].text;if(!accept(":"))return types_.store.unknown();
-                const auto value=additive();properties.push_back({name,value,false,false});if(!accept(","))break;
-            }
-            if(!accept("}"))return types_.store.unknown();
-            return types_.store.object_of(std::move(properties));
-        }
-        if (accept("(")) {
-            const auto value = additive();
-            if (!accept(")")) return types_.store.unknown();
-            return value;
-        }
-        const auto token_index = sig_[pos_++];
-        const auto& token = tokens_[token_index];
-        if (token.kind == TokenKind::Number)
-            return types_.store.literal(!token.text.empty() && token.text.back() == 'n'
-                       ? types_.store.bigint() : types_.store.number(),token.text);
-        if (token.kind == TokenKind::String || token.kind == TokenKind::Template)
-            return types_.store.literal(types_.store.string(),literal_value(token.text));
-        if (token.text == "true" || token.text == "false") return types_.store.literal(types_.store.boolean(),token.text);
-        if(token.text=="null")return types_.store.null();
-        if(token.text=="undefined")return types_.store.undefined();
-        if (token.kind == TokenKind::Identifier) {
-            const auto symbol = binding_.symbol_for_reference(token_index);
-            if(facts_){auto fact=facts_->find(symbol);if(fact!=facts_->end()&&!(pos_<sig_.size()&&tokens_[sig_[pos_]].text=="("))return fact->second;}
-            if (pos_ < sig_.size() && tokens_[sig_[pos_]].text == "(") {
-                ++pos_; std::vector<TypeId> arguments;
-                if (pos_ < sig_.size() && tokens_[sig_[pos_]].text != ")") for (;;) {
-                    arguments.push_back(additive());
-                    if (!accept(",")) break;
-                }
-                if (!accept(")")) return types_.store.unknown();
-                if (symbol < types_.function_signatures.size() &&
-                    types_.function_signatures[symbol].valid) {
-                    const auto& signature = types_.function_signatures[symbol];
-                    if ((arguments.size() < signature.required_parameters ||
-                         (!signature.rest && arguments.size() > signature.parameters.size())) &&
-                        error_.empty()) {
-                        error_token_ = token_index;
-                        error_ = "Expected " + std::to_string(signature.parameters.size()) +
-                                 " arguments, but got " + std::to_string(arguments.size()) + ".";
-                    } else for (std::size_t i = 0; i < arguments.size(); ++i) {
-                        if (signature.parameters.empty()) break;
-                        const auto parameter = i < signature.parameters.size() ? i : signature.parameters.size()-1;
-                        const auto expected = signature.parameters[parameter], actual = arguments[i];
-                        if (expected != types_.store.unknown() && actual != types_.store.unknown() &&
-                            !types_.store.assignable(actual,expected) && error_.empty()) {
-                            error_token_ = token_index;
-                            error_ = std::string("Argument of type '") + types_.store.name(types_.store.widen(actual)) +
-                                     "' is not assignable to parameter of type '" +
-                                     types_.store.name(expected) + "'.";
-                        }
-                    }
-                    return signature.result;
-                }
-                return types_.store.unknown();
-            }
-            if (symbol < types_.symbol_types.size()) {
-                auto value=types_.symbol_types[symbol];
-                while(accept(".")){
-                    if(pos_>=sig_.size()||tokens_[sig_[pos_]].kind!=TokenKind::Identifier)return types_.store.unknown();
-                    const auto property_token=sig_[pos_++];const auto*property=types_.store.property(value,tokens_[property_token].text);
-                    if(!property){if(value!=types_.store.unknown()&&error_.empty()){error_token_=property_token;error_="Property '"+tokens_[property_token].text+"' does not exist on type '"+types_.store.name(value)+"'.";}return types_.store.unknown();}value=property->type;
-                }
-                return value;
-            }
-        }
-        return types_.store.unknown();
-    }
-    TypeId unary() {
-        if (pos_ >= sig_.size()) return types_.store.unknown();
-        const auto op_token = sig_[pos_];
-        const auto& op = tokens_[op_token].text;
-        if (op != "+" && op != "-" && op != "~" && op != "!" && op != "typeof")
-            return primary();
-        ++pos_;
-        const auto value = unary();
+    TypeId type(ExpressionId id) {
+        const auto&node=expressions_.node(id);
+        if(node.kind==ExpressionKind::Unknown)return types_.store.unknown();
+        if(node.kind==ExpressionKind::Parenthesized)return node.children.size()==1?type(node.children[0]):types_.store.unknown();
+        if(node.kind==ExpressionKind::Literal){const auto&token=tokens_[node.operator_token];if(token.kind==TokenKind::Number)return types_.store.literal(!token.text.empty()&&token.text.back()=='n'?types_.store.bigint():types_.store.number(),token.text);if(token.kind==TokenKind::String||token.kind==TokenKind::Template)return types_.store.literal(types_.store.string(),literal_value(token.text));if(token.text=="true"||token.text=="false")return types_.store.literal(types_.store.boolean(),token.text);if(token.text=="null")return types_.store.null();return types_.store.unknown();}
+        if(node.kind==ExpressionKind::Identifier){if(node.text=="undefined")return types_.store.undefined();const auto symbol=binding_.symbol_for_reference(node.operator_token);if(facts_){auto fact=facts_->find(symbol);if(fact!=facts_->end())return fact->second;}return symbol<types_.symbol_types.size()?types_.symbol_types[symbol]:types_.store.unknown();}
+        if(node.kind==ExpressionKind::ObjectLiteral){if(!allow_object_)return types_.store.unknown();std::vector<TypeProperty>properties;for(auto property_id:node.children){const auto&property=expressions_.node(property_id);if(property.kind!=ExpressionKind::Property||property.children.size()!=1)return types_.store.unknown();properties.push_back({property.text,type(property.children[0]),false,false});}return types_.store.object_of(std::move(properties));}
+        if(node.kind==ExpressionKind::Property){if(node.children.size()!=1)return types_.store.unknown();const auto value=type(node.children[0]);const auto*property=types_.store.property(value,node.text);if(!property){if(value!=types_.store.unknown()&&error_.empty()){error_token_=node.operator_token;error_="Property '"+node.text+"' does not exist on type '"+types_.store.name(value)+"'.";}return types_.store.unknown();}return property->type;}
+        if(node.kind==ExpressionKind::Call){if(node.children.empty())return types_.store.unknown();const auto&callee=expressions_.node(node.children[0]);if(callee.kind!=ExpressionKind::Identifier)return types_.store.unknown();const auto symbol=binding_.symbol_for_reference(callee.operator_token);if(symbol>=types_.function_signatures.size()||!types_.function_signatures[symbol].valid)return types_.store.unknown();std::vector<TypeId>arguments;for(std::size_t i=1;i<node.children.size();++i)arguments.push_back(type(node.children[i]));const auto&signature=types_.function_signatures[symbol];if((arguments.size()<signature.required_parameters||(!signature.rest&&arguments.size()>signature.parameters.size()))&&error_.empty()){error_token_=callee.operator_token;error_="Expected "+std::to_string(signature.parameters.size())+" arguments, but got "+std::to_string(arguments.size())+".";}else for(std::size_t i=0;i<arguments.size()&&!signature.parameters.empty();++i){const auto parameter=i<signature.parameters.size()?i:signature.parameters.size()-1,expected=signature.parameters[parameter],actual=arguments[i];if(expected!=types_.store.unknown()&&actual!=types_.store.unknown()&&!types_.store.assignable(actual,expected)&&error_.empty()){error_token_=callee.operator_token;error_="Argument of type '"+types_.store.name(types_.store.widen(actual))+"' is not assignable to parameter of type '"+types_.store.name(expected)+"'.";}}return signature.result;}
+        if(node.kind==ExpressionKind::Unary){if(node.children.size()!=1)return types_.store.unknown();const auto value=type(node.children[0]);const auto&op=node.text;
         const auto kind = types_.store.kind(types_.store.widen(value));
         if (value == types_.store.unknown()) return value;
         if (op == "!") return types_.store.boolean();
         if (op == "typeof") return types_.store.string();
         if ((op == "-" || op == "~") && kind == TypeKind::BigInt) return types_.store.bigint();
         if (kind == TypeKind::Number) return types_.store.number();
-        fail_unary(op_token, op, value);
+        fail_unary(node.operator_token, op, value);
         return types_.store.unknown();
-    }
-    TypeId multiplicative() {
-        auto left = unary();
-        while (pos_ < sig_.size()) {
-            const auto op_token = sig_[pos_];
-            const auto& op = tokens_[op_token].text;
-            if (op != "*" && op != "/" && op != "%" && op != "**") break;
-            ++pos_;
-            const auto right = unary();
-            left = arithmetic(op_token, op, left, right);
         }
-        return left;
-    }
-    TypeId additive() {
-        auto left = multiplicative();
-        while (pos_ < sig_.size()) {
-            const auto op_token = sig_[pos_];
-            const auto& op = tokens_[op_token].text;
-            if (op != "+" && op != "-") break;
-            ++pos_;
-            const auto right = multiplicative();
-            if (op == "+" && left != types_.store.unknown() && right != types_.store.unknown() &&
+        if(node.kind==ExpressionKind::Binary){if(node.children.size()!=2)return types_.store.unknown();auto left=type(node.children[0]),right=type(node.children[1]);if(node.text=="+"&&left!=types_.store.unknown()&&right!=types_.store.unknown()&&
                 (types_.store.kind(types_.store.widen(left)) == TypeKind::String ||
                  types_.store.kind(types_.store.widen(right)) == TypeKind::String))
-                left = types_.store.string();
-            else left = arithmetic(op_token, op, left, right);
-        }
-        return left;
+                return types_.store.string();
+            return arithmetic(node.operator_token,node.text,left,right);}
+        if(node.kind==ExpressionKind::Assignment&&node.children.size()==2)return type(node.children[1]);
+        return types_.store.unknown();
     }
     TypeId arithmetic(std::size_t token, const std::string& op, TypeId left, TypeId right) {
         if (left == types_.store.unknown() || right == types_.store.unknown())
@@ -198,7 +101,8 @@ private:
 ExpressionResult expression_type(const std::vector<Token>& tokens, ExpressionModel&expressions,std::size_t begin,
                                  std::size_t end, const BindingModel& binding,
                                  const TypeModel& types,const std::unordered_map<std::size_t,TypeId>*facts=nullptr,bool allow_object=false) {
-    return PrimitiveExpressionTyper(tokens, expressions.intern(tokens,begin,end), binding, types,facts,allow_object).run();
+    const auto&root=expressions.intern(tokens,begin,end);
+    return NodeExpressionTyper(tokens,expressions,root,binding,types,facts,allow_object).run();
 }
 
 void report_expression_error(const SourceFile& source, const std::vector<Token>& tokens,
