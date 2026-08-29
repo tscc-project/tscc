@@ -247,3 +247,10 @@ canonical significant-token sequence retained through emission. The typer
 consumes that owned representation rather than rescanning raw ranges. This is
 the migration seam for richer operator/property nodes; it is not yet a complete
 TypeScript expression AST.
+
+## CP26 structured expression nodes (2026-08-30)
+
+The compilation-unit expression model retains explicit literal, identifier,
+parenthesized, unary, binary, call, property, object-literal and assignment
+nodes with stable child identities and operator tokens. The bounded external
+contract remains 505/0/24; unknown grammar is retained as an unknown node.

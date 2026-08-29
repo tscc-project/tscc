@@ -2,15 +2,29 @@
 #include "Lexer.h"
 #include <cstddef>
 #include <map>
+#include <string>
 #include <utility>
 #include <vector>
 namespace tscc {
 using ExpressionId=std::size_t;
-struct ExpressionNode { ExpressionId id=0;std::size_t begin_token=0,end_token=0;std::vector<std::size_t>significant_tokens; };
+inline constexpr ExpressionId InvalidExpressionId=static_cast<ExpressionId>(-1);
+enum class ExpressionKind { Unknown,Identifier,Literal,Parenthesized,Unary,Binary,Call,Property,ObjectLiteral,Assignment };
+struct ExpressionNode { ExpressionId id=InvalidExpressionId;ExpressionKind kind=ExpressionKind::Unknown;std::size_t begin_token=0,end_token=0,operator_token=InvalidExpressionId;std::string text;std::vector<ExpressionId>children;std::vector<std::size_t>significant_tokens; };
 class ExpressionModel {
+ struct Builder {
+  ExpressionModel&model;const std::vector<Token>&tokens;std::vector<std::size_t>sig;std::size_t pos=0;
+  ExpressionId add(ExpressionKind kind,std::size_t begin,std::size_t end,std::string text={},std::vector<ExpressionId>children={},std::size_t op=InvalidExpressionId){ExpressionNode n;n.id=model.nodes_.size();n.kind=kind;n.begin_token=begin;n.end_token=end;n.text=std::move(text);n.children=std::move(children);n.operator_token=op;model.nodes_.push_back(std::move(n));return model.nodes_.back().id;}
+  bool accept(const char*t){if(pos>=sig.size()||tokens[sig[pos]].text!=t)return false;++pos;return true;}
+  ExpressionId primary(){if(pos>=sig.size())return add(ExpressionKind::Unknown,0,0);const auto start=pos;if(accept("(")){auto value=assignment();if(!accept(")"))return add(ExpressionKind::Unknown,sig[start],sig.back()+1);return add(ExpressionKind::Parenthesized,sig[start],sig[pos-1]+1,{}, {value});}if(accept("{")){std::vector<ExpressionId>properties;while(pos<sig.size()&&tokens[sig[pos]].text!="}"){if(tokens[sig[pos]].kind!=TokenKind::Identifier)return add(ExpressionKind::Unknown,sig[start],sig.back()+1);auto key=sig[pos++];if(!accept(":"))return add(ExpressionKind::Unknown,sig[start],sig.back()+1);auto value=assignment();properties.push_back(add(ExpressionKind::Property,key,model.nodes_[value].end_token,tokens[key].text,{value},key));if(!accept(","))break;}if(!accept("}"))return add(ExpressionKind::Unknown,sig[start],sig.back()+1);return add(ExpressionKind::ObjectLiteral,sig[start],sig[pos-1]+1,{},std::move(properties));}auto token=sig[pos++];const auto&item=tokens[token];auto kind=(item.kind==TokenKind::Identifier||item.text=="undefined")?ExpressionKind::Identifier:ExpressionKind::Literal;return add(kind,token,token+1,item.text,{},token);}
+  ExpressionId postfix(){auto value=primary();for(;;){if(accept(".")){if(pos>=sig.size()||tokens[sig[pos]].kind!=TokenKind::Identifier)return add(ExpressionKind::Unknown,model.nodes_[value].begin_token,model.nodes_[value].end_token);auto property=sig[pos++];value=add(ExpressionKind::Property,model.nodes_[value].begin_token,property+1,tokens[property].text,{value},property);continue;}if(accept("(")){std::vector<ExpressionId>children{value};if(pos<sig.size()&&tokens[sig[pos]].text!=")")for(;;){children.push_back(assignment());if(!accept(","))break;}if(!accept(")"))return add(ExpressionKind::Unknown,model.nodes_[value].begin_token,model.nodes_[value].end_token);value=add(ExpressionKind::Call,model.nodes_[value].begin_token,sig[pos-1]+1,{},std::move(children));continue;}break;}return value;}
+  ExpressionId unary(){if(pos<sig.size()){const auto op=sig[pos];const auto&t=tokens[op].text;if(t=="+"||t=="-"||t=="~"||t=="!"||t=="typeof"){++pos;auto child=unary();return add(ExpressionKind::Unary,op,model.nodes_[child].end_token,t,{child},op);}}return postfix();}
+  ExpressionId binary(int minimum){auto left=unary();for(;;){if(pos>=sig.size())break;const auto op=sig[pos];const auto&t=tokens[op].text;int precedence=t=="**"?30:(t=="*"||t=="/"||t=="%")?20:(t=="+"||t=="-")?10:0;if(precedence<minimum||precedence==0)break;++pos;auto right=binary(precedence+(t=="**"?0:1));left=add(ExpressionKind::Binary,model.nodes_[left].begin_token,model.nodes_[right].end_token,t,{left,right},op);}return left;}
+  ExpressionId assignment(){auto left=binary(1);if(pos<sig.size()&&(tokens[sig[pos]].text=="="||tokens[sig[pos]].text=="+="||tokens[sig[pos]].text=="-="||tokens[sig[pos]].text=="*="||tokens[sig[pos]].text=="/=")){auto op=sig[pos++];auto right=assignment();return add(ExpressionKind::Assignment,model.nodes_[left].begin_token,model.nodes_[right].end_token,tokens[op].text,{left,right},op);}return left;}
+  ExpressionId build(){if(sig.empty())return add(ExpressionKind::Unknown,0,0);auto root=assignment();if(pos!=sig.size())return add(ExpressionKind::Unknown,sig.front(),sig.back()+1,{}, {root});return root;}
+ };
 public:
- const ExpressionNode&intern(const std::vector<Token>&tokens,std::size_t begin,std::size_t end){auto key=std::make_pair(begin,end);auto found=index_.find(key);if(found!=index_.end())return nodes_[found->second];ExpressionNode node;node.id=nodes_.size();node.begin_token=begin;node.end_token=end;for(auto i=begin;i<end;++i)if(tokens[i].kind!=TokenKind::Comment)node.significant_tokens.push_back(i);nodes_.push_back(std::move(node));index_[key]=nodes_.back().id;return nodes_.back();}
- const std::vector<ExpressionNode>&nodes()const{return nodes_;}
+ const ExpressionNode&intern(const std::vector<Token>&tokens,std::size_t begin,std::size_t end){auto key=std::make_pair(begin,end);auto found=index_.find(key);if(found!=index_.end())return nodes_[found->second];Builder builder{*this,tokens,{},0};for(auto i=begin;i<end;++i)if(tokens[i].kind!=TokenKind::Comment)builder.sig.push_back(i);auto root=builder.build();nodes_[root].significant_tokens=builder.sig;index_[key]=root;return nodes_[root];}
+ const ExpressionNode&node(ExpressionId id)const{return nodes_[id];}const std::vector<ExpressionNode>&nodes()const{return nodes_;}
 private:std::vector<ExpressionNode>nodes_;std::map<std::pair<std::size_t,std::size_t>,ExpressionId>index_;
 };
 }

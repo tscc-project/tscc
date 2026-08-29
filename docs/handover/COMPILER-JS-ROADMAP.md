@@ -376,3 +376,6 @@ diagnostics. Extra source properties remain compatible by explicit policy.
 CP24 establishes CompilationUnit-owned expression identity and routes checker
 entry through interned expression nodes. Rich operator-node migration can now
 proceed incrementally without creating parallel range identities.
+CP26 gives that owned model explicit structural kinds, child IDs and operator
+tokens for the bounded grammar. This is an architecture checkpoint rather than
+a wider TypeScript compatibility claim.
