@@ -79,6 +79,11 @@ equality guards. Facts apply only inside the guarded brace region and restore on
 exit. Else complements, mutation invalidation, joins, loops and definite
 assignment remain future flow-graph work.
 
+CP19/TC8A establishes canonical structural object shapes in the durable type
+store. Properties retain name, type, optionality and readonly metadata and can
+be looked up by name. This is infrastructure only; source-facing object checks
+belong to CP20.
+
 ## Build and validation
 
 ```bash

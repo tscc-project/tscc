@@ -156,6 +156,10 @@ then-branch facts and lexical restoration; full flow joins remain later work.
 
 ### TC8 - Object and property types
 
+CP19/TC8A is complete: the canonical type store interns structural object
+shapes and retains optional/readonly property metadata with stable lookup.
+CP20/TC8B activates the first bounded source-facing structural checks.
+
 Add object type literals, property lookup, optional/readonly properties, object
 literal checking, property access, structural assignment, and an explicit
 excess-property compatibility decision.

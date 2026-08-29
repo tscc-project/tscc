@@ -25,6 +25,7 @@ int main() {
     const auto semantic = build_semantic_model(tokens, program);
     const auto binding = bind_semantic_model(tokens, program, semantic);
     const auto types = build_type_model(tokens, program, semantic, binding);
+    const auto point=types.store.object_of({{"x",types.store.number(),false,false},{"label",types.store.string(),true,true}});if(types.store.kind(point)!=TypeKind::Object||!types.store.property(point,"x")||!types.store.property(point,"label")->readonly)fail("canonical object shape missing");if(types.store.object_of({{"label",types.store.string(),true,true},{"x",types.store.number(),false,false}})!=point)fail("object shape was not canonical");
     if (types.symbol_types.size() != binding.symbols.size()) fail("type facts lost symbol identity");
     for (std::size_t i = 0; i < binding.symbols.size(); ++i) {
         const auto& name = binding.symbols[i].name;

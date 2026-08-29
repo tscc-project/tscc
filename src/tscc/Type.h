@@ -10,8 +10,9 @@
 namespace tscc {
 
 using TypeId = std::size_t;
-enum class TypeKind { Unknown, Number, String, Boolean, BigInt, Function, Null, Undefined, Literal, Union };
-struct Type { TypeKind kind = TypeKind::Unknown;TypeId base=0;std::string literal;std::vector<TypeId> members; };
+enum class TypeKind { Unknown, Number, String, Boolean, BigInt, Function, Null, Undefined, Literal, Union, Object };
+struct TypeProperty{std::string name;TypeId type=0;bool optional=false;bool readonly=false;};
+struct Type { TypeKind kind = TypeKind::Unknown;TypeId base=0;std::string literal;std::vector<TypeId> members;std::vector<TypeProperty>properties; };
 
 class TypeStore {
 public:
@@ -27,6 +28,8 @@ public:
     TypeId literal(TypeId,const std::string&) const;
     TypeId union_of(std::vector<TypeId>) const;
     bool assignable(TypeId actual,TypeId expected) const;
+    TypeId object_of(std::vector<TypeProperty>)const;
+    const TypeProperty* property(TypeId,const std::string&)const;
     TypeKind kind(TypeId) const;
     TypeId widen(TypeId) const;
     std::string name(TypeId) const;

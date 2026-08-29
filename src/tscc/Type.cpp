@@ -49,10 +49,10 @@ TypeId node_annotation(const std::vector<Token>& tokens, const SemanticNode& nod
 }
 
 TypeStore::TypeStore()
-    : types_{{TypeKind::Unknown,0,"",{}}, {TypeKind::Number,0,"",{}},
-             {TypeKind::String,0,"",{}}, {TypeKind::Boolean,0,"",{}},
-             {TypeKind::BigInt,0,"",{}}, {TypeKind::Function,0,"",{}},
-             {TypeKind::Null,0,"",{}}, {TypeKind::Undefined,0,"",{}}} {}
+    : types_{{TypeKind::Unknown,0,"",{},{}}, {TypeKind::Number,0,"",{},{}},
+             {TypeKind::String,0,"",{},{}}, {TypeKind::Boolean,0,"",{},{}},
+             {TypeKind::BigInt,0,"",{},{}}, {TypeKind::Function,0,"",{},{}},
+             {TypeKind::Null,0,"",{},{}}, {TypeKind::Undefined,0,"",{},{}}} {}
 
 TypeKind TypeStore::kind(TypeId id) const {
     return id < types_.size() ? types_[id].kind : TypeKind::Unknown;
@@ -69,13 +69,16 @@ std::string TypeStore::name(TypeId id) const {
         case TypeKind::Null:return "null";case TypeKind::Undefined:return "undefined";
         case TypeKind::Literal:return types_[id].base==string()?"'"+types_[id].literal+"'":types_[id].literal;
         case TypeKind::Union:{std::string out;for(auto member:types_[id].members){if(!out.empty())out+=" | ";out+=name(member);}return out;}
+        case TypeKind::Object:return "object";
         default: return "unknown";
     }
 }
 
-TypeId TypeStore::literal(TypeId base,const std::string&value)const{for(TypeId i=8;i<types_.size();++i)if(types_[i].kind==TypeKind::Literal&&types_[i].base==base&&types_[i].literal==value)return i;types_.push_back({TypeKind::Literal,base,value,{}});return types_.size()-1;}
-TypeId TypeStore::union_of(std::vector<TypeId> members)const{std::vector<TypeId>flat;for(auto id:members){if(id==unknown())return id;if(kind(id)==TypeKind::Union)flat.insert(flat.end(),types_[id].members.begin(),types_[id].members.end());else flat.push_back(id);}std::sort(flat.begin(),flat.end());flat.erase(std::unique(flat.begin(),flat.end()),flat.end());std::vector<TypeId>bases;for(auto id:flat)if(kind(id)!=TypeKind::Literal)bases.push_back(id);flat.erase(std::remove_if(flat.begin(),flat.end(),[&](auto x){return kind(x)==TypeKind::Literal&&std::find(bases.begin(),bases.end(),types_[x].base)!=bases.end();}),flat.end());if(flat.empty())return unknown();if(flat.size()==1)return flat[0];for(TypeId i=8;i<types_.size();++i)if(types_[i].kind==TypeKind::Union&&types_[i].members==flat)return i;types_.push_back({TypeKind::Union,0,"",flat});return types_.size()-1;}
+TypeId TypeStore::literal(TypeId base,const std::string&value)const{for(TypeId i=8;i<types_.size();++i)if(types_[i].kind==TypeKind::Literal&&types_[i].base==base&&types_[i].literal==value)return i;types_.push_back({TypeKind::Literal,base,value,{}, {}});return types_.size()-1;}
+TypeId TypeStore::union_of(std::vector<TypeId> members)const{std::vector<TypeId>flat;for(auto id:members){if(id==unknown())return id;if(kind(id)==TypeKind::Union)flat.insert(flat.end(),types_[id].members.begin(),types_[id].members.end());else flat.push_back(id);}std::sort(flat.begin(),flat.end());flat.erase(std::unique(flat.begin(),flat.end()),flat.end());std::vector<TypeId>bases;for(auto id:flat)if(kind(id)!=TypeKind::Literal)bases.push_back(id);flat.erase(std::remove_if(flat.begin(),flat.end(),[&](auto x){return kind(x)==TypeKind::Literal&&std::find(bases.begin(),bases.end(),types_[x].base)!=bases.end();}),flat.end());if(flat.empty())return unknown();if(flat.size()==1)return flat[0];for(TypeId i=8;i<types_.size();++i)if(types_[i].kind==TypeKind::Union&&types_[i].members==flat)return i;types_.push_back({TypeKind::Union,0,"",flat,{}});return types_.size()-1;}
 bool TypeStore::assignable(TypeId actual,TypeId expected)const{if(actual==unknown()||expected==unknown()||actual==expected)return true;if(kind(expected)==TypeKind::Union){for(auto member:types_[expected].members)if(assignable(actual,member))return true;return false;}if(kind(actual)==TypeKind::Union){for(auto member:types_[actual].members)if(!assignable(member,expected))return false;return true;}if(kind(actual)==TypeKind::Literal)return types_[actual].base==expected;return false;}
+TypeId TypeStore::object_of(std::vector<TypeProperty>properties)const{std::sort(properties.begin(),properties.end(),[](const auto&a,const auto&b){return a.name<b.name;});for(TypeId i=8;i<types_.size();++i)if(types_[i].kind==TypeKind::Object&&types_[i].properties.size()==properties.size()){bool same=true;for(std::size_t p=0;p<properties.size();++p){const auto&a=types_[i].properties[p];const auto&b=properties[p];same= same&&a.name==b.name&&a.type==b.type&&a.optional==b.optional&&a.readonly==b.readonly;}if(same)return i;}types_.push_back({TypeKind::Object,0,"",{},std::move(properties)});return types_.size()-1;}
+const TypeProperty*TypeStore::property(TypeId id,const std::string&name)const{if(kind(id)!=TypeKind::Object)return nullptr;for(const auto&property:types_[id].properties)if(property.name==name)return &property;return nullptr;}
 
 TypeModel build_type_model(const std::vector<Token>& tokens, const Program& program,
                            const SemanticModel& semantic, const BindingModel& binding) {
