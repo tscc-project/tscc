@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "product": "tscc",
-  "oracle": {"typescript": "7.0.2", "cases": 525, "pass": 499, "fail": 0, "skip": 26},
+  "oracle": {"typescript": "7.0.2", "cases": 529, "pass": 505, "fail": 0, "skip": 24},
   "dimensions": ["parse", "bind", "type", "lower", "emit", "runtime", "diagnostic", "project"],
   "features": [
     {"id":"type-erasure","name":"Type annotation and declaration erasure","status":{"parse":"supported","bind":"partial","type":"partial","lower":"supported","emit":"supported","runtime":"supported","diagnostic":"partial","project":"supported"},"cases":["basic-variable","interface-erasure","type-alias-erasure"]},
@@ -13,7 +13,7 @@
     {"id":"commonjs","name":"CommonJS lowering and live imports","status":{"parse":"supported","bind":"partial","type":"planned","lower":"supported","emit":"supported","runtime":"supported","diagnostic":"partial","project":"supported"},"cases":["cjs-live-export-getter","cjs-live-import-compound-assignment","cjs-live-import-destructured-param-shadow"]},
     {"id":"primitive-checking","name":"Primitive expression and assignment checking","status":{"parse":"supported","bind":"supported","type":"partial","lower":"not-applicable","emit":"supported","runtime":"supported","diagnostic":"partial","project":"partial"},"cases":["semantic-type-mismatch","semantic-bound-direct-assignment-mismatch","semantic-const-direct-reassignment"]},
     {"id":"function-types","name":"Function signatures and call checking","status":{"parse":"partial","bind":"supported","type":"partial","lower":"not-applicable","emit":"supported","runtime":"supported","diagnostic":"partial","project":"partial"},"cases":["semantic-call-type","semantic-call-arity","semantic-return-type"]},
-    {"id":"object-types","name":"Structural object and property checking","status":{"parse":"partial","bind":"partial","type":"planned","lower":"not-applicable","emit":"supported","runtime":"supported","diagnostic":"planned","project":"planned"},"cases":["semantic-missing-property","semantic-readonly-write"]},
+    {"id":"object-types","name":"Structural object and property checking","status":{"parse":"partial","bind":"partial","type":"partial","lower":"not-applicable","emit":"supported","runtime":"supported","diagnostic":"partial","project":"planned"},"cases":["semantic-missing-property","semantic-readonly-write","semantic-nested-object-missing","nested-object-property-read"]},
     {"id":"module-types","name":"Cross-module symbols and types","status":{"parse":"partial","bind":"partial","type":"planned","lower":"partial","emit":"supported","runtime":"partial","diagnostic":"planned","project":"partial"},"cases":["semantic-type-only-runtime-use","cjs-live-reexport-alias"]}
   ]
 }
