@@ -27,6 +27,13 @@ void Parser::error_at(std::size_t index, const std::string& message) {
     if (index >= tokens_.size()) index = tokens_.size() - 1;
     const auto [line, column] = source_.line_col(tokens_[index].begin);
     diagnostics_.error(source_.path, line, column, message, source_.line_text(line));
+    if(std::find(recovery_tokens_.begin(),recovery_tokens_.end(),index)==recovery_tokens_.end())recovery_tokens_.push_back(index);
+}
+
+void Parser::finalize_syntax(SyntaxNode&node,SyntaxNodeId parent,SyntaxNodeId&next){
+    node.id=next++;node.parent_id=parent;
+    if(!tokens_.empty()){node.begin_token=std::min(node.begin_token,tokens_.size()-1);node.end_token=std::min(std::max(node.begin_token,node.end_token),tokens_.size()-1);node.begin_offset=tokens_[node.begin_token].begin;node.end_offset=tokens_[node.end_token].end;}
+    for(auto&child:node.children)finalize_syntax(child,node.id,next);
 }
 void Parser::erase_tokens(std::size_t first, std::size_t last_exclusive) {
     if (!program_ || first >= last_exclusive || first >= tokens_.size()) return;
@@ -1422,12 +1429,16 @@ bool Parser::parse(Program& program) {
     program.erasures.clear();
     program.replacements.clear();
     program.variables.clear();
+    recovery_tokens_.clear();
     i_ = 0;
     while (!at_end()) {
         const std::size_t before = i_;
         program.root.children.push_back(parse_top_level());
         if (i_ <= before) ++i_; // parser progress invariant
     }
+    for(const auto token_index:recovery_tokens_){SyntaxNode recovery{SyntaxKind::Recovery,token_index,token_index,{}};recovery.recovered=true;program.root.children.push_back(std::move(recovery));}
+    std::stable_sort(program.root.children.begin(),program.root.children.end(),[](const SyntaxNode&a,const SyntaxNode&b){return a.begin_token<b.begin_token;});
+    SyntaxNodeId next=0;finalize_syntax(program.root,InvalidSyntaxNodeId,next);
     std::sort(program.erasures.begin(), program.erasures.end(),
               [](const EraseRange& a, const EraseRange& b) { return a.begin < b.begin; });
     return !diagnostics_.has_errors();

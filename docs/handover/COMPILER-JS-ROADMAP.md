@@ -102,11 +102,15 @@ Completed with `ProgramGraph` as the sole production traversal. It owns canonica
 file identities, root indices, dependency edges, durable compilation units and
 graph diagnostics; `Compiler.cpp` prepares and commits those same units.
 
-### TC3 - Durable syntax identity
+### TC3 - Durable syntax identity - completed 2026-08-30
 
 Grow stable node IDs, relationships, exact spans, token ownership, and recovery
 nodes for the next semantic slices. Retain the range/replacement emitter as a
 compatibility path during migration.
+
+Completed with compilation-unit-local stable node IDs, parent relationships,
+exact token/byte spans, lookup by identity and explicit parser recovery nodes.
+Focused tests prove identity survives analysis and source-preserving emission.
 
 ### TC4 - Recovery and syntax diagnostics
 

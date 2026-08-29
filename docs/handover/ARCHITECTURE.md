@@ -130,6 +130,11 @@ AST. Parser-owned erasure/replacement ranges prevent broad heuristics such as
 “every colon means type annotation.” Do not move runtime semantics into token
 guessing when a structural parser decision is required.
 
+Every structural node now has a stable compilation-unit-local ID, parent ID,
+token span and byte span. Parser errors create explicit recovery nodes. This
+identity remains valid through binding, checking and emission while the
+range/replacement emitter continues to own changed bytes.
+
 ## Transpiler
 
 `transpile_unit` consumes a checked durable unit and retains its emitted text;

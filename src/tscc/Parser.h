@@ -18,6 +18,7 @@ private:
     Diagnostics& diagnostics_;
     std::size_t i_ = 0;
     Program* program_ = nullptr;
+    std::vector<std::size_t> recovery_tokens_;
 
     bool at_end() const;
     const Token& token(std::size_t offset = 0) const;
@@ -49,6 +50,7 @@ private:
     void parse_runtime_range(std::size_t first, std::size_t end);
     void parse_object_literal_range(std::size_t open, std::size_t close);
     bool validate_generic_list(std::size_t open, std::size_t close);
+    void finalize_syntax(SyntaxNode&,SyntaxNodeId,SyntaxNodeId&);
 };
 
 } // namespace tscc

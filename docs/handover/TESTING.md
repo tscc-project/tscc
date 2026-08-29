@@ -31,6 +31,8 @@ primitive-checker, durable-compilation-unit, runtime/generics, project/module,
 regression, TSX-preserve, and CommonJS targets.
 The focused program-graph test proves canonical cycle identity, root ownership,
 dependency edges, durable checked units and `--noResolve` policy.
+The durable-syntax test proves unique IDs, parents, exact spans, recovery nodes
+and identity stability after emission.
 Keep focused targets available for iteration, but require the aggregate target at
 checkpoints.
 
