@@ -482,6 +482,22 @@
     "expect": null
   },
   {
+    "name": "semantic-literal-union-mismatch",
+    "kind": "semantic-only",
+    "src": "const mode:'on'|'off'='other';",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "is not assignable to type"
+  },
+  {
+    "name": "semantic-primitive-union-mismatch",
+    "kind": "semantic-only",
+    "src": "const value:number|string=true;",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "is not assignable to type"
+  },
+  {
     "name": "tuple-type",
     "kind": "runtime",
     "src": "const x:[number,string]=[1,\"a\"]; console.log(x[0],x[1]);",

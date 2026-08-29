@@ -32,7 +32,7 @@ int main() {
         if (name == "n" && kind != TypeKind::Number) fail("number fact missing");
         if (name == "s" && kind != TypeKind::String) fail("string fact missing");
         if (name == "b" && kind != TypeKind::Boolean) fail("boolean fact missing");
-        if (name == "complex" && kind != TypeKind::Unknown) fail("unsupported type was guessed");
+        if (name == "complex" && kind != TypeKind::Union) fail("union type fact missing");
         if (name == "add") {
             if (kind != TypeKind::Function) fail("function type fact missing");
             const auto& signature = types.function_signatures[i];

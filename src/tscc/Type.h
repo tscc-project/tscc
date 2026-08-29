@@ -4,13 +4,14 @@
 #include "Semantic.h"
 #include "Syntax.h"
 #include <cstddef>
+#include <string>
 #include <vector>
 
 namespace tscc {
 
 using TypeId = std::size_t;
-enum class TypeKind { Unknown, Number, String, Boolean, BigInt, Function };
-struct Type { TypeKind kind = TypeKind::Unknown; };
+enum class TypeKind { Unknown, Number, String, Boolean, BigInt, Function, Null, Undefined, Literal, Union };
+struct Type { TypeKind kind = TypeKind::Unknown;TypeId base=0;std::string literal;std::vector<TypeId> members; };
 
 class TypeStore {
 public:
@@ -21,10 +22,16 @@ public:
     TypeId boolean() const { return 3; }
     TypeId bigint() const { return 4; }
     TypeId function() const { return 5; }
+    TypeId null() const { return 6; }
+    TypeId undefined() const { return 7; }
+    TypeId literal(TypeId,const std::string&) const;
+    TypeId union_of(std::vector<TypeId>) const;
+    bool assignable(TypeId actual,TypeId expected) const;
     TypeKind kind(TypeId) const;
-    const char* name(TypeId) const;
+    TypeId widen(TypeId) const;
+    std::string name(TypeId) const;
 private:
-    std::vector<Type> types_;
+    mutable std::vector<Type> types_;
 };
 
 struct TypeModel {

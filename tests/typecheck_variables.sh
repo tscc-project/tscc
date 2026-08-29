@@ -139,3 +139,19 @@ fi
 grep -Fq "Type 'string' is not assignable to type 'number'." "$TMP/return.err"
 
 printf 'tscc bounded function signature test passed\n'
+
+cat >"$TMP/type-algebra-valid.ts" <<'TS'
+const mode: "on" | "off" = "on";
+const answer: 42 | string = 42;
+const maybe: number | null | undefined = null;
+TS
+"$ROOT/tscc" --pretty false --noEmit "$TMP/type-algebra-valid.ts" >/dev/null
+
+printf '%s\n' 'const mode:"on"|"off"="other";' >"$TMP/literal-union.ts"
+if "$ROOT/tscc" --pretty false --noEmit "$TMP/literal-union.ts" >"$TMP/literal.out" 2>"$TMP/literal.err"; then
+    echo "invalid literal union unexpectedly succeeded" >&2
+    exit 1
+fi
+grep -Fq "is not assignable to type" "$TMP/literal.err"
+
+printf 'tscc literal/union/nullish type algebra test passed\n'

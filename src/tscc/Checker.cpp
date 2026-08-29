@@ -60,11 +60,13 @@ private:
         const auto token_index = sig_[pos_++];
         const auto& token = tokens_[token_index];
         if (token.kind == TokenKind::Number)
-            return !token.text.empty() && token.text.back() == 'n'
-                       ? types_.store.bigint() : types_.store.number();
+            return types_.store.literal(!token.text.empty() && token.text.back() == 'n'
+                       ? types_.store.bigint() : types_.store.number(),token.text);
         if (token.kind == TokenKind::String || token.kind == TokenKind::Template)
-            return types_.store.string();
-        if (token.text == "true" || token.text == "false") return types_.store.boolean();
+            return types_.store.literal(types_.store.string(),token.text);
+        if (token.text == "true" || token.text == "false") return types_.store.literal(types_.store.boolean(),token.text);
+        if(token.text=="null")return types_.store.null();
+        if(token.text=="undefined")return types_.store.undefined();
         if (token.kind == TokenKind::Identifier) {
             const auto symbol = binding_.symbol_for_reference(token_index);
             if (pos_ < sig_.size() && tokens_[sig_[pos_]].text == "(") {
@@ -88,9 +90,9 @@ private:
                         const auto parameter = i < signature.parameters.size() ? i : signature.parameters.size()-1;
                         const auto expected = signature.parameters[parameter], actual = arguments[i];
                         if (expected != types_.store.unknown() && actual != types_.store.unknown() &&
-                            expected != actual && error_.empty()) {
+                            !types_.store.assignable(actual,expected) && error_.empty()) {
                             error_token_ = token_index;
-                            error_ = std::string("Argument of type '") + types_.store.name(actual) +
+                            error_ = std::string("Argument of type '") + types_.store.name(types_.store.widen(actual)) +
                                      "' is not assignable to parameter of type '" +
                                      types_.store.name(expected) + "'.";
                         }
@@ -111,7 +113,7 @@ private:
             return primary();
         ++pos_;
         const auto value = unary();
-        const auto kind = types_.store.kind(value);
+        const auto kind = types_.store.kind(types_.store.widen(value));
         if (value == types_.store.unknown()) return value;
         if (op == "!") return types_.store.boolean();
         if (op == "typeof") return types_.store.string();
@@ -141,8 +143,8 @@ private:
             ++pos_;
             const auto right = multiplicative();
             if (op == "+" && left != types_.store.unknown() && right != types_.store.unknown() &&
-                (types_.store.kind(left) == TypeKind::String ||
-                 types_.store.kind(right) == TypeKind::String))
+                (types_.store.kind(types_.store.widen(left)) == TypeKind::String ||
+                 types_.store.kind(types_.store.widen(right)) == TypeKind::String))
                 left = types_.store.string();
             else left = arithmetic(op_token, op, left, right);
         }
@@ -151,7 +153,7 @@ private:
     TypeId arithmetic(std::size_t token, const std::string& op, TypeId left, TypeId right) {
         if (left == types_.store.unknown() || right == types_.store.unknown())
             return types_.store.unknown();
-        const auto left_kind = types_.store.kind(left), right_kind = types_.store.kind(right);
+        left=types_.store.widen(left);right=types_.store.widen(right);const auto left_kind = types_.store.kind(left), right_kind = types_.store.kind(right);
         if (left_kind == TypeKind::Number && right_kind == TypeKind::Number)
             return types_.store.number();
         if (left_kind == TypeKind::BigInt && right_kind == TypeKind::BigInt)
@@ -190,13 +192,14 @@ void report_mismatch(const SourceFile& source, const std::vector<Token>& tokens,
                      Diagnostics& diagnostics) {
     const auto [line, column] = source.line_col(tokens[token].begin);
     diagnostics.error(source.path, line, column,
-        std::string("Type '") + types.name(actual) + "' is not assignable to type '" +
+        std::string("Type '") + types.name(types.widen(actual)) + "' is not assignable to type '" +
         types.name(expected) + "'.", source.line_text(line));
 }
 
 TypeId compound_result(const std::string& op, TypeId left, TypeId right,
                        const TypeStore& types) {
     if (left == types.unknown() || right == types.unknown()) return types.unknown();
+    left=types.widen(left);right=types.widen(right);
     const auto left_kind = types.kind(left), right_kind = types.kind(right);
     if (op == "+=" && (left_kind == TypeKind::String || right_kind == TypeKind::String))
         return types.string();
@@ -211,7 +214,7 @@ void report_operator_error(const SourceFile& source, const std::vector<Token>& t
     const auto [line, column] = source.line_col(tokens[token].begin);
     diagnostics.error(source.path, line, column,
         std::string("Operator '") + op + "' cannot be applied to types '" +
-        types.name(left) + "' and '" + types.name(right) + "'.", source.line_text(line));
+        types.name(types.widen(left)) + "' and '" + types.name(types.widen(right)) + "'.", source.line_text(line));
 }
 }
 
@@ -236,7 +239,7 @@ bool check_program(const SourceFile& source, const std::vector<Token>& tokens,
         report_expression_error(source, tokens, expression, diagnostics);
         const auto actual = expression.type;
         if (!expression.error.empty() || expected == types.store.unknown() ||
-            actual == types.store.unknown() || actual == expected) continue;
+            actual == types.store.unknown() || types.store.assignable(actual,expected)) continue;
         report_mismatch(source, tokens, declaration.initializer_begin_token,
                         actual, expected, types.store, diagnostics);
     }
@@ -260,7 +263,7 @@ bool check_program(const SourceFile& source, const std::vector<Token>& tokens,
                                                 binding, types);
         report_expression_error(source, tokens, expression, diagnostics);
         if (expression.error.empty() && expression.type != types.store.unknown() &&
-            expression.type != expected)
+            !types.store.assignable(expression.type,expected))
             report_mismatch(source, tokens, node.begin_token + 1,
                             expression.type, expected, types.store, diagnostics);
     }
@@ -313,7 +316,7 @@ bool check_program(const SourceFile& source, const std::vector<Token>& tokens,
         const auto rhs = expression.type;
         if (!expression.error.empty() || rhs == types.store.unknown()) continue;
         if (op == "=") {
-            if (rhs != expected)
+            if (!types.store.assignable(rhs,expected))
                 report_mismatch(source, tokens, begin, rhs, expected, types.store, diagnostics);
             continue;
         }

@@ -6,20 +6,26 @@ namespace {
 TypeId annotation_type(const std::vector<Token>& tokens,
                        const VariableDeclaration& declaration,
                        const TypeStore& store) {
-    std::size_t found = static_cast<std::size_t>(-1), count = 0;
-    for (auto i = declaration.type_begin_token; i < declaration.type_end_token; ++i)
-        if (tokens[i].kind != TokenKind::Comment) { found = i; ++count; }
-    if (count != 1) return store.unknown();
-    if (tokens[found].text == "number") return store.number();
-    if (tokens[found].text == "string") return store.string();
-    if (tokens[found].text == "boolean") return store.boolean();
-    return store.unknown();
+    std::vector<TypeId> members;
+    for (auto i = declaration.type_begin_token; i < declaration.type_end_token; ++i) {
+        if (tokens[i].kind == TokenKind::Comment || tokens[i].text == "|") continue;
+        TypeId type=store.unknown();
+        if(tokens[i].text=="number")type=store.number();else if(tokens[i].text=="string")type=store.string();else if(tokens[i].text=="boolean")type=store.boolean();else if(tokens[i].text=="bigint")type=store.bigint();else if(tokens[i].text=="null")type=store.null();else if(tokens[i].text=="undefined")type=store.undefined();
+        else if(tokens[i].kind==TokenKind::String)type=store.literal(store.string(),tokens[i].text);
+        else if(tokens[i].kind==TokenKind::Number)type=store.literal(tokens[i].text.back()=='n'?store.bigint():store.number(),tokens[i].text);
+        else if(tokens[i].text=="true"||tokens[i].text=="false")type=store.literal(store.boolean(),tokens[i].text);
+        if(type==store.unknown())return type;
+        members.push_back(type);
+    }
+    return store.union_of(std::move(members));
 }
 TypeId named_type(const std::string& text, const TypeStore& store) {
     if (text == "number") return store.number();
     if (text == "string") return store.string();
     if (text == "boolean") return store.boolean();
     if (text == "bigint") return store.bigint();
+    if (text == "null") return store.null();
+    if (text == "undefined") return store.undefined();
     return store.unknown();
 }
 TypeId node_annotation(const std::vector<Token>& tokens, const SemanticNode& node,
@@ -36,23 +42,33 @@ TypeId node_annotation(const std::vector<Token>& tokens, const SemanticNode& nod
 }
 
 TypeStore::TypeStore()
-    : types_{{TypeKind::Unknown}, {TypeKind::Number}, {TypeKind::String},
-             {TypeKind::Boolean}, {TypeKind::BigInt}, {TypeKind::Function}} {}
+    : types_{{TypeKind::Unknown,0,"",{}}, {TypeKind::Number,0,"",{}},
+             {TypeKind::String,0,"",{}}, {TypeKind::Boolean,0,"",{}},
+             {TypeKind::BigInt,0,"",{}}, {TypeKind::Function,0,"",{}},
+             {TypeKind::Null,0,"",{}}, {TypeKind::Undefined,0,"",{}}} {}
 
 TypeKind TypeStore::kind(TypeId id) const {
     return id < types_.size() ? types_[id].kind : TypeKind::Unknown;
 }
+TypeId TypeStore::widen(TypeId id)const{return kind(id)==TypeKind::Literal?types_[id].base:id;}
 
-const char* TypeStore::name(TypeId id) const {
+std::string TypeStore::name(TypeId id) const {
     switch (kind(id)) {
         case TypeKind::Number: return "number";
         case TypeKind::String: return "string";
         case TypeKind::Boolean: return "boolean";
         case TypeKind::BigInt: return "bigint";
         case TypeKind::Function: return "function";
+        case TypeKind::Null:return "null";case TypeKind::Undefined:return "undefined";
+        case TypeKind::Literal:return types_[id].base==string()?"'"+types_[id].literal+"'":types_[id].literal;
+        case TypeKind::Union:{std::string out;for(auto member:types_[id].members){if(!out.empty())out+=" | ";out+=name(member);}return out;}
         default: return "unknown";
     }
 }
+
+TypeId TypeStore::literal(TypeId base,const std::string&value)const{for(TypeId i=8;i<types_.size();++i)if(types_[i].kind==TypeKind::Literal&&types_[i].base==base&&types_[i].literal==value)return i;types_.push_back({TypeKind::Literal,base,value,{}});return types_.size()-1;}
+TypeId TypeStore::union_of(std::vector<TypeId> members)const{std::vector<TypeId>flat;for(auto id:members){if(id==unknown())return id;if(kind(id)==TypeKind::Union)flat.insert(flat.end(),types_[id].members.begin(),types_[id].members.end());else flat.push_back(id);}std::sort(flat.begin(),flat.end());flat.erase(std::unique(flat.begin(),flat.end()),flat.end());std::vector<TypeId>bases;for(auto id:flat)if(kind(id)!=TypeKind::Literal)bases.push_back(id);flat.erase(std::remove_if(flat.begin(),flat.end(),[&](auto x){return kind(x)==TypeKind::Literal&&std::find(bases.begin(),bases.end(),types_[x].base)!=bases.end();}),flat.end());if(flat.empty())return unknown();if(flat.size()==1)return flat[0];for(TypeId i=8;i<types_.size();++i)if(types_[i].kind==TypeKind::Union&&types_[i].members==flat)return i;types_.push_back({TypeKind::Union,0,"",flat});return types_.size()-1;}
+bool TypeStore::assignable(TypeId actual,TypeId expected)const{if(actual==unknown()||expected==unknown()||actual==expected)return true;if(kind(expected)==TypeKind::Union){for(auto member:types_[expected].members)if(assignable(actual,member))return true;return false;}if(kind(actual)==TypeKind::Union){for(auto member:types_[actual].members)if(!assignable(member,expected))return false;return true;}if(kind(actual)==TypeKind::Literal)return types_[actual].base==expected;return false;}
 
 TypeModel build_type_model(const std::vector<Token>& tokens, const Program& program,
                            const SemanticModel& semantic, const BindingModel& binding) {
