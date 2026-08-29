@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "product": "tscc",
-  "oracle": {"typescript": "7.0.2", "cases": 523, "pass": 497, "fail": 0, "skip": 26},
+  "oracle": {"typescript": "7.0.2", "cases": 525, "pass": 499, "fail": 0, "skip": 26},
   "dimensions": ["parse", "bind", "type", "lower", "emit", "runtime", "diagnostic", "project"],
   "features": [
     {"id":"type-erasure","name":"Type annotation and declaration erasure","status":{"parse":"supported","bind":"partial","type":"partial","lower":"supported","emit":"supported","runtime":"supported","diagnostic":"partial","project":"supported"},"cases":["basic-variable","interface-erasure","type-alias-erasure"]},

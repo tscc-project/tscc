@@ -155,3 +155,22 @@ fi
 grep -Fq "is not assignable to type" "$TMP/literal.err"
 
 printf 'tscc literal/union/nullish type algebra test passed\n'
+
+cat >"$TMP/narrowing-valid.ts" <<'TS'
+const value: string | number = "ready";
+if (typeof value === "string") { const text: string = value; }
+const maybe: number | null = null;
+if (maybe === null) { const absent: null = maybe; }
+const mode: "on" | "off" = "on";
+if (mode === "on") { const exact: "on" = mode; }
+TS
+"$ROOT/tscc" --pretty false --noEmit "$TMP/narrowing-valid.ts" >/dev/null
+
+printf '%s\n' 'const value:string|number="x";if(typeof value==="string"){const bad:number=value;}' >"$TMP/narrowing-invalid.ts"
+if "$ROOT/tscc" --pretty false --noEmit "$TMP/narrowing-invalid.ts" >"$TMP/narrow.out" 2>"$TMP/narrow.err"; then
+    echo "invalid narrowed assignment unexpectedly succeeded" >&2
+    exit 1
+fi
+grep -Fq "Type 'string' is not assignable to type 'number'." "$TMP/narrow.err"
+
+printf 'tscc bounded branch narrowing test passed\n'

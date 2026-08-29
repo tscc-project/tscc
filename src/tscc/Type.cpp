@@ -3,6 +3,7 @@
 
 namespace tscc {
 namespace {
+std::string literal_value(const std::string&text){return text.size()>=2&&(text.front()=='\''||text.front()=='"')?text.substr(1,text.size()-2):text;}
 TypeId annotation_type(const std::vector<Token>& tokens,
                        const VariableDeclaration& declaration,
                        const TypeStore& store) {
@@ -11,7 +12,7 @@ TypeId annotation_type(const std::vector<Token>& tokens,
         if (tokens[i].kind == TokenKind::Comment || tokens[i].text == "|") continue;
         TypeId type=store.unknown();
         if(tokens[i].text=="number")type=store.number();else if(tokens[i].text=="string")type=store.string();else if(tokens[i].text=="boolean")type=store.boolean();else if(tokens[i].text=="bigint")type=store.bigint();else if(tokens[i].text=="null")type=store.null();else if(tokens[i].text=="undefined")type=store.undefined();
-        else if(tokens[i].kind==TokenKind::String)type=store.literal(store.string(),tokens[i].text);
+        else if(tokens[i].kind==TokenKind::String)type=store.literal(store.string(),literal_value(tokens[i].text));
         else if(tokens[i].kind==TokenKind::Number)type=store.literal(tokens[i].text.back()=='n'?store.bigint():store.number(),tokens[i].text);
         else if(tokens[i].text=="true"||tokens[i].text=="false")type=store.literal(store.boolean(),tokens[i].text);
         if(type==store.unknown())return type;
@@ -30,14 +31,20 @@ TypeId named_type(const std::string& text, const TypeStore& store) {
 }
 TypeId node_annotation(const std::vector<Token>& tokens, const SemanticNode& node,
                        const TypeStore& store) {
-    bool colon = false;
+    bool colon = false;std::vector<TypeId>members;
     for (auto i = node.name_token + 1; i < node.end_token && i < tokens.size(); ++i) {
         if (tokens[i].kind == TokenKind::Comment) continue;
         if (tokens[i].text == ":") { colon = true; continue; }
-        if (tokens[i].text == "=" || tokens[i].text == "?") continue;
-        if (colon) return named_type(tokens[i].text, store);
+        if (!colon||tokens[i].text=="|"||tokens[i].text=="?"||tokens[i].text=="...") continue;
+        if(tokens[i].text=="=")break;
+        TypeId type=named_type(tokens[i].text,store);
+        if(tokens[i].kind==TokenKind::String)type=store.literal(store.string(),literal_value(tokens[i].text));
+        else if(tokens[i].kind==TokenKind::Number)type=store.literal(tokens[i].text.back()=='n'?store.bigint():store.number(),tokens[i].text);
+        else if(tokens[i].text=="true"||tokens[i].text=="false")type=store.literal(store.boolean(),tokens[i].text);
+        if(type==store.unknown())return type;
+        members.push_back(type);
     }
-    return store.unknown();
+    return store.union_of(std::move(members));
 }
 }
 
@@ -125,8 +132,7 @@ TypeModel build_type_model(const std::vector<Token>& tokens, const Program& prog
         for (auto i = close + 1; seen && i < function.scope_token; ++i) {
             if (tokens[i].kind == TokenKind::Comment) continue;
             if (tokens[i].text == ":") {
-                do { ++i; } while (i < function.scope_token && tokens[i].kind == TokenKind::Comment);
-                if (i < function.scope_token) signature.result = named_type(tokens[i].text, model.store);
+                std::vector<TypeId>members;for(++i;i<function.scope_token;++i){if(tokens[i].kind==TokenKind::Comment||tokens[i].text=="|")continue;auto type=named_type(tokens[i].text,model.store);if(tokens[i].kind==TokenKind::String)type=model.store.literal(model.store.string(),literal_value(tokens[i].text));else if(tokens[i].kind==TokenKind::Number)type=model.store.literal(tokens[i].text.back()=='n'?model.store.bigint():model.store.number(),tokens[i].text);if(type==model.store.unknown()){members.clear();break;}members.push_back(type);}signature.result=model.store.union_of(std::move(members));
                 break;
             }
         }

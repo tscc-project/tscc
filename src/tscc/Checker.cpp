@@ -1,5 +1,6 @@
 #include "Checker.h"
 #include "Type.h"
+#include <unordered_map>
 #include <unordered_set>
 
 namespace tscc {
@@ -11,6 +12,7 @@ std::vector<std::size_t> significant_tokens(const std::vector<Token>& tokens,
         if (tokens[i].kind != TokenKind::Comment) result.push_back(i);
     return result;
 }
+std::string literal_value(const std::string&text){return text.size()>=2&&(text.front()=='\''||text.front()=='"')?text.substr(1,text.size()-2):text;}
 
 struct ExpressionResult {
     TypeId type = 0;
@@ -23,8 +25,8 @@ class PrimitiveExpressionTyper {
 public:
     PrimitiveExpressionTyper(const std::vector<Token>& tokens, std::size_t begin,
                              std::size_t end, const BindingModel& binding,
-                             const TypeModel& types)
-        : tokens_(tokens), binding_(binding), types_(types), sig_(significant_tokens(tokens, begin, end)) {}
+                             const TypeModel& types,const std::unordered_map<std::size_t,TypeId>*facts=nullptr)
+        : tokens_(tokens), binding_(binding), types_(types), facts_(facts),sig_(significant_tokens(tokens, begin, end)) {}
 
     ExpressionResult run() {
         ExpressionResult result;
@@ -40,6 +42,7 @@ private:
     const std::vector<Token>& tokens_;
     const BindingModel& binding_;
     const TypeModel& types_;
+    const std::unordered_map<std::size_t,TypeId>*facts_;
     std::vector<std::size_t> sig_;
     std::size_t pos_ = 0;
     std::size_t error_token_ = static_cast<std::size_t>(-1);
@@ -63,12 +66,13 @@ private:
             return types_.store.literal(!token.text.empty() && token.text.back() == 'n'
                        ? types_.store.bigint() : types_.store.number(),token.text);
         if (token.kind == TokenKind::String || token.kind == TokenKind::Template)
-            return types_.store.literal(types_.store.string(),token.text);
+            return types_.store.literal(types_.store.string(),literal_value(token.text));
         if (token.text == "true" || token.text == "false") return types_.store.literal(types_.store.boolean(),token.text);
         if(token.text=="null")return types_.store.null();
         if(token.text=="undefined")return types_.store.undefined();
         if (token.kind == TokenKind::Identifier) {
             const auto symbol = binding_.symbol_for_reference(token_index);
+            if(facts_){auto fact=facts_->find(symbol);if(fact!=facts_->end()&&!(pos_<sig_.size()&&tokens_[sig_[pos_]].text=="("))return fact->second;}
             if (pos_ < sig_.size() && tokens_[sig_[pos_]].text == "(") {
                 ++pos_; std::vector<TypeId> arguments;
                 if (pos_ < sig_.size() && tokens_[sig_[pos_]].text != ")") for (;;) {
@@ -175,8 +179,8 @@ private:
 
 ExpressionResult expression_type(const std::vector<Token>& tokens, std::size_t begin,
                                  std::size_t end, const BindingModel& binding,
-                                 const TypeModel& types) {
-    return PrimitiveExpressionTyper(tokens, begin, end, binding, types).run();
+                                 const TypeModel& types,const std::unordered_map<std::size_t,TypeId>*facts=nullptr) {
+    return PrimitiveExpressionTyper(tokens, begin, end, binding, types,facts).run();
 }
 
 void report_expression_error(const SourceFile& source, const std::vector<Token>& tokens,
@@ -222,6 +226,10 @@ bool check_program(const SourceFile& source, const std::vector<Token>& tokens,
                    const Program& program, const SemanticModel& model,
                    const BindingModel& binding, const TypeModel& types,
                    Diagnostics& diagnostics) {
+    struct FlowFact{std::size_t begin,end,symbol;TypeId type;};std::vector<FlowFact>flow;
+    auto next_sig=[&](std::size_t i){while(i<tokens.size()&&tokens[i].kind==TokenKind::Comment)++i;return i;};
+    auto match=[&](std::size_t open,const char*l,const char*r){int depth=0;for(std::size_t i=open;i<tokens.size();++i){if(tokens[i].text==l)++depth;else if(tokens[i].text==r&&--depth==0)return i;}return tokens.size();};
+    for(std::size_t i=0;i<tokens.size();++i){if(tokens[i].text!="if")continue;auto open=next_sig(i+1);if(open>=tokens.size()||tokens[open].text!="(")continue;auto close=match(open,"(",")");if(close>=tokens.size())continue;auto sig=significant_tokens(tokens,open+1,close);std::size_t ref=static_cast<std::size_t>(-1);TypeId narrowed=types.store.unknown();if(sig.size()==4&&tokens[sig[0]].text=="typeof"&&tokens[sig[1]].kind==TokenKind::Identifier&&tokens[sig[2]].text=="==="&&tokens[sig[3]].kind==TokenKind::String){ref=sig[1];const auto t=literal_value(tokens[sig[3]].text);if(t=="string")narrowed=types.store.string();else if(t=="number")narrowed=types.store.number();else if(t=="boolean")narrowed=types.store.boolean();}else if(sig.size()==3&&tokens[sig[0]].kind==TokenKind::Identifier&&tokens[sig[1]].text=="==="){ref=sig[0];const auto&v=tokens[sig[2]];if(v.text=="null")narrowed=types.store.null();else if(v.text=="undefined")narrowed=types.store.undefined();else if(v.kind==TokenKind::String)narrowed=types.store.literal(types.store.string(),literal_value(v.text));else if(v.kind==TokenKind::Number)narrowed=types.store.literal(v.text.back()=='n'?types.store.bigint():types.store.number(),v.text);else if(v.text=="true"||v.text=="false")narrowed=types.store.literal(types.store.boolean(),v.text);}auto body=next_sig(close+1);if(ref==static_cast<std::size_t>(-1)||narrowed==types.store.unknown()||body>=tokens.size()||tokens[body].text!="{")continue;auto body_end=match(body,"{","}");const auto symbol=binding.symbol_for_reference(ref);if(symbol<binding.symbols.size()&&body_end<tokens.size())flow.push_back({body+1,body_end,symbol,narrowed});}
     for (const auto& node : model.nodes) {
         if (node.kind != SemanticNodeKind::VariableDeclaration ||
             node.variable_index >= program.variables.size()) continue;
@@ -233,9 +241,10 @@ bool check_program(const SourceFile& source, const std::vector<Token>& tokens,
             }
         if (declaration.initializer_end_token <= declaration.initializer_begin_token)
             continue;
+        std::unordered_map<std::size_t,TypeId>facts;std::size_t best=tokens.size();for(const auto&fact:flow)if(declaration.initializer_begin_token>=fact.begin&&declaration.initializer_end_token<=fact.end&&fact.end-fact.begin<=best){facts[fact.symbol]=fact.type;best=fact.end-fact.begin;}
         const auto expression = expression_type(tokens, declaration.initializer_begin_token,
                                                 declaration.initializer_end_token,
-                                                binding, types);
+                                                binding, types,facts.empty()?nullptr:&facts);
         report_expression_error(source, tokens, expression, diagnostics);
         const auto actual = expression.type;
         if (!expression.error.empty() || expected == types.store.unknown() ||
@@ -257,6 +266,7 @@ bool check_program(const SourceFile& source, const std::vector<Token>& tokens,
             if (span < owner_span) { owner = i; owner_span = span; }
         }
         if (owner >= types.function_signatures.size()) continue;
+        std::size_t same_name=0;for(const auto&symbol:binding.symbols)if(symbol.kind==SymbolKind::Function&&symbol.name==binding.symbols[owner].name&&symbol.scope==binding.symbols[owner].scope)++same_name;if(same_name>1)continue;
         const auto expected = types.function_signatures[owner].result;
         if (expected == types.store.unknown()) continue;
         const auto expression = expression_type(tokens, node.begin_token + 1, node.end_token,

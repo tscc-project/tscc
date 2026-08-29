@@ -151,7 +151,8 @@ overloads, generics and contextual typing remain later TC6 expansions.
 ### TC7 - Literal, union, null, and undefined types
 
 CP14/TC7A completes canonical literal, normalized union and nullish identities
-with bounded assignability. CP17/TC7B owns equality/`typeof` branch narrowing.
+with bounded assignability. CP17/TC7B completes strict equality/`typeof`
+then-branch facts and lexical restoration; full flow joins remain later work.
 
 ### TC8 - Object and property types
 

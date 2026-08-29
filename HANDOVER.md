@@ -65,7 +65,7 @@ erasure, generics, enums, namespaces, parameter properties, project/relative
 module discovery, TSX preserve mode, CommonJS lowering with live imported reads,
 module grammar hardening, scope/shadowing work, and import attributes.
 
-The independent corpus currently contains 523 cases: 497 pass, zero fail, and 26
+The independent corpus currently contains 525 cases: 499 pass, zero fail, and 26
 semantic-checker-only skips at the retained checkpoint. Counts are evidence, not
 the product definition. Ten semantic cases are implemented; the project is not
 implicitly a drop-in replacement for all `tsc` behavior.
@@ -73,6 +73,11 @@ implicitly a drop-in replacement for all `tsc` behavior.
 CP14/TC7A adds canonical literal, union, `null` and `undefined` identities,
 normalized union ownership and bounded assignability. Narrowing and flow joins
 remain CP17 work.
+
+CP17/TC7B adds branch-local facts for strict `typeof` and literal/nullish
+equality guards. Facts apply only inside the guarded brace region and restore on
+exit. Else complements, mutation invalidation, joins, loops and definite
+assignment remain future flow-graph work.
 
 ## Build and validation
 

@@ -498,6 +498,22 @@
     "diagnostic_contains": "is not assignable to type"
   },
   {
+    "name": "semantic-narrowed-branch-mismatch",
+    "kind": "semantic-only",
+    "src": "const value:string|number='x';if(typeof value==='string'){const bad:number=value;}",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "Type 'string' is not assignable to type 'number'."
+  },
+  {
+    "name": "semantic-narrowing-restoration",
+    "kind": "semantic-only",
+    "src": "function check(value:string|number){if(typeof value==='string'){const ok:string=value;}const bad:string=value;}",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "is not assignable to type 'string'."
+  },
+  {
     "name": "tuple-type",
     "kind": "runtime",
     "src": "const x:[number,string]=[1,\"a\"]; console.log(x[0],x[1]);",
