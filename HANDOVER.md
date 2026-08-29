@@ -82,10 +82,12 @@ make test-tsx
 make test-commonjs
 ```
 
-Inspect the current Makefile because `make test` currently runs only the smoke
-target; the additional targets must be invoked deliberately for a complete
-checkpoint. Benchmarks live in `benchmarks/`; their README and JSON files retain
-local checkpoint evidence. The Makefile has no named sanitizer target.
+`make test` is the complete aggregate correctness gate and currently runs the
+smoke, parser, binder, type-model, source-edit, checker, runtime, project,
+independent regression, TSX, and CommonJS targets. Focused targets remain useful
+for iteration. `make test-sanitize` builds and smoke-runs the ASan/UBSan candidate;
+the retained memory-safety checkpoint targets provide the deeper lifetime,
+project-pressure, RSS, and Valgrind evidence. Benchmarks live in `benchmarks/`.
 
 The regression runner requires the candidate `tscc`, Node, and TypeScript `tsc`.
 It uses `tsc --noCheck` as syntax/emission reference and normal `tsc` to classify
@@ -145,6 +147,8 @@ without explicit approval.
 - `TESTING.md`: runtime, differential, scope, and malformed-input evidence.
 - `DECISIONS.md`: current scope and rejected assumptions.
 - `ROADMAP.md`: living production-readiness risk assessment.
+- `COMPILER-JS-ROADMAP.md`: coordinated checkpoint plan for developing tscc as
+  a compiler, building JS++, and integrating them through explicit boundaries.
 - `PROJECT-HISTORY.md`: detailed tscc history and institutional context,
   including compiler semantics, production definition, and roadmap evolution.
 
@@ -154,6 +158,23 @@ These documents are living infrastructure. Review them whenever architecture,
 language scope, compatibility, tests/corpus, build/release workflow, website
 claims, or durable compiler lessons change. Consolidate rather than append a
 diary. Every substantial checkpoint must review handover and roadmap impact.
+
+## Coordinated tscc and JS++ direction (2026-08-29)
+
+The next development campaign is defined in
+`docs/handover/COMPILER-JS-ROADMAP.md`. Its central boundary is settled unless
+new evidence justifies reopening it:
+
+- tscc owns TypeScript syntax, binding, types, diagnostics, project/module
+  compilation, lowering, and JavaScript emission;
+- JS++ owns executable ECMAScript parsing, bytecode, runtime semantics, values,
+  objects, environments, garbage collection, exceptions, modules, and embedding;
+- normal tscc compilation does not execute compiler input through JS++;
+- the first integration is test-only: eligible emitted JavaScript is parsed and
+  executed in both Node and JS++ as JS++ gains the necessary coverage;
+- no existing tscc component migrates merely because it is JavaScript-facing.
+  Sharing is considered only after both implementations exist and a checkpoint
+  proves a stable common contract.
 
 ## Memory-safety Checkpoint 5A (2026-08-18)
 

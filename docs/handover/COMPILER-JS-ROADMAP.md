@@ -1,0 +1,308 @@
+# Coordinated tscc and JS++ roadmap
+
+## Purpose
+
+This living checkpoint plan coordinates three goals:
+
+1. move tscc from its protected transpiler foundation toward a genuine
+   TypeScript type-checking compiler;
+2. build JS++ as an independent embeddable JavaScript engine;
+3. integrate JS++ where it materially strengthens tscc without turning the
+   compiler into a runtime wrapper or forcing premature shared architecture.
+
+Near checkpoints are deliberately more specific than distant ones. Later work
+must be reassessed as implementation evidence exposes the real constraints.
+
+## Product boundary
+
+### tscc owns
+
+- TypeScript and supported JavaScript compiler input;
+- compiler-quality source locations, syntax recovery, declarations, scopes,
+  symbols, binding, TypeScript merging, types, inference, narrowing, checking,
+  and diagnostics;
+- project graphs, module resolution, configuration, and incremental invalidation;
+- TypeScript lowering, target-specific JavaScript emission, source maps, and
+  declaration output.
+
+### JS++ owns
+
+- executable ECMAScript parsing and runtime semantics;
+- bytecode and virtual-machine execution;
+- JavaScript values, objects, prototypes, environments, closures, exceptions,
+  garbage collection, jobs, modules, and built-ins;
+- native embedding plus the `js`, `js.h`, `libjs.a`, and `libjs.so` artifacts.
+
+### Dependency rule
+
+tscc compiles ordinary projects without executing their source. JS++ begins as
+a test/runtime oracle beside Node. Optional production integration is allowed
+later only for a concrete, deterministic, resource-bounded compiler feature.
+Execution is never a substitute for implementing TypeScript semantics.
+
+## Checkpoint discipline
+
+Every checkpoint requires relevant focused tests, independent contract cases,
+a clean optimized build, sanitizer coverage for native ownership changes,
+unchanged accepted behaviour unless deliberately revised, reconciled handovers
+and roadmaps, and an exact accepted repository head. Checkpoints do not imply a
+release or public compatibility claim.
+
+## Foundation checkpoints
+
+### F0 - Reconcile the retained baseline
+
+Correct stale statements about aggregate tests, sanitizers, the bounded checker,
+corpus counts, and prepared/staged output. Record the verified 519-case baseline
+without changing behaviour.
+
+### F1 - Freeze the product boundary
+
+Record the ownership and dependency rules in tscc, JS++, both regression suites,
+and their websites. Reject private cross-repository includes and an implicit
+required JS++ runtime dependency.
+
+### F2 - Establish executable feature matrices
+
+Classify JS++ features as tokenized, parsed, compiled, executed, error-tested,
+embedding-tested, and conformance-tested. Classify tscc features as parsed,
+bound, typed, lowered, emitted, runtime-tested, diagnostic-tested, and
+project-tested. Use explicit versioned targets rather than broad language claims.
+
+## tscc compiler checkpoints
+
+### TC1 - Durable compilation unit
+
+Create stable per-file ownership for source, tokens, syntax, semantic structure,
+binding, type facts, diagnostics, options, and output while preserving behaviour.
+
+### TC2 - One program and module graph
+
+Make one program graph own roots, discovered files, identities, dependencies,
+compilation units, program diagnostics, and emission policy. Retire the duplicate
+`Compiler.cpp` traversal after parity evidence.
+
+### TC3 - Durable syntax identity
+
+Grow stable node IDs, relationships, exact spans, token ownership, and recovery
+nodes for the next semantic slices. Retain the range/replacement emitter as a
+compatibility path during migration.
+
+### TC4 - Recovery and syntax diagnostics
+
+Harden EOF, delimiters, generic/relational and TSX ambiguity, comments, semicolon
+boundaries, and recovery without consuming following declarations. Add
+deterministic fuzz-ready parser entry points.
+
+### TC5 - Declaration and scope completion
+
+Bind arrows, destructuring, defaults/rest, classes and members, remaining
+block/loop forms, imports/exports, hoisting regions, and merging foundations.
+Retire CommonJS shadow heuristics one protected binding family at a time.
+
+### TC6 - Function signatures and calls
+
+Add parameter and return types, optional/rest parameters, callable types,
+function declarations/expressions, arguments, return checking, and diagnostics.
+Establish explicit signatures before overloads or generic inference.
+
+### TC7 - Literal, union, null, and undefined types
+
+Add literal types, unions and normalization, nullish types, assignability, and
+bounded equality/`typeof` narrowing.
+
+### TC8 - Object and property types
+
+Add object type literals, property lookup, optional/readonly properties, object
+literal checking, property access, structural assignment, and an explicit
+excess-property compatibility decision.
+
+### TC9 - Classes and constructors
+
+Add instance/static sides, constructors, fields, methods, visibility,
+inheritance, `this`, `super`, overrides, and abstract members.
+
+### TC10 - Generic foundations
+
+Add type parameters, constraints, explicit instantiation, substitution and
+recursion guards, then bounded inference after explicit forms are sound.
+
+### TC11 - Control flow and narrowing
+
+Introduce flow facts for assignment, branches, returns, loops, truthiness,
+discriminants, `typeof`, `instanceof`, and definite assignment.
+
+### TC12 - Cross-module symbols and types
+
+Add export tables, import aliases, type-only edges, re-exports, cycles, and
+cross-file callable/object type propagation on the unified program graph.
+
+### TC13 - Libraries and package resolution
+
+Add declaration files, configurable standard libraries, package lookup,
+`package.json` fields, path mappings, and versioned module-resolution modes.
+
+### TC14 - Incremental compiler service
+
+Add persistent programs, changed-file invalidation, reusable syntax/symbol/type
+state, watch operation, and clean-versus-incremental equivalence gates.
+
+### TC15 - Source maps and declarations
+
+Add source maps, declaration emission, later declaration maps, atomic multi-output
+policy, collision handling, and stale-output handling.
+
+### TC16 - Production compiler campaign
+
+Exercise representative projects, large graphs, diagnostics, malformed/generated
+inputs, fuzzing, memory tools, supported platforms, release artifacts, and clearly
+separated comparisons with `tsc --noCheck` and checked `tsc`. Assess production
+transpiler and production checker milestones independently.
+
+## JS++ checkpoints
+
+### JS0 - Repository and build foundation
+
+Create the C++17 layout, Make build, `include/js.h`, CLI/library targets, tests,
+handovers, and independent regression runner.
+
+### JS1 - Embedding lifecycle
+
+Implement opaque runtime/value types, creation/destruction, evaluation, errors,
+versioning, allocator policy, value lifetime, runtime affinity, and an explicit
+thread-safety contract.
+
+### JS2 - Source, diagnostics, lexer, and parser
+
+Implement UTF-8 source ownership, locations, ECMAScript tokens, comments,
+literals, semicolon rules, executable syntax, and controlled recovery. Parsing
+is independently testable before execution.
+
+### JS3 - Bytecode and primitive execution
+
+Implement an inspectable unoptimized VM for primitive values, variables,
+arithmetic, comparisons, expression completion, and bytecode disassembly.
+
+### JS4 - Control flow
+
+Add blocks, conditions, loops, break/continue, short-circuiting, conditional
+expressions, and completion propagation with side-effect-order tests.
+
+### JS5 - Functions and environments
+
+Add functions, calls, parameters, returns, recursion, lexical environments,
+closures, and then arrows.
+
+### JS6 - Objects and arrays
+
+Add ordinary objects, arrays, properties/descriptors, computed access, methods,
+`this`, prototypes, constructors, and `new`.
+
+### JS7 - Garbage collection
+
+Introduce tracing collection after roots are explicit across the VM stack,
+environments, objects, native handles, and exceptions. Add allocation pressure,
+teardown, sanitizer, and Valgrind evidence.
+
+### JS8 - Exceptions
+
+Add throw/try/catch/finally, completion interaction, native error propagation,
+uncaught reporting, and stack traces.
+
+### JS9 - Conversions and built-ins
+
+Centralize ECMAScript conversions and add Object, Array, String, Number, Boolean,
+Math, JSON, and errors as tested families.
+
+### JS10 - Native functions and handles
+
+Extend `js.h` with persistent handles, native functions, arguments, property
+construction, exceptions, user data, finalizers, and safe re-entry rules.
+
+### JS11 - Promises and jobs
+
+Add promises, reactions, a host-controlled job queue, then async functions.
+Networking, filesystems, and timers remain host facilities.
+
+### JS12 - Modules
+
+Add module parsing, records, linking, cycles, live bindings, host resolver hooks,
+and later dynamic import.
+
+### JS13 - Broader ECMAScript slices
+
+Add classes, destructuring, rest/spread, generators/iterators, symbols,
+collections, regular expressions, typed arrays, dates, and other modern families
+as complete parse/compile/runtime/error slices.
+
+### JS14 - Conformance and hardening
+
+Run selected Test262 with explicit supported, unsupported,
+harness-inapplicable, failed, crash, and timeout classifications. Add parser,
+bytecode, and execution fuzzing.
+
+### JS15 - Packaging and releases
+
+Ship supported platform libraries/CLI, pkg-config/CMake metadata, ABI versioning,
+per-user and `--system` installation, release automation, examples, and
+evidence-backed documentation.
+
+## Integration checkpoints
+
+### INT0 - Dual-runtime regression harness
+
+Execute eligible tscc output under Node and JS++. Node remains the compatibility
+oracle; JS++ failures remain engine gaps until the supported intersection is
+explicitly promoted.
+
+### INT1 - Independent output parsing
+
+When dependable, use the JS++ parser as an optional test gate before Node
+execution. Keep it a test dependency initially.
+
+### INT2 - Shared emitted-JavaScript corpus
+
+Establish clearly owned cases from enums, namespaces, parameter properties,
+CommonJS helpers, closures, classes, and evaluation-order defects. Avoid
+manually divergent copies.
+
+### INT3 - Syntax-sharing decision gate
+
+Compare source ownership, tokens, diagnostics, executable syntax, losslessness,
+TypeScript extension needs, and recovery. Share only a small public API if both
+implementations prove a stable common contract. Default to shared concepts and
+corpora, not private classes.
+
+### INT4 - Optional compile-time evaluation
+
+Consider embedding only for a concrete feature such as configuration,
+plugins/transformers, scripting, or deliberately safe constant evaluation. It
+must be opt-in, bounded, and isolated from ordinary compilation.
+
+### INT5 - Developer runtime validation
+
+If useful, expose an explicit developer/CI mode for validating or executing
+tscc output through JS++. Never silently execute code during normal compilation.
+
+### INT6 - Production dependency decision
+
+Choose between test-only integration, optional linked integration, a public
+syntax dependency, or a required runtime dependency. Default to test-only first
+and optional embedding later. A required dependency needs strong evidence and
+an explicit product decision.
+
+## Initial execution order
+
+Start with F0, F1, F2, TC1, JS0, JS1, TC2, JS2, JS3, then INT0. After INT0,
+alternate bounded compiler and engine slices according to evidence. The likely
+first major tscc semantic feature is callable types and call checking; the likely
+first major JS++ path is primitives through closures and objects.
+
+## Existing tscc migration policy
+
+Nothing moves initially. The TypeScript lexer/parser, range transforms, binder,
+checker, CommonJS lowering, and project machinery stay in tscc. Runtime harnesses
+become multi-engine. Output validation may later use a public JS++ parser. Generic
+source/diagnostic facilities are reconsidered only after comparative evidence.
+CommonJS lowering remains tscc-owned because it is a compiler transform; JS++
+separately owns ECMAScript module runtime semantics.
