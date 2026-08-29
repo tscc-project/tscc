@@ -329,3 +329,12 @@ arity and contextual result checking with ordinary calls. Interfaces may extend
 already-declared object interfaces and merge inherited required properties. The
 corpus is 559 cases at 535/0/24. Call signatures, index signatures, generic
 methods, forward inheritance and classes remain deferred.
+
+## CP37 nested expression ownership (2026-08-29)
+
+Parenthesized, object-property and array-element expressions now build bounded
+recursive subtrees instead of sharing the outer builder cursor. Context flows
+through parentheses and structural object properties, enabling contextual
+callbacks in both positions. The corpus is 563 cases at 539/0/24. Statement
+call-root discovery is still retained for constructs without durable statement
+expression children; replacing that final discovery layer remains future work.

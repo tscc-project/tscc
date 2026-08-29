@@ -323,3 +323,27 @@ fi
 grep -Fq "Property 'value' is missing" "$TMP/extends.err"
 
 printf 'tscc callable member and interface inheritance test passed\n'
+
+cat > "$TMP/nested-expression-ownership-valid.ts" <<'EOF'
+type Callback = (value: number) => number;
+function apply(value: number, callback: Callback): number { return callback(value); }
+const parenthesized: number = apply(41, (value => value + 1));
+type Options = { callback: Callback };
+const options: Options = {callback: value => value + 1};
+const objectResult: number = options.callback(41);
+EOF
+"$ROOT/tscc" --pretty false --noEmit "$TMP/nested-expression-ownership-valid.ts" >/dev/null
+
+printf '%s\n' "type Callback=(value:number)=>number;function apply(value:number,callback:Callback):number{return callback(value);}apply(41,(value=>value-'bad'));" >"$TMP/parenthesized-callback-invalid.ts"
+if "$ROOT/tscc" --pretty false --noEmit "$TMP/parenthesized-callback-invalid.ts" >"$TMP/parenthesized.out" 2>"$TMP/parenthesized.err"; then
+    echo "invalid parenthesized callback unexpectedly succeeded" >&2; exit 1
+fi
+grep -Fq "Operator '-' cannot be applied to types 'number' and 'string'." "$TMP/parenthesized.err"
+
+printf '%s\n' "type Callback=(value:number)=>number;type Options={callback:Callback};const options:Options={callback:value=>'bad'};" >"$TMP/object-callback-invalid.ts"
+if "$ROOT/tscc" --pretty false --noEmit "$TMP/object-callback-invalid.ts" >"$TMP/object-callback.out" 2>"$TMP/object-callback.err"; then
+    echo "invalid object callback unexpectedly succeeded" >&2; exit 1
+fi
+grep -Fq "Type 'string' is not assignable to type 'number'." "$TMP/object-callback.err"
+
+printf 'tscc nested expression ownership test passed\n'

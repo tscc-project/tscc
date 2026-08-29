@@ -268,6 +268,12 @@ argument and arity checks without a second method typer. The next object-model
 work should add index/call signatures or classes only after selecting a durable
 representation for those shapes.
 
+CP37 extends recursive expression ownership through parentheses, object values
+and array elements, and propagates object-property context into nested callable
+expressions. This materially reduces cursor-coupled parsing, but statement forms
+still need explicit expression-child identities before the global call-root
+discovery pass can be removed safely.
+
 If a feature reveals a binding/transform-ownership deficiency, prioritize that
 architecture before planned grammar features. If a real corpus demonstrates a
 high-value missing slice, reorder accordingly. Remove speculative work when a
