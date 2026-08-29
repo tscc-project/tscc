@@ -385,3 +385,6 @@ generics and classes remain decision-gated follow-on work.
 CP30 removes the checker compatibility token view: semantic expression typing
 now walks retained node kinds and child identities directly. Broader callable
 semantics can build on that graph without introducing another parser.
+CP31 makes callable signatures canonical type identities shared by aliases,
+annotated variables and declarations. The bounded variance policy is parameter
+contravariance and result covariance; call-through/contextual behavior follows.

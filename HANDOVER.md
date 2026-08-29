@@ -270,3 +270,12 @@ identifiers, parentheses, unary/binary operators, calls, property access, object
 literals and assignments. The compatibility significant-token view has been
 removed from `ExpressionNode`; precedence parsing exists only in the expression
 builder. This is an ownership change and retains the 509/0/24 contract.
+
+## CP31 canonical callable types (2026-08-30)
+
+Function types are now canonical `TypeStore` values carrying parameter, result,
+required-arity and rest metadata. Basic callable aliases and variable annotations
+resolve to those identities, and function declarations publish the same shape.
+Assignability uses contravariant parameters and covariant results for this bounded
+slice. Calls through variables and contextual function-expression typing remain
+CP32 work; the external contract remains 509/0/24.

@@ -13,7 +13,7 @@ namespace tscc {
 using TypeId = std::size_t;
 enum class TypeKind { Unknown, Number, String, Boolean, BigInt, Function, Null, Undefined, Literal, Union, Object };
 struct TypeProperty{std::string name;TypeId type=0;bool optional=false;bool readonly=false;};
-struct Type { TypeKind kind = TypeKind::Unknown;TypeId base=0;std::string literal;std::vector<TypeId> members;std::vector<TypeProperty>properties; };
+struct Type { TypeKind kind = TypeKind::Unknown;TypeId base=0;std::string literal;std::vector<TypeId> members;std::vector<TypeProperty>properties;std::vector<TypeId>parameters;TypeId result=0;std::size_t required_parameters=0;bool rest=false; };
 
 class TypeStore {
 public:
@@ -30,6 +30,8 @@ public:
     TypeId union_of(std::vector<TypeId>) const;
     bool assignable(TypeId actual,TypeId expected) const;
     TypeId object_of(std::vector<TypeProperty>)const;
+    TypeId function_of(std::vector<TypeId>,TypeId,std::size_t,bool)const;
+    const Type* callable(TypeId)const;
     const TypeProperty* property(TypeId,const std::string&)const;
     const std::vector<TypeProperty>& properties(TypeId)const;
     TypeKind kind(TypeId) const;
