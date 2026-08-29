@@ -53,6 +53,16 @@ SemanticModel build_semantic_model(const std::vector<Token>& tokens, const Progr
                                variable.name_token, end, variable.name_token, i});
     }
 
+    // Flat object/array binding patterns. Nested patterns and computed keys are
+    // deliberately left for the next binder expansion rather than guessed.
+    for (std::size_t keyword=0;keyword+2<tokens.size();++keyword) {
+        if (tokens[keyword].text!="const"&&tokens[keyword].text!="let"&&tokens[keyword].text!="var") continue;
+        const auto open=keyword+1;if(tokens[open].text!="{"&&tokens[open].text!="[")continue;
+        const auto close=matching(tokens,open,tokens[open].text.c_str(),tokens[open].text=="{"?"}":"]");if(close>=tokens.size())continue;
+        for(std::size_t p=open+1;p<close;++p){if(tokens[p].kind!=TokenKind::Identifier)continue;const bool at_binding_start=p==open+1||tokens[p-1].text==","||tokens[p-1].text=="...";bool binding=tokens[open].text=="["&&at_binding_start;if(tokens[open].text=="{"){const bool alias=p>open+1&&tokens[p-1].text==":";const bool shorthand=at_binding_start&&(p+1>=close||tokens[p+1].text==","||tokens[p+1].text=="}"||tokens[p+1].text=="=");binding=alias||shorthand;}if(binding)model.nodes.push_back({SemanticNodeKind::BindingDeclaration,p,p+1,p});}
+        keyword=close;
+    }
+
     for (std::size_t function_token = 0; function_token < tokens.size(); ++function_token) {
         if (tokens[function_token].text != "function") continue;
         std::size_t open = function_token + 1;
@@ -92,6 +102,51 @@ SemanticModel build_semantic_model(const std::vector<Token>& tokens, const Progr
             }
         }
     }
+
+    // Arrow functions need durable parameter/function-scope facts too. This
+    // bounded slice covers identifier parameter lists and single identifiers;
+    // destructured parameters remain explicit future binder work.
+    for (std::size_t arrow = 0; arrow < tokens.size(); ++arrow) {
+        if (tokens[arrow].text != "=>") continue;
+        std::size_t body = arrow + 1, end = statement_end(tokens, body), scope = arrow;
+        if (body < tokens.size() && tokens[body].text == "{") {
+            const auto close = matching(tokens, body, "{", "}");
+            if (close >= tokens.size()) continue;
+            end = close + 1; scope = body;
+        } else {
+            model.nodes.push_back({SemanticNodeKind::LexicalRegion, arrow, end,
+                                   static_cast<std::size_t>(-1), static_cast<std::size_t>(-1),
+                                   arrow, end});
+        }
+        model.nodes.push_back({SemanticNodeKind::ArrowFunction, arrow, end,
+                               static_cast<std::size_t>(-1), static_cast<std::size_t>(-1), scope});
+        std::size_t parameter_close=arrow;
+        for(std::size_t p=arrow;p-- > 0;){if(tokens[p].text==")"){parameter_close=p;break;}if(tokens[p].text==";"||tokens[p].text=="="||tokens[p].text=="{")break;}
+        if (parameter_close < arrow) {
+            int depth = 0; std::size_t open = arrow - 1;
+            for (std::size_t p = parameter_close+1; p-- > 0;) {
+                if (tokens[p].text == ")") ++depth;
+                else if (tokens[p].text == "(" && --depth == 0) { open = p; break; }
+            }
+            std::size_t part = open + 1;
+            for (std::size_t p = part; p <= parameter_close; ++p)
+                if (p == parameter_close || tokens[p].text == ",") {
+                    const auto name = first_parameter_name(tokens, part, p);
+                    if (name != static_cast<std::size_t>(-1))
+                        model.nodes.push_back({SemanticNodeKind::ParameterDeclaration,
+                                               part, p, name, static_cast<std::size_t>(-1), scope});
+                    part = p + 1;
+                }
+        } else if (arrow && tokens[arrow-1].kind == TokenKind::Identifier &&
+                   (arrow<2||tokens[arrow-2].text!=":")) {
+            model.nodes.push_back({SemanticNodeKind::ParameterDeclaration, arrow-1, arrow,
+                                   arrow-1, static_cast<std::size_t>(-1), scope});
+        }
+    }
+
+    for (std::size_t i = 0; i + 1 < tokens.size(); ++i)
+        if (tokens[i].text == "class" && tokens[i+1].kind == TokenKind::Identifier)
+            model.nodes.push_back({SemanticNodeKind::ClassDeclaration, i, i+2, i+1});
 
     for (std::size_t i = 0; i < tokens.size(); ++i) {
         if (tokens[i].kind == TokenKind::Comment) continue;

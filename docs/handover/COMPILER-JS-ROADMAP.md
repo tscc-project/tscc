@@ -132,6 +132,14 @@ Bind arrows, destructuring, defaults/rest, classes and members, remaining
 block/loop forms, imports/exports, hoisting regions, and merging foundations.
 Retire CommonJS shadow heuristics one protected binding family at a time.
 
+Completed as CP10 on 2026-08-30 for the bounded declaration families now used by
+the checker and emitter: ordinary functions, expression/block arrows with typed,
+default and rest identifier parameters, flat object/array destructuring, class
+names, catch/loop bindings, value imports, block/function scope, captures,
+shadowing and order-independent function lookup. Nested/computed destructuring,
+full class-member symbol tables and declaration merging remain later explicit
+slices rather than inferred from this checkpoint.
+
 ### TC6 - Function signatures and calls
 
 Add parameter and return types, optional/rest parameters, callable types,

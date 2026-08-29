@@ -192,6 +192,11 @@ fixtures, then compare emitted completion values under Node, JS++ and explicit
 fixture expectations. It is deliberately absent from `make test` and
 `make test-core`; normal compiler development still requires no JS++ artifact.
 
+CP10 expands binder-owned identity across arrow scopes, identifier defaults/rest,
+flat destructuring and class names while retaining explicit limits for nested
+patterns, member tables and merging. Do not reintroduce emitter guesses for
+binding families that remain outside this contract.
+
 ## Memory-safety Checkpoint 5A (2026-08-18)
 
 - Maintained compiler lifetime corpus added at `tests/memory_lifetime.cpp`, with Make targets for sanitizer, native RSS/project pressure and independent Valgrind confirmation.

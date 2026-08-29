@@ -47,6 +47,11 @@ control-flow analysis, export table, or cross-module type propagation.
 Transpiler-owned shadow analysis remains only as a compatibility bridge for
 unsupported binding forms.
 
+CP10 extends binder ownership to ordinary and arrow function scopes,
+typed/default/rest identifier parameters, flat object/array binding patterns and
+class-name symbols. Function lookup is order-independent. Nested/computed
+patterns, full member tables and declaration merging remain explicit gaps.
+
 `ProgramGraph` owns the shipped dependency traversal, canonical absolute file
 identities, roots, dependency edges, durable units and graph diagnostics. The
 compiler driver no longer has a parallel queue. Relative resolution is deliberately small: `.ts`,

@@ -8,7 +8,10 @@ namespace tscc {
 
 enum class SemanticNodeKind {
     VariableDeclaration,
+    BindingDeclaration,
     FunctionDeclaration,
+    ArrowFunction,
+    ClassDeclaration,
     ParameterDeclaration,
     BraceRegion,
     ReturnStatement,

@@ -37,6 +37,9 @@ and identity stability after emission.
 compares diagnostics plus stable syntax identity. It proves declarations after
 recovery boundaries remain visible and separately exercises the deterministic
 `ParserLimits` failure path.
+`test-declaration-scope` protects CP10 arrow scopes and parameters, rest/default
+forms, captures and shadowing, flat destructuring bindings, class-name identity
+and reference-before-function-declaration resolution.
 Keep focused targets available for iteration, but require the aggregate target at
 checkpoints.
 

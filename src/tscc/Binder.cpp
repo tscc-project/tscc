@@ -75,7 +75,8 @@ BindingModel bind_semantic_model(const std::vector<Token>& tokens, const Program
     }
 
     for (const auto& function : semantic.nodes) {
-        if (function.kind != SemanticNodeKind::FunctionDeclaration) continue;
+        if (function.kind != SemanticNodeKind::FunctionDeclaration &&
+            function.kind != SemanticNodeKind::ArrowFunction) continue;
         std::size_t body_scope = missing;
         for (std::size_t i = 1; i < binding.scopes.size(); ++i)
             if (binding.scopes[i].begin_token == function.scope_token) body_scope = i;
@@ -86,10 +87,18 @@ BindingModel bind_semantic_model(const std::vector<Token>& tokens, const Program
                                        static_cast<std::size_t>(&function - semantic.nodes.data())});
     }
 
+    for (std::size_t node_index = 0; node_index < semantic.nodes.size(); ++node_index) {
+        const auto& node = semantic.nodes[node_index];
+        if (node.kind != SemanticNodeKind::ClassDeclaration || node.name_token >= tokens.size()) continue;
+        binding.symbols.push_back({tokens[node.name_token].text, SymbolKind::Class,
+                                   node.name_token, containing_scope(binding,node.begin_token),node_index});
+    }
+
     std::unordered_set<std::size_t> declaration_tokens;
     for (std::size_t node_index = 0; node_index < semantic.nodes.size(); ++node_index) {
         const auto& node = semantic.nodes[node_index];
         if (node.kind != SemanticNodeKind::VariableDeclaration &&
+            node.kind != SemanticNodeKind::BindingDeclaration &&
             node.kind != SemanticNodeKind::ParameterDeclaration &&
             node.kind != SemanticNodeKind::CatchDeclaration) continue;
         if (node.name_token == missing || node.name_token >= tokens.size()) continue;

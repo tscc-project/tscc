@@ -69,7 +69,10 @@ const typedObject: {name: string; x: number} = {name: "Grace", x: 2};
             fail("semantic node has invalid source span");
         switch (node.kind) {
             case SemanticNodeKind::VariableDeclaration: ++declarations; break;
+            case SemanticNodeKind::BindingDeclaration: break;
             case SemanticNodeKind::FunctionDeclaration: ++functions_semantic; break;
+            case SemanticNodeKind::ArrowFunction: break;
+            case SemanticNodeKind::ClassDeclaration: break;
             case SemanticNodeKind::ParameterDeclaration: ++parameters; break;
             case SemanticNodeKind::BraceRegion: ++braces; break;
             case SemanticNodeKind::ReturnStatement: ++returns; break;
@@ -78,8 +81,8 @@ const typedObject: {name: string; x: number} = {name: "Grace", x: 2};
         }
     }
     if (declarations != program.variables.size() || functions_semantic != 1 ||
-        parameters != 2 || braces < 5 || returns < 3)
-        fail("unexpected lightweight semantic model shape");
+        parameters != 4 || braces < 5 || returns < 3)
+        { std::cerr<<"counts "<<declarations<<' '<<functions_semantic<<' '<<parameters<<' '<<braces<<' '<<returns<<'\n'; fail("unexpected lightweight semantic model shape"); }
 
     // Object-literal colons must not be parser-owned erasures.
     const auto object_colon = source.text.find("name: \"Ada\"");
