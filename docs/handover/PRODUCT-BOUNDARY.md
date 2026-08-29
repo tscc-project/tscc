@@ -30,7 +30,7 @@ garbage collection, jobs, modules, built-ins, the `js` shell, and the public
    checkpoint proving compatible ownership, losslessness, recovery, diagnostic,
    and extension requirements.
 
-## First integration
+## First integration — INT0 completed 2026-08-30
 
 The first planned integration is dual-runtime evidence:
 
@@ -39,8 +39,10 @@ TypeScript → tscc → JavaScript → Node reference
                              ↘ JS++ candidate
 ```
 
-Until an intersection is explicitly promoted, a JS++ mismatch is an engine gap,
-not a tscc regression.
+Six eligible fixtures now exercise this path through the two public CLIs. Node
+and a fixture expectation are independent oracles, so agreement alone cannot
+pass. Until a wider intersection is explicitly promoted, a JS++ mismatch remains
+an engine gap, not a normal tscc regression.
 
 ## Enforcement
 

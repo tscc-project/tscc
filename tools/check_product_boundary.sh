@@ -11,4 +11,9 @@ if rg -n '#include[[:space:]]*[<"][^>"]*js\.h[>"]|libjs|(^|[[:space:]])-ljs([[:s
     exit 1
 fi
 
+if sed -n '/^test:/p;/^test-core:/p' Makefile | rg -q 'test-js-interop|JS_RUNTIME'; then
+    echo "tscc product boundary violated: aggregate compiler gates require JS++" >&2
+    exit 1
+fi
+
 echo "tscc/JS++ product boundary check passed"

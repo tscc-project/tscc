@@ -20,7 +20,7 @@ test-smoke: tscc
 clean:
 	rm -f $(OBJECTS) $(DEPS) tscc
 	rm -rf .build
-.PHONY: all test test-core test-smoke test-parser test-parser-recovery test-syntax-identity test-binder test-types test-edits test-checker test-compilation-unit test-program-graph test-runtime test-project test-regression test-tsx test-commonjs test-product-boundary test-feature-matrix check-regression-sync test-sanitize memory-safety-smoke clean
+.PHONY: all test test-core test-smoke test-parser test-parser-recovery test-syntax-identity test-binder test-types test-edits test-checker test-compilation-unit test-program-graph test-runtime test-project test-regression test-js-interop test-tsx test-commonjs test-product-boundary test-feature-matrix check-regression-sync test-sanitize memory-safety-smoke clean
 
 
 test-parser:
@@ -73,6 +73,10 @@ test-project: tscc
 
 test-regression: tscc
 	python3 regression/run.py --tscc "$(CURDIR)/tscc"
+
+test-js-interop: tscc test-product-boundary
+	test -n "$(JS_RUNTIME)" || (echo "set JS_RUNTIME to the JS++ CLI" >&2; exit 2)
+	python3 ../tscc-regression-suite/run_interop.py --tscc "$(CURDIR)/tscc" --js "$(JS_RUNTIME)"
 
 check-regression-sync:
 	bash tools/check_regression_sync.sh

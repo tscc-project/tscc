@@ -40,6 +40,12 @@ recovery boundaries remain visible and separately exercises the deterministic
 Keep focused targets available for iteration, but require the aggregate target at
 checkpoints.
 
+`make test-js-interop JS_RUNTIME=/path/to/js` is the opt-in INT0 gate. It
+compiles six explicitly eligible TypeScript fixtures, executes each emitted file
+in Node and JS++, and requires both completion values to match a fixture-owned
+expectation. The runner self-tests equal-but-wrong and one-sided mismatch
+classification. This target is intentionally outside aggregate compiler gates.
+
 The retained `cjs-import-function-var-shadow` case proves the binder participates
 in production CommonJS emission: a function-local `var` must not be rewritten as
 the homonymous imported live binding. Legacy shadow-range coverage remains for

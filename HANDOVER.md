@@ -186,6 +186,12 @@ targets must not include `js.h`, link `libjs`, or compile JS++ private sources.
 Future test-only or optional integration must use an explicit target and a public
 JS++ surface rather than silently entering the compiler core.
 
+CP9/INT0 implements that first test-only adapter. Run
+`make test-js-interop JS_RUNTIME=/path/to/js` to compile six eligible TypeScript
+fixtures, then compare emitted completion values under Node, JS++ and explicit
+fixture expectations. It is deliberately absent from `make test` and
+`make test-core`; normal compiler development still requires no JS++ artifact.
+
 ## Memory-safety Checkpoint 5A (2026-08-18)
 
 - Maintained compiler lifetime corpus added at `tests/memory_lifetime.cpp`, with Make targets for sanitizer, native RSS/project pressure and independent Valgrind confirmation.

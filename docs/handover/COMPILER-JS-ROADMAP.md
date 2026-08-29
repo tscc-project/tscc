@@ -292,6 +292,15 @@ Execute eligible tscc output under Node and JS++. Node remains the compatibility
 oracle; JS++ failures remain engine gaps until the supported intersection is
 explicitly promoted.
 
+Completed as CP9 on 2026-08-30. The standalone tscc suite owns six explicitly
+eligible fixtures spanning erasure, control flow, typed functions, generics and
+closures. Each fixture compiles through the public `tscc` CLI, then the emitted
+file executes independently through Node and the public JS++ CLI. Expected values
+prevent two equally wrong runtimes from passing by agreement; an anti-agreement
+self-test exercises all mismatch classifications. The opt-in
+`make test-js-interop JS_RUNTIME=...` target is excluded from `test`/`test-core`,
+and the normal compiler still has no JS++ header, source or library dependency.
+
 ### INT1 - Independent output parsing
 
 When dependable, use the JS++ parser as an optional test gate before Node
