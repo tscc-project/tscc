@@ -10,6 +10,6 @@
 
 namespace tscc {
 bool check_program(const SourceFile&, const std::vector<Token>&, const Program&,
-                   const SemanticModel&, const BindingModel&, const TypeModel&,
+                   const SemanticModel&, const BindingModel&, TypeModel&,
                    ExpressionModel&, Diagnostics&);
 }

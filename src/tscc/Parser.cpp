@@ -484,6 +484,18 @@ void Parser::parse_variable_declarators(std::size_t first, std::size_t end) {
         // property whose value is an untyped arrow; do not reinterpret its colon.
     }
 
+    // Function expressions inside variable initializers carry the same
+    // erasable parameter/result syntax as declarations.
+    for(std::size_t p=first;p<end;++p)if(tokens_[p].text=="function"){
+        std::size_t open=p+1;while(open<end&&tokens_[open].text!="(")++open;
+        if(open>=end)continue;
+        const auto close=find_matching(open,"(",")");
+        if(close>=end)continue;
+        parse_parameter_list(open,close);std::size_t body=close+1;
+        if(body<end&&tokens_[body].text==":"){erase_type_annotation(body,end,{"{"});while(body<end&&tokens_[body].text!="{")++body;}
+        if(body<end&&tokens_[body].text=="{"){const auto body_close=find_matching(body,"{","}");if(body_close<end){parse_runtime_range(body+1,body_close);p=body_close;}}
+    }
+
     // Object-literal methods/accessors have TypeScript signatures too.
     for (std::size_t p = first; p < end; ++p) {
         if (tokens_[p].text == "{") {

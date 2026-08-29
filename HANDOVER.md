@@ -298,3 +298,14 @@ only variable initializers and ordinary function declarations. Standalone,
 branch-nested and throw-expression calls use the retained call-expression node
 for argument and arity typing. Broader non-call operator checking in every
 statement form remains incremental work. The corpus is 543 cases at 519/0/24.
+
+## CP34 callable inference and parameter forms (2026-08-30)
+
+Unannotated variables initialized by arrows or function expressions now acquire
+canonical callable types when parameter annotations and body results provide a
+bounded inference result. Calls use those inferred identities. Contextual
+callables accept optional/default/rest parameter forms and nested callable
+results. Typed function-expression parameters are erased during emission.
+The corpus is 549 cases at 525/0/24. Inline callback arrows nested directly in
+call arguments remain blocked on nested-arrow expression grammar; overloads,
+generics and broad return-flow inference remain deferred.

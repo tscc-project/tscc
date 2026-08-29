@@ -250,6 +250,12 @@ across the complete source token stream while retaining node-owned argument
 typing. Future work should replace discovery scans as statement/control-flow
 nodes gain durable expression-child identities; do not add a second typer.
 
+CP34 publishes inferred callable identities for bounded typed arrows/function
+expressions and completes optional/default/rest behavior for contextual callable
+variables. The evidence exposed nested callback arrows inside call arguments as
+the next expression-grammar seam. Solve that through recursive expression nodes,
+not a callback-specific token parser, before claiming general contextual typing.
+
 If a feature reveals a binding/transform-ownership deficiency, prioritize that
 architecture before planned grammar features. If a real corpus demonstrates a
 high-value missing slice, reorder accordingly. Remove speculative work when a

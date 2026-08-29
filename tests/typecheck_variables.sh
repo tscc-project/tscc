@@ -202,6 +202,34 @@ grep -Fq "Expected 1 arguments, but got 0." "$TMP/call-statement-arity.err"
 
 printf 'tscc whole-program call checking test passed\n'
 
+cat >"$TMP/inferred-callables-valid.ts" <<'TS'
+const add = (left: number, right: number) => left + right;
+const answer: number = add(20, 22);
+type Visit = (value: number, index?: number) => number;
+const visit: Visit = (value, index = 0) => value + index;
+const first: number = visit(42);
+type Sum = (head: number, ...tail: number) => number;
+const sum: Sum = (head, ...tail) => head;
+const total: number = sum(42, 1, 2);
+TS
+"$ROOT/tscc" --pretty false --noEmit "$TMP/inferred-callables-valid.ts" >/dev/null
+
+printf '%s\n' "const add=(left:number,right:number)=>left+right;add('bad',2);" >"$TMP/inferred-callable-argument.ts"
+if "$ROOT/tscc" --pretty false --noEmit "$TMP/inferred-callable-argument.ts" >"$TMP/inferred-argument.out" 2>"$TMP/inferred-argument.err"; then
+    echo "invalid inferred callable argument unexpectedly succeeded" >&2
+    exit 1
+fi
+grep -Fq "Argument of type 'string' is not assignable to parameter of type 'number'." "$TMP/inferred-argument.err"
+
+printf '%s\n' "const bad=(value:number)=>'wrong';const answer:number=bad(1);" >"$TMP/inferred-callable-result.ts"
+if "$ROOT/tscc" --pretty false --noEmit "$TMP/inferred-callable-result.ts" >"$TMP/inferred-result.out" 2>"$TMP/inferred-result.err"; then
+    echo "invalid inferred callable result unexpectedly succeeded" >&2
+    exit 1
+fi
+grep -Fq "Type 'string' is not assignable to type 'number'." "$TMP/inferred-result.err"
+
+printf 'tscc inferred/optional/rest callable test passed\n'
+
 cat >"$TMP/type-algebra-valid.ts" <<'TS'
 const mode: "on" | "off" = "on";
 const answer: 42 | string = 42;

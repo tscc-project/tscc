@@ -4271,5 +4271,11 @@
   {"name":"semantic-callable-statement-argument","kind":"semantic-only","src":"type F=(x:number)=>number;const f:F=x=>x;f('bad');","expect":null,"tscc_check":true,"diagnostic_contains":"Argument of type 'string' is not assignable to parameter of type 'number'."},
   {"name":"semantic-callable-statement-arity","kind":"semantic-only","src":"type F=(x:number)=>number;const f:F=x=>x;f();","expect":null,"tscc_check":true,"diagnostic_contains":"Expected 1 arguments, but got 0."},
   {"name":"semantic-callable-branch-argument","kind":"semantic-only","src":"type F=(x:number)=>number;const f:F=x=>x;if(true){f('bad');}","expect":null,"tscc_check":true,"diagnostic_contains":"Argument of type 'string' is not assignable to parameter of type 'number'."},
-  {"name":"semantic-callable-throw-argument","kind":"semantic-only","src":"type F=(x:number)=>number;const f:F=x=>x;throw f('bad');","expect":null,"tscc_check":true,"diagnostic_contains":"Argument of type 'string' is not assignable to parameter of type 'number'."}
+  {"name":"semantic-callable-throw-argument","kind":"semantic-only","src":"type F=(x:number)=>number;const f:F=x=>x;throw f('bad');","expect":null,"tscc_check":true,"diagnostic_contains":"Argument of type 'string' is not assignable to parameter of type 'number'."},
+  {"name":"inferred-arrow-callable-runtime","kind":"runtime","src":"const add=(left:number,right:number)=>left+right;console.log(add(20,22));","expect":"42"},
+  {"name":"inferred-function-callable-runtime","kind":"runtime","src":"const increment=function(value:number){return value+1;};console.log(increment(41));","expect":"42"},
+  {"name":"contextual-optional-callable-runtime","kind":"runtime","src":"type Visit=(value:number,index?:number)=>number;const visit:Visit=(value,index=0)=>value+index;console.log(visit(42));","expect":"42"},
+  {"name":"contextual-rest-callable-runtime","kind":"runtime","src":"type Sum=(head:number,...tail:number)=>number;const sum:Sum=(head,...tail)=>head;console.log(sum(42,1,2));","expect":"42"},
+  {"name":"semantic-inferred-callable-argument","kind":"semantic-only","src":"const add=(left:number,right:number)=>left+right;add('bad',2);","expect":null,"tscc_check":true,"diagnostic_contains":"Argument of type 'string' is not assignable to parameter of type 'number'."},
+  {"name":"semantic-inferred-callable-result","kind":"semantic-only","src":"const bad=(value:number)=>'wrong';const answer:number=bad(1);","expect":null,"tscc_check":true,"diagnostic_contains":"Type 'string' is not assignable to type 'number'."}
 ]
