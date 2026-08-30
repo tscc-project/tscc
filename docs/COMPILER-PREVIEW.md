@@ -71,6 +71,16 @@ environment reproduces the build and artifacts.
 6. **TCP5 - preview candidate:** representative projects, sanitizer/fuzz gates,
    performance guardrails, reproducible packages and exact public limitations.
 
-TCP0 comes next. Its main output is a reviewable contract manifest, not another
+TCP0 is frozen. Its main output is a reviewable contract manifest, not another
 feature. Later checkpoints must point to a failed preview acceptance item or
 remain outside this milestone.
+
+## Reassessment after TCP0-TCP2
+
+Project/output mechanics are no longer the primary preview blocker. TCP3 should
+close semantic gaps exposed by the frozen projects, led by cross-module exported
+and imported type identity; imported values currently compile conservatively as
+`unknown`, so the positive project executes but is not fully checked across its
+module boundary. TCP4 then freezes a deliberately module-free emitted-JavaScript
+intersection for JS++ rather than making ECMAScript/CommonJS module loading a
+runtime dependency. TCP5 is candidate evidence, not open-ended feature growth.

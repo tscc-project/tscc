@@ -409,3 +409,10 @@ and JSX is preserve-only. Project roots are sorted, unknown compiler options fai
 with TSCC3001, and repeated builds are byte-identical. Default error policy emits
 prepared valid siblings; `noEmitOnError` commits none. The focused gate executes
 the frozen positive project and pins both policies.
+
+## Post-TCP2 order decision (2026-08-30)
+
+After JS++ EP3, do TCP3 semantic closure with cross-module type propagation as
+the leading failed acceptance item. Follow JS++ EP4 with TCP4's module-free
+runtime intersection, then run EP5 and TCP5 candidate gates. Do not broaden into
+classes/generics/overloads unless the frozen preview corpus demonstrates a need.
