@@ -13,6 +13,30 @@ This living checkpoint plan coordinates three goals:
 Near checkpoints are deliberately more specific than distant ones. Later work
 must be reassessed as implementation evidence exposes the real constraints.
 
+## Current campaign status and next gate
+
+The bounded finish lines have been reached. TSCC TCP0-TCP5 is a qualified Linux
+compiler preview at 555/0/24, and JS++ EP0-EP5 is a qualified Linux embedded
+preview at 171/171. Their module-free runtime intersection is 7/7. These are
+evidence-backed preview contracts, not broad TypeScript or ECMAScript
+compatibility claims.
+
+The next campaign is evidence acquisition rather than immediate feature breadth:
+
+1. PC0V external Valgrind confirmation on Nick's Ubuntu machine, delegated to
+   DeepSeek when convenient;
+2. PC0P second-platform packaging, noting TSCC already has multi-platform CI
+   while JS++ currently has only the qualified Linux package;
+3. EP6A pinned selected-Test262 infrastructure and classifications;
+4. TCP6A a pinned, license-compatible real-project trial manifest and failure
+   classifier;
+5. a decision gate that selects TCP7 and the next JS++ vertical slice from those
+   results.
+
+PC0V is pending external evidence, not failed. Work may prepare EP6A and TCP6A
+without pretending Valgrind has run, but no broader release claim should bypass
+the external memory and platform confirmations.
+
 ## Product boundary
 
 ### tscc owns

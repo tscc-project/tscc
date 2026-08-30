@@ -457,3 +457,55 @@ Test262/conformance harness around the embedded subset; (4) choose TCP7 from tri
 evidence, with default/namespace/re-export type propagation and practical package
 resolution the current likely candidates. Do not begin promises, broad class
 semantics or a package resolver until evidence selects them.
+
+## Current game-plan handoff (2026-08-30)
+
+The original preview campaigns are complete rather than open-ended:
+
+- TSCC TCP0-TCP5 is qualified at 555 pass, 0 fail and 24 intentional
+  semantic-only skips, with a 7/7 Node/JS++ emitted-runtime intersection.
+- JS++ EP0-EP5 is qualified at 171/171 with ABI 0.1 packaging, the frozen C
+  embedding demonstration, containment, recovery, ASan/UBSan, deterministic
+  fuzzing and soak evidence.
+- TSCC remains a bounded TypeScript compiler preview, not a drop-in `tsc`
+  replacement. JS++ remains a bounded synchronous embedded preview, not a
+  general ECMAScript implementation.
+- Ordinary TSCC compilation still has no JS++ production dependency. JS++ is an
+  independent engine and test runtime at this stage.
+
+PC0 is now split so unavailable tooling does not turn into a false pass or block
+all useful work:
+
+1. **PC0V - external native-memory confirmation:** run TSCC's retained Valgrind
+   lifetime/project gates and the JS++ frozen host, lifecycle and VM gates under
+   Valgrind on Nick's Ubuntu machine. DeepSeek can perform this later because
+   Valgrind is installed there. Record versions, exact commands, exit codes,
+   leak/error summaries and repository heads. Do not weaken suppressions or
+   classify environment failures as product passes.
+2. **PC0P - second-platform packaging:** TSCC already has Ubuntu/macOS/Windows CI
+   and multi-platform release workflows. JS++ still needs CI/package coverage
+   beyond the locally qualified Linux ABI. Adding or running remote workflows is
+   a separate authorized task; no second-platform JS++ result is currently
+   claimed.
+
+After the current commits are pushed, the next development sequence is:
+
+1. **EP6A:** add a pinned selected-Test262 harness with explicit pass, fail,
+   unsupported, harness-inapplicable, crash and timeout classifications. Freeze
+   the imported revision and licensing; do not copy tests informally.
+2. **TCP6A:** define a curated small-project trial manifest and reproducible
+   runner. Projects must be real, pinned and license-compatible. Classify failures
+   by parser, binder, checker, resolution, configuration, emit and runtime rather
+   than immediately fixing every incompatibility.
+3. **Evidence review:** combine EP6A/TCP6A results with the later PC0V/PC0P
+   evidence. Choose the smallest vertical fixes that unlock meaningful cases.
+4. **TCP7 decision gate:** current candidates are default/namespace/re-export
+   type propagation and practical package resolution. Select one only when the
+   trial corpus demonstrates it is the leading compiler blocker.
+5. **JS++ decision gate:** choose jobs/promises, modules or another compatibility
+   slice only after Test262 and embedding-host evidence identifies the leading
+   engine limitation.
+
+Do not push, tag, release or broaden compatibility claims merely because the
+preview candidates are qualified. Update this section when PC0V, PC0P, EP6A or
+TCP6A produces evidence.
