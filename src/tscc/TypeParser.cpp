@@ -10,11 +10,11 @@ public:
         : tokens(t), cursor(i), end(end), store(store), named(named) {}
 
     TypeId parse() {
-        auto first = primary();
+        auto first = postfix_primary();
         if (first == store.unknown()) return first;
         std::vector<TypeId> members{first};
         while (take("|")) {
-            auto member = primary();
+            auto member = postfix_primary();
             if (member == store.unknown()) return member;
             members.push_back(member);
         }
@@ -22,6 +22,15 @@ public:
     }
 
 private:
+    TypeId postfix_primary() {
+        auto type = primary();
+        if (type == store.unknown()) return type;
+        while (take("[")) {
+            if (!take("]")) return store.unknown();
+            type = store.array_of(type);
+        }
+        return type;
+    }
     void noise() { while (cursor < end && tokens[cursor].kind == TokenKind::Comment) ++cursor; }
     bool take(const char* text) {
         noise();
@@ -49,7 +58,19 @@ private:
         if (cursor >= end) return store.unknown();
         if (tokens[cursor].text == "{") return object();
         if (tokens[cursor].text == "(") return function("=>");
+        if (tokens[cursor].text == "[") return tuple();
         return atom(tokens[cursor++]);
+    }
+    TypeId tuple() {
+        if (!take("[")) return store.unknown();
+        std::vector<TypeId> elements;
+        while (cursor < end && tokens[cursor].text != "]") {
+            auto element = parse();
+            if (element == store.unknown()) return element;
+            elements.push_back(element);
+            if (!take(",")) break;
+        }
+        return take("]") ? store.tuple_of(std::move(elements)) : store.unknown();
     }
     bool parameters(std::vector<TypeId>& types, std::size_t& required, bool& rest) {
         if (!take("(")) return false;

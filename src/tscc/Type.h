@@ -30,6 +30,10 @@ public:
     TypeId union_of(std::vector<TypeId>) const;
     bool assignable(TypeId actual,TypeId expected) const;
     TypeId object_of(std::vector<TypeProperty>,TypeId string_index=0,TypeId number_index=0,TypeId call_signature=0)const;
+    TypeId array_of(TypeId)const;
+    TypeId tuple_of(std::vector<TypeId>)const;
+    TypeId array_element(TypeId)const;
+    const std::vector<TypeId>& tuple_elements(TypeId)const;
     TypeId function_of(std::vector<TypeId>,TypeId,std::size_t,bool)const;
     const Type* callable(TypeId)const;
     const TypeProperty* property(TypeId,const std::string&)const;

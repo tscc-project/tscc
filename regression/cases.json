@@ -4301,5 +4301,11 @@
   {"name":"computed-string-index-runtime","kind":"runtime","src":"type Dictionary={[key:string]:number};const values:Dictionary={answer:42};const key:string='answer';console.log(values[key]);","expect":"42"},
   {"name":"computed-exact-property-runtime","kind":"runtime","src":"type Box={answer:number};const box:Box={answer:42};console.log(box['answer']);","expect":"42"},
   {"name":"computed-number-index-runtime","kind":"runtime","src":"type Row={[key:number]:number};const row:Row={0:42};const key:number=0;console.log(row[key]);","expect":"42"},
-  {"name":"semantic-computed-index-key","kind":"semantic-only","src":"type Dictionary={[key:string]:number};const values:Dictionary={answer:42};const key:boolean=true;const answer:number=values[key];","expect":null,"tscc_check":true,"diagnostic_contains":"has no matching index signature for 'boolean'."}
+  {"name":"semantic-computed-index-key","kind":"semantic-only","src":"type Dictionary={[key:string]:number};const values:Dictionary={answer:42};const key:boolean=true;const answer:number=values[key];","expect":null,"tscc_check":true,"diagnostic_contains":"has no matching index signature for 'boolean'."},
+  {"name":"typed-array-read-runtime","kind":"runtime","src":"const values:number[]=[40,2];console.log(values[0]+values[1]);","expect":"42"},
+  {"name":"typed-array-length-runtime","kind":"runtime","src":"const values:number[]=[40,2];const length:number=values.length;console.log(length);","expect":"2"},
+  {"name":"typed-tuple-read-runtime","kind":"runtime","src":"const pair:[number,string]=[42,'answer'];const answer:number=pair[0];console.log(pair[1],answer);","expect":"answer 42"},
+  {"name":"semantic-array-element-type","kind":"semantic-only","src":"const values:number[]=[1,'wrong'];","expect":null,"tscc_check":true,"diagnostic_contains":"is not assignable to type 'number[]'"},
+  {"name":"semantic-tuple-element-type","kind":"semantic-only","src":"const pair:[number,string]=['wrong','answer'];","expect":null,"tscc_check":true,"diagnostic_contains":"property '0' is not assignable to type 'number'"},
+  {"name":"semantic-tuple-access-type","kind":"semantic-only","src":"const pair:[number,string]=[42,'answer'];const wrong:number=pair[1];","expect":null,"tscc_check":true,"diagnostic_contains":"Type 'string' is not assignable to type 'number'."}
 ]

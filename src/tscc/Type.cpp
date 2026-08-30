@@ -16,7 +16,7 @@ TypeId annotation_type(const std::vector<Token>& tokens,
                        const VariableDeclaration& declaration,
                        const TypeStore& store,const std::unordered_map<std::string,TypeId>*named=nullptr) {
     auto first=declaration.type_begin_token;while(first<declaration.type_end_token&&tokens[first].kind==TokenKind::Comment)++first;
-    if(first<declaration.type_end_token&&(tokens[first].text=="{"||tokens[first].text=="("))return parse_type_annotation(tokens,first,declaration.type_end_token,store,named);
+    if(first<declaration.type_end_token){auto at=first;auto parsed=parse_type_annotation(tokens,at,declaration.type_end_token,store,named);while(at<declaration.type_end_token&&tokens[at].kind==TokenKind::Comment)++at;if(parsed!=store.unknown()&&at==declaration.type_end_token)return parsed;}
     std::vector<TypeId> members;
     for (auto i = declaration.type_begin_token; i < declaration.type_end_token; ++i) {
         if (tokens[i].kind == TokenKind::Comment || tokens[i].text == "|") continue;
@@ -41,20 +41,12 @@ TypeId named_type(const std::string& text, const TypeStore& store,const std::uno
 }
 TypeId node_annotation(const std::vector<Token>& tokens, const SemanticNode& node,
                        const TypeStore& store,const std::unordered_map<std::string,TypeId>*named=nullptr) {
-    bool colon = false;std::vector<TypeId>members;
-    for (auto i = node.name_token + 1; i < node.end_token && i < tokens.size(); ++i) {
-        if (tokens[i].kind == TokenKind::Comment) continue;
-        if (tokens[i].text == ":") { colon = true; continue; }
-        if (!colon||tokens[i].text=="|"||tokens[i].text=="?"||tokens[i].text=="...") continue;
-        if(tokens[i].text=="=")break;
-        TypeId type=named_type(tokens[i].text,store,named);
-        if(tokens[i].kind==TokenKind::String)type=store.literal(store.string(),literal_value(tokens[i].text));
-        else if(tokens[i].kind==TokenKind::Number)type=store.literal(tokens[i].text.back()=='n'?store.bigint():store.number(),tokens[i].text);
-        else if(tokens[i].text=="true"||tokens[i].text=="false")type=store.literal(store.boolean(),tokens[i].text);
-        if(type==store.unknown())return type;
-        members.push_back(type);
-    }
-    return store.union_of(std::move(members));
+    auto begin=node.name_token+1;
+    while(begin<node.end_token&&tokens[begin].kind==TokenKind::Comment)++begin;
+    if(begin<node.end_token&&tokens[begin].text=="?")++begin;
+    while(begin<node.end_token&&tokens[begin].kind==TokenKind::Comment)++begin;
+    if(begin>=node.end_token||tokens[begin].text!=":")return store.unknown();
+    ++begin;return parse_type_annotation(tokens,begin,node.end_token,store,named);
 }
 }
 
@@ -79,7 +71,7 @@ std::string TypeStore::name(TypeId id) const {
         case TypeKind::Null:return "null";case TypeKind::Undefined:return "undefined";
         case TypeKind::Literal:return types_[id].base==string()?"'"+types_[id].literal+"'":types_[id].literal;
         case TypeKind::Union:{std::string out;for(auto member:types_[id].members){if(!out.empty())out+=" | ";out+=name(member);}return out;}
-        case TypeKind::Object:return "object";
+        case TypeKind::Object:{if(types_[id].literal=="array")return name(types_[id].result)+"[]";if(types_[id].literal=="tuple"){std::string out="[";for(std::size_t i=0;i<types_[id].parameters.size();++i){if(i)out+=", ";out+=name(types_[id].parameters[i]);}return out+"]";}return "object";}
         default: return "unknown";
     }
 }
@@ -88,10 +80,14 @@ TypeId TypeStore::literal(TypeId base,const std::string&value)const{for(TypeId i
 TypeId TypeStore::union_of(std::vector<TypeId> members)const{std::vector<TypeId>flat;for(auto id:members){if(id==unknown())return id;if(kind(id)==TypeKind::Union)flat.insert(flat.end(),types_[id].members.begin(),types_[id].members.end());else flat.push_back(id);}std::sort(flat.begin(),flat.end());flat.erase(std::unique(flat.begin(),flat.end()),flat.end());std::vector<TypeId>bases;for(auto id:flat)if(kind(id)!=TypeKind::Literal)bases.push_back(id);flat.erase(std::remove_if(flat.begin(),flat.end(),[&](auto x){return kind(x)==TypeKind::Literal&&std::find(bases.begin(),bases.end(),types_[x].base)!=bases.end();}),flat.end());if(flat.empty())return unknown();if(flat.size()==1)return flat[0];for(TypeId i=8;i<types_.size();++i)if(types_[i].kind==TypeKind::Union&&types_[i].members==flat)return i;types_.push_back({TypeKind::Union,0,"",flat,{},{},0,0,false});return types_.size()-1;}
 bool TypeStore::assignable(TypeId actual,TypeId expected)const{if(actual==unknown()||expected==unknown()||actual==expected)return true;if(kind(expected)==TypeKind::Union){for(auto member:types_[expected].members)if(assignable(actual,member))return true;return false;}if(kind(actual)==TypeKind::Union){for(auto member:types_[actual].members)if(!assignable(member,expected))return false;return true;}if(kind(actual)==TypeKind::Literal)return types_[actual].base==expected;if(kind(actual)==TypeKind::Function&&kind(expected)==TypeKind::Function){const auto*a=callable(actual),*e=callable(expected);if(!a||!e)return actual==function()||expected==function();if(a->required_parameters>e->required_parameters||(!a->rest&&a->parameters.size()<e->parameters.size()))return false;for(std::size_t i=0;i<e->parameters.size();++i){const auto ai=i<a->parameters.size()?i:a->parameters.size()-1;if(a->parameters.empty()||!assignable(e->parameters[i],a->parameters[ai]))return false;}return assignable(a->result,e->result);}if(kind(expected)==TypeKind::Object&&types_[expected].call_signature!=unknown()&&kind(actual)==TypeKind::Function)return assignable(actual,types_[expected].call_signature);if(kind(actual)==TypeKind::Object&&kind(expected)==TypeKind::Object){if(types_[expected].call_signature!=unknown()&&(types_[actual].call_signature==unknown()||!assignable(types_[actual].call_signature,types_[expected].call_signature)))return false;for(const auto&wanted:types_[expected].properties){const auto*got=property(actual,wanted.name);if(!got){if(wanted.optional)continue;return false;}if(!assignable(got->type,wanted.type))return false;}if(types_[expected].string_index!=unknown()){for(const auto&got:types_[actual].properties)if(!assignable(got.type,types_[expected].string_index))return false;if(types_[actual].string_index!=unknown()&&!assignable(types_[actual].string_index,types_[expected].string_index))return false;}if(types_[expected].number_index!=unknown()&&types_[actual].number_index!=unknown()&&!assignable(types_[actual].number_index,types_[expected].number_index))return false;return true;}return false;}
 TypeId TypeStore::object_of(std::vector<TypeProperty>properties,TypeId string_index,TypeId number_index,TypeId call_signature)const{std::sort(properties.begin(),properties.end(),[](const auto&a,const auto&b){return a.name<b.name;});for(TypeId i=8;i<types_.size();++i)if(types_[i].kind==TypeKind::Object&&types_[i].properties.size()==properties.size()&&types_[i].string_index==string_index&&types_[i].number_index==number_index&&types_[i].call_signature==call_signature){bool same=true;for(std::size_t p=0;p<properties.size();++p){const auto&a=types_[i].properties[p];const auto&b=properties[p];same= same&&a.name==b.name&&a.type==b.type&&a.optional==b.optional&&a.readonly==b.readonly;}if(same)return i;}Type type;type.kind=TypeKind::Object;type.properties=std::move(properties);type.string_index=string_index;type.number_index=number_index;type.call_signature=call_signature;types_.push_back(std::move(type));return types_.size()-1;}
+TypeId TypeStore::array_of(TypeId element)const{for(TypeId i=8;i<types_.size();++i)if(types_[i].kind==TypeKind::Object&&types_[i].literal=="array"&&types_[i].result==element)return i;Type type;type.kind=TypeKind::Object;type.literal="array";type.result=element;type.number_index=element;type.properties={{"length",number(),false,true}};types_.push_back(std::move(type));return types_.size()-1;}
+TypeId TypeStore::tuple_of(std::vector<TypeId>elements)const{for(TypeId i=8;i<types_.size();++i)if(types_[i].kind==TypeKind::Object&&types_[i].literal=="tuple"&&types_[i].parameters==elements)return i;Type type;type.kind=TypeKind::Object;type.literal="tuple";type.parameters=elements;type.number_index=union_of(elements);type.properties.push_back({"length",literal(number(),std::to_string(elements.size())),false,true});for(std::size_t i=0;i<elements.size();++i)type.properties.push_back({std::to_string(i),elements[i],false,false});types_.push_back(std::move(type));return types_.size()-1;}
+TypeId TypeStore::array_element(TypeId id)const{return kind(id)==TypeKind::Object&&types_[id].literal=="array"?types_[id].result:unknown();}
+const std::vector<TypeId>&TypeStore::tuple_elements(TypeId id)const{static const std::vector<TypeId>empty;return kind(id)==TypeKind::Object&&types_[id].literal=="tuple"?types_[id].parameters:empty;}
 const TypeProperty*TypeStore::property(TypeId id,const std::string&name)const{if(kind(id)!=TypeKind::Object)return nullptr;for(const auto&property:types_[id].properties)if(property.name==name)return &property;if(types_[id].string_index!=unknown()){static thread_local TypeProperty indexed;indexed={name,types_[id].string_index,false,false};return &indexed;}return nullptr;}
 const std::vector<TypeProperty>&TypeStore::properties(TypeId id)const{static const std::vector<TypeProperty>empty;return kind(id)==TypeKind::Object?types_[id].properties:empty;}
 TypeId TypeStore::string_index(TypeId id)const{return kind(id)==TypeKind::Object?types_[id].string_index:unknown();}
-TypeId TypeStore::number_index(TypeId id)const{return kind(id)==TypeKind::Object?types_[id].number_index:(kind(id)==TypeKind::Number||kind(id)==TypeKind::String||kind(id)==TypeKind::Boolean||kind(id)==TypeKind::BigInt?id:unknown());}
+TypeId TypeStore::number_index(TypeId id)const{return kind(id)==TypeKind::Object?types_[id].number_index:unknown();}
 TypeId TypeStore::function_of(std::vector<TypeId>parameters,TypeId result,std::size_t required,bool rest)const{for(TypeId i=8;i<types_.size();++i)if(types_[i].kind==TypeKind::Function&&types_[i].parameters==parameters&&types_[i].result==result&&types_[i].required_parameters==required&&types_[i].rest==rest)return i;Type type;type.kind=TypeKind::Function;type.parameters=std::move(parameters);type.result=result;type.required_parameters=required;type.rest=rest;types_.push_back(std::move(type));return types_.size()-1;}
 const Type*TypeStore::callable(TypeId id)const{if(kind(id)==TypeKind::Object&&types_[id].call_signature!=unknown())id=types_[id].call_signature;return kind(id)==TypeKind::Function&&id!=function()?&types_[id]:nullptr;}
 

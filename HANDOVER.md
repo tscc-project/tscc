@@ -371,3 +371,11 @@ nodes with durable token ranges. The checker consumes those nodes alongside
 initializer and return owners; its binding-reference discovery scan is gone.
 Program-graph evidence pins retained roots and the 573-case corpus remains
 549/0/24. Full statement AST children beyond callable roots remain incremental.
+
+## CP42 canonical array and tuple types (2026-08-30)
+
+`T[]` and tuple annotations now receive canonical structural identities rather
+than collapsing to a primitive. Contextual array literals retain element types;
+tuples retain ordered positional types, exact numeric reads and literal length.
+Six cases raise the corpus to 579 and 555/0/24. Readonly arrays, optional/rest
+tuple elements, array methods and indexed-write checking remain deferred.
