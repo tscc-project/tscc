@@ -37,12 +37,17 @@ int main(int argc, char** argv) {
         const std::string arg = argv[i];
         if (arg == "--help" || arg == "-h") { help(); return 0; }
         if (arg == "--version" || arg == "-v") { std::cout << "tscc 0.15.0\n"; return 0; }
-        if ((arg == "--project" || arg == "-p") && i + 1 < argc) { project = argv[++i]; continue; }
-        if (arg == "--outDir" && i + 1 < argc) { options.out_dir = argv[++i]; continue; }
-        if (arg == "--rootDir" && i + 1 < argc) { options.root_dir = argv[++i]; continue; }
-        if (arg == "--module" && i + 1 < argc) { options.module = argv[++i]; continue; }
-        if (arg == "--jsx" && i + 1 < argc) { options.jsx = argv[++i]; continue; }
-        if (arg == "--target" && i + 1 < argc) { options.target = argv[++i]; continue; }
+        auto require_value = [&](const char* name) {
+            if (i + 1 < argc) return true;
+            std::cerr << "tscc: error TSCC0002: option '" << name << "' requires a value\n";
+            return false;
+        };
+        if (arg == "--project" || arg == "-p") { if(!require_value(arg.c_str()))return 2; project = argv[++i]; continue; }
+        if (arg == "--outDir") { if(!require_value("--outDir"))return 2; options.out_dir = argv[++i]; continue; }
+        if (arg == "--rootDir") { if(!require_value("--rootDir"))return 2; options.root_dir = argv[++i]; continue; }
+        if (arg == "--module") { if(!require_value("--module"))return 2; options.module = argv[++i]; continue; }
+        if (arg == "--jsx") { if(!require_value("--jsx"))return 2; options.jsx = argv[++i]; continue; }
+        if (arg == "--target") { if(!require_value("--target"))return 2; options.target = argv[++i]; continue; }
         if (arg == "--removeComments") { options.remove_comments = true; continue; }
         if (arg == "--noEmit") { options.no_emit = true; continue; }
         if (arg == "--noEmitOnError") { options.no_emit_on_error = true; continue; }
@@ -52,7 +57,7 @@ int main(int argc, char** argv) {
         }
         if (arg == "--pretty") { options.pretty = true; continue; }
         if (!arg.empty() && arg[0] == '-') {
-            std::cerr << "tscc: error: unknown option '" << arg << "'\n";
+            std::cerr << "tscc: error TSCC0001: unknown option '" << arg << "'\n";
             return 2;
         }
         files.push_back(arg);
@@ -60,7 +65,7 @@ int main(int argc, char** argv) {
 
     if (!project.empty()) {
         if (!files.empty()) {
-            std::cerr << "tscc: error: cannot mix --project with source files\n";
+            std::cerr << "tscc: error TSCC0003: cannot mix --project with source files\n";
             return 2;
         }
         tscc::Diagnostics diagnostics;

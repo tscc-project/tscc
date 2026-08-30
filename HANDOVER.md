@@ -394,3 +394,10 @@ drop-in `tsc` compatibility claim.
 emitted-only families, exclusions and candidate gates. The positive and negative
 multi-file projects live under `examples/compiler-preview/`. Production remains
 free of Node, `tsc` and JS++ dependencies.
+
+## TCP1 diagnostic contract (2026-08-30)
+
+Non-pretty diagnostics are deterministically ordered by file/location/severity/
+code/message and carry stable `TSCC` codes. CLI contract errors use TSCC0001-3,
+ordinary compiler errors use TSCC1000 and warnings use TSCC2000. Missing option
+values fail explicitly. `tests/diagnostic_contract.sh` pins the surface.

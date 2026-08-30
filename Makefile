@@ -20,7 +20,7 @@ test-smoke: tscc
 clean:
 	rm -f $(OBJECTS) $(DEPS) tscc
 	rm -rf .build
-.PHONY: all test test-core test-preview-contract test-smoke test-parser test-parser-recovery test-syntax-identity test-binder test-declaration-scope test-types test-edits test-checker test-compilation-unit test-program-graph test-runtime test-project test-regression test-js-interop test-tsx test-commonjs test-product-boundary test-feature-matrix check-regression-sync test-sanitize memory-safety-smoke clean
+.PHONY: all test test-core test-preview-contract test-diagnostics test-smoke test-parser test-parser-recovery test-syntax-identity test-binder test-declaration-scope test-types test-edits test-checker test-compilation-unit test-program-graph test-runtime test-project test-regression test-js-interop test-tsx test-commonjs test-product-boundary test-feature-matrix check-regression-sync test-sanitize memory-safety-smoke clean
 
 
 test-parser:
@@ -100,8 +100,10 @@ test-feature-matrix:
 
 test-preview-contract:
 	python3 ../tscc-regression-suite/validate_preview_contract.py
+test-diagnostics: tscc
+	bash tests/diagnostic_contract.sh
 
-test: test-preview-contract test-product-boundary test-feature-matrix test-smoke test-parser test-parser-recovery test-syntax-identity test-binder test-declaration-scope test-types test-edits test-checker test-compilation-unit test-program-graph test-runtime test-project test-regression test-tsx test-commonjs
+test: test-preview-contract test-diagnostics test-product-boundary test-feature-matrix test-smoke test-parser test-parser-recovery test-syntax-identity test-binder test-declaration-scope test-types test-edits test-checker test-compilation-unit test-program-graph test-runtime test-project test-regression test-tsx test-commonjs
 
 # Compiler-core gates that do not require a native node/tsc round-trip. CI
 # runs this on Windows (msys2): the node/tsc differential gates (runtime,

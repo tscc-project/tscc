@@ -34,8 +34,9 @@ matrix. A syntax feature being emitted does not imply it is semantically checked
 
 ### Diagnostics, output and operation
 
-Supported errors must carry stable file/line/column attribution, specific
-categories and deterministic ordering. Valid projects produce deterministic
+Supported errors carry stable file/line/column attribution, stable `TSCC` codes
+and deterministic ordering. CLI errors use `TSCC000x`, ordinary compiler errors
+currently use `TSCC1000`, and warnings use `TSCC2000`. Valid projects produce deterministic
 JavaScript; invalid projects obey the documented output policy. The preview
 ships a reproducible native binary with documented platforms and a versioned
 feature matrix, and passes clean-build, sanitizer, malformed-input,
