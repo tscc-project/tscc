@@ -9,7 +9,7 @@ namespace tscc {
 using ExpressionId=std::size_t;
 inline constexpr ExpressionId InvalidExpressionId=static_cast<ExpressionId>(-1);
 enum class ExpressionKind { Unknown,Identifier,Literal,Parenthesized,Unary,Binary,Call,Property,ObjectLiteral,ArrayLiteral,Assignment,Function };
-struct ExpressionNode { ExpressionId id=InvalidExpressionId;ExpressionKind kind=ExpressionKind::Unknown;std::size_t begin_token=0,end_token=0,operator_token=InvalidExpressionId;std::string text;std::vector<ExpressionId>children;std::vector<std::size_t>parameter_tokens;bool expression_body=false; };
+struct ExpressionNode { ExpressionId id=InvalidExpressionId;ExpressionKind kind=ExpressionKind::Unknown;std::size_t begin_token=0,end_token=0,operator_token=InvalidExpressionId;std::string text;std::vector<ExpressionId>children;std::vector<std::size_t>parameter_tokens;bool expression_body=false;bool computed=false; };
 class ExpressionModel {
  struct Builder {
   ExpressionModel&model;const std::vector<Token>&tokens;std::vector<std::size_t>sig;std::size_t pos=0;
@@ -20,6 +20,7 @@ class ExpressionModel {
    auto value=primary();
    for(;;){
     if(accept(".")){if(pos>=sig.size()||tokens[sig[pos]].kind!=TokenKind::Identifier)return add(ExpressionKind::Unknown,model.nodes_[value].begin_token,model.nodes_[value].end_token);auto property=sig[pos++];value=add(ExpressionKind::Property,model.nodes_[value].begin_token,property+1,tokens[property].text,{value},property);continue;}
+    if(accept("[")){const auto open=sig[pos-1],begin=pos;int depth=1;while(pos<sig.size()&&depth){if(tokens[sig[pos]].text=="[")++depth;else if(tokens[sig[pos]].text=="]"&&--depth==0)break;++pos;}if(depth||begin==pos)return add(ExpressionKind::Unknown,model.nodes_[value].begin_token,model.nodes_[value].end_token);auto key=sub(begin,pos);++pos;auto property=add(ExpressionKind::Property,model.nodes_[value].begin_token,sig[pos-1]+1,{}, {value,key},open);model.nodes_[property].computed=true;value=property;continue;}
     if(accept("(")){
      std::vector<ExpressionId>children{value};
      while(pos<sig.size()&&tokens[sig[pos]].text!=")"){

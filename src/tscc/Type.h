@@ -34,6 +34,8 @@ public:
     const Type* callable(TypeId)const;
     const TypeProperty* property(TypeId,const std::string&)const;
     const std::vector<TypeProperty>& properties(TypeId)const;
+    TypeId string_index(TypeId)const;
+    TypeId number_index(TypeId)const;
     TypeKind kind(TypeId) const;
     TypeId widen(TypeId) const;
     std::string name(TypeId) const;

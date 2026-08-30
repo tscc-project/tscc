@@ -355,3 +355,11 @@ parser implementation. Parameter lists, function types, object members, methods,
 index signatures, call signatures and unions are parsed through small productions
 instead of the former monolithic routine. Existing 569-case evidence remains
 545/0/24; this architecture checkpoint intentionally adds no support claim.
+
+## CP40 computed element-access typing (2026-08-30)
+
+Computed property nodes now retain both receiver and key expression children.
+String literals prefer exact declared properties; dynamic string and number keys
+select CP38's canonical index identities, with number keys falling back to a
+string index. Four cases raise the corpus to 573 and 549/0/24. General array,
+tuple, symbol-key and indexed-write checking remain deferred.

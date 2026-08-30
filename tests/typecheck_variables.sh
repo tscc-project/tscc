@@ -371,3 +371,21 @@ fi
 grep -Fq "Argument of type 'number' is not assignable to parameter of type 'string'." "$TMP/call-signature.err"
 
 printf 'tscc index and callable object signature test passed\n'
+
+cat > "$TMP/computed-access-valid.ts" <<'EOF'
+type Dictionary = { [key: string]: number };
+const dictionary: Dictionary = {answer: 42};
+const key: string = "answer";
+const answer: number = dictionary[key];
+type Row = { [key: number]: string };
+const row: Row = {0: "ready"};
+const label: string = row[0];
+EOF
+"$ROOT/tscc" --pretty false --noEmit "$TMP/computed-access-valid.ts" >/dev/null
+
+printf '%s\n' 'type Dictionary={[key:string]:number};const value:Dictionary={answer:42};const key:boolean=true;const answer:number=value[key];' >"$TMP/computed-access-invalid.ts"
+if "$ROOT/tscc" --pretty false --noEmit "$TMP/computed-access-invalid.ts" >"$TMP/computed-access.out" 2>"$TMP/computed-access.err"; then
+    echo "invalid computed key unexpectedly succeeded" >&2; exit 1
+fi
+grep -Fq "has no matching index signature for 'boolean'." "$TMP/computed-access.err"
+printf 'tscc computed element-access typing test passed\n'

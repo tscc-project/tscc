@@ -4297,5 +4297,9 @@
   {"name":"semantic-string-index-signature-value","kind":"semantic-only","src":"type Dictionary={[key:string]:number};const bad:Dictionary={answer:'wrong'};","expect":null,"tscc_check":true,"diagnostic_contains":"is not assignable to type 'object'"},
   {"name":"semantic-callable-object-argument","kind":"semantic-only","src":"type Parser={(text:string):number};const parse:Parser=text=>42;parse(42);","expect":null,"tscc_check":true,"diagnostic_contains":"Argument of type 'number' is not assignable to parameter of type 'string'."},
   {"name":"semantic-callable-object-arity","kind":"semantic-only","src":"type Parser={(text:string):number};const parse:Parser=text=>42;parse();","expect":null,"tscc_check":true,"diagnostic_contains":"Expected 1 arguments, but got 0."},
-  {"name":"semantic-callable-object-result","kind":"semantic-only","src":"type Parser={(text:string):number};const parse:Parser=text=>'wrong';","expect":null,"tscc_check":true,"diagnostic_contains":"Type 'string' is not assignable to type 'number'."}
+  {"name":"semantic-callable-object-result","kind":"semantic-only","src":"type Parser={(text:string):number};const parse:Parser=text=>'wrong';","expect":null,"tscc_check":true,"diagnostic_contains":"Type 'string' is not assignable to type 'number'."},
+  {"name":"computed-string-index-runtime","kind":"runtime","src":"type Dictionary={[key:string]:number};const values:Dictionary={answer:42};const key:string='answer';console.log(values[key]);","expect":"42"},
+  {"name":"computed-exact-property-runtime","kind":"runtime","src":"type Box={answer:number};const box:Box={answer:42};console.log(box['answer']);","expect":"42"},
+  {"name":"computed-number-index-runtime","kind":"runtime","src":"type Row={[key:number]:number};const row:Row={0:42};const key:number=0;console.log(row[key]);","expect":"42"},
+  {"name":"semantic-computed-index-key","kind":"semantic-only","src":"type Dictionary={[key:string]:number};const values:Dictionary={answer:42};const key:boolean=true;const answer:number=values[key];","expect":null,"tscc_check":true,"diagnostic_contains":"has no matching index signature for 'boolean'."}
 ]
