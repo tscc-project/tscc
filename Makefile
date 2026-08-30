@@ -2,6 +2,9 @@ CXX ?= g++
 CXXFLAGS ?= -std=c++17 -O2 -Wall -Wextra -pedantic
 DEPFLAGS ?= -MMD -MP
 CPPFLAGS ?= -Isrc
+PREFIX ?= /usr/local
+BINDIR ?= $(PREFIX)/bin
+DATADIR ?= $(PREFIX)/share/tscc
 SANITIZER_FLAGS ?= -O1 -g -fno-omit-frame-pointer -fsanitize=address,undefined
 SAN_TARGET := .build/tscc-sanitize
 MEMORY_SMOKE := .build/tscc-parser-memory-san
@@ -20,7 +23,18 @@ test-smoke: tscc
 clean:
 	rm -f $(OBJECTS) $(DEPS) tscc
 	rm -rf .build
-.PHONY: all test test-core test-preview-contract test-diagnostics test-project-output-contract test-smoke test-parser test-parser-recovery test-syntax-identity test-binder test-declaration-scope test-types test-edits test-checker test-compilation-unit test-program-graph test-runtime test-project test-regression test-js-interop test-tsx test-commonjs test-product-boundary test-feature-matrix check-regression-sync test-sanitize memory-safety-smoke clean
+.PHONY: all install package package-test test-preview-candidate test test-core test-preview-contract test-diagnostics test-project-output-contract test-smoke test-parser test-parser-recovery test-syntax-identity test-binder test-declaration-scope test-types test-edits test-checker test-compilation-unit test-program-graph test-runtime test-project test-regression test-js-interop test-tsx test-commonjs test-product-boundary test-feature-matrix check-regression-sync test-sanitize memory-safety-smoke clean
+
+install: tscc
+	install -d "$(DESTDIR)$(BINDIR)" "$(DESTDIR)$(DATADIR)/docs" "$(DESTDIR)$(DATADIR)/examples"
+	install -m 0755 tscc "$(DESTDIR)$(BINDIR)/tscc"
+	install -m 0644 LICENSE "$(DESTDIR)$(DATADIR)/LICENSE"
+	install -m 0644 docs/COMPILER-PREVIEW.md docs/compiler-preview-contract.json "$(DESTDIR)$(DATADIR)/docs/"
+	cp -R examples/compiler-preview "$(DESTDIR)$(DATADIR)/examples/"
+package: tscc
+	bash tools/package_preview.sh
+package-test: package
+	bash tests/package_preview.sh
 
 
 test-parser:
@@ -85,6 +99,9 @@ test-js-interop: tscc test-product-boundary
 
 test-preview-interop: test-js-interop
 
+test-preview-candidate: test package-test test-sanitize test-preview-interop
+	bash tests/preview_candidate.sh
+
 check-regression-sync:
 	bash tools/check_regression_sync.sh
 
@@ -127,7 +144,7 @@ $(SAN_TARGET): $(SAN_OBJECTS)
 	$(CXX) -std=c++17 $(SANITIZER_FLAGS) $(SAN_OBJECTS) -o $(SAN_TARGET)
 
 test-sanitize: $(SAN_TARGET)
-	ASAN_OPTIONS="$${ASAN_OPTIONS:-detect_leaks=1:halt_on_error=1}" UBSAN_OPTIONS=halt_on_error=1 ./$(SAN_TARGET) --version
+	ASAN_OPTIONS="$${ASAN_OPTIONS:-detect_leaks=0:halt_on_error=1}" UBSAN_OPTIONS=halt_on_error=1 ./$(SAN_TARGET) --version
 
 -include $(SAN_DEPS)
 

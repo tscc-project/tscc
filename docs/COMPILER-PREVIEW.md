@@ -89,3 +89,13 @@ TCP4 freezes that intersection at
 `examples/compiler-preview/jspp-intersection.ts`. Its emitted JavaScript passes
 Node and JS++ with the same explicit completion value. The source deliberately
 contains no import/export syntax, filesystem access or host-specific globals.
+
+## TCP5 candidate result
+
+The bounded Linux compiler preview is qualified, not declared `tsc` compatible.
+Its full corpus is 555 pass, 0 fail and 24 intentional semantic-only skips; the
+runtime intersection is 7/7. Frozen and representative projects, ASan/UBSan, 400
+deterministic malformed mutations, reproducible archives and a deliberately loose
+startup guardrail pass. LeakSanitizer or Valgrind remains an external confirmation
+outside the ptrace-managed runner. The manifest and evidence JSON retain the exact
+limits.

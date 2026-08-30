@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "candidate": "tscc Compiler Preview",
+  "platform": "Linux x86_64",
+  "regression": {"pass": 555, "fail": 0, "semantic_skip": 24},
+  "jspp_intersection": {"pass": 7, "fail": 0},
+  "fuzz_mutations": 400,
+  "startup_guardrail": "100 single-file noEmit processes under 10 seconds",
+  "gates": ["frozen-positive-negative", "diagnostic-contract", "deterministic-output", "both-emit-policies", "representative-projects", "asan-ubsan", "deterministic-fuzz", "reproducible-package", "node-jspp-intersection"],
+  "external_confirmation": ["LeakSanitizer or Valgrind outside a ptrace-managed runner"],
+  "limitations": ["not a drop-in tsc replacement", "ES2022 only", "JSX preserve only", "bounded semantic subset", "no declaration emit", "no source maps", "no incremental or watch mode", "no package/node_modules resolution", "no path mapping"]
+}

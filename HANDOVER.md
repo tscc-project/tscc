@@ -435,3 +435,15 @@ and numeric completion, with no modules or host APIs. `make
 test-preview-interop JS_RUNTIME=...` compiles it through production TSCC and
 requires both Node and JS++ to return `42`. The independent intersection is now
 7/7. This is emitted-subset evidence, not a JS++ module-loading claim.
+
+## TCP5 compiler preview candidate (2026-08-30)
+
+The bounded Linux compiler preview is qualified at 555/0/24 plus the 7/7
+Node/JS++ intersection. The candidate gate covers the frozen positive and
+cross-module negative projects, a representative existing project, deterministic
+diagnostics/output and emit policies, ASan/UBSan, 400 deterministic malformed
+mutations, a loose 100-process startup guardrail and byte-identical preview
+archives. The archive installs the binary, license, contract, preview docs and
+frozen examples. LeakSanitizer/Valgrind remains external under the ptrace-managed
+runner. Exact evidence and limitations are in
+`docs/evidence/compiler-preview-candidate.json`.

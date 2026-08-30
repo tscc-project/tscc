@@ -1,7 +1,8 @@
 {
   "schema_version": 1,
   "milestone": "tscc Compiler Preview",
-  "status": "contract-frozen",
+  "status": "preview-candidate-qualified",
+  "candidate_evidence": "docs/evidence/compiler-preview-candidate.json",
   "production_dependencies": [],
   "cli": ["source-files", "--project", "--outDir", "--rootDir", "--module", "--jsx", "--target", "--removeComments", "--noEmit", "--noEmitOnError", "--noResolve", "--pretty"],
   "module_modes": ["preserve", "esnext", "commonjs"],
