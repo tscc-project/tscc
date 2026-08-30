@@ -21,7 +21,10 @@ jobs:
     env:
       TSCC_REGRESSION_SUITE_DIR: ${{ github.workspace }}/tscc-regression-suite
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out TSCC
+        uses: actions/checkout@v4
+        with:
+          path: tscc
       - name: Check out pinned regression contract
         uses: actions/checkout@v4
         with:
@@ -33,10 +36,13 @@ jobs:
           npm install -g typescript
       - name: Build
         run: make -j2
+        working-directory: tscc
       - name: Test
         run: make test
+        working-directory: tscc
       - name: Sanitize build
         run: make test-sanitize
+        working-directory: tscc
         env:
           ASAN_OPTIONS: ${{ matrix.asan_options }}
 

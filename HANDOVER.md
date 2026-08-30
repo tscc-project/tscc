@@ -524,3 +524,17 @@ exports its absolute path. Keep the commit pinned and update it deliberately
 whenever compiler/suite contracts advance together. Do not switch this checkout
 to an unpinned moving branch or remove the aggregate gate merely to keep CI
 green.
+
+## CI aggregate topology repair (2026-08-30)
+
+The first provisioning repair checked out the pinned suite, but nested it inside
+the default TSCC checkout. The suite validator deliberately derives the compiler
+repository as its sibling, so that layout produced `tscc/tscc/docs/...` and
+failed before compiler tests with `NotADirectoryError`.
+
+Unix CI now checks out TSCC at `${GITHUB_WORKSPACE}/tscc` and the pinned suite at
+`${GITHUB_WORKSPACE}/tscc-regression-suite`, then runs build, test and sanitizer
+steps with `working-directory: tscc`. This matches the aggregate workspace model
+used locally. Windows retains its self-contained default checkout and
+`test-core`. Keep the two Unix checkouts as siblings unless the suite validator
+is explicitly redesigned around a passed compiler-repository path.
