@@ -509,3 +509,18 @@ After the current commits are pushed, the next development sequence is:
 Do not push, tag, release or broaden compatibility claims merely because the
 preview candidates are qualified. Update this section when PC0V, PC0P, EP6A or
 TCP6A produces evidence.
+
+## CI aggregate-suite provisioning repair (2026-08-30)
+
+The first post-preview push exposed an undeclared workspace assumption: Unix CI
+checked out only TSCC, while `make test` expected
+`../tscc-regression-suite/validate_preview_contract.py`. Windows passed its
+self-contained `test-core`; Linux/macOS failed before compiler testing.
+
+`TSCC_REGRESSION_SUITE_DIR` now owns the suite location, defaulting to the
+existing sibling layout for local aggregate work. Unix CI checks out regression
+suite commit `c80d065e673bd1a7e0e1769835e12dc13cc54836` into the workspace and
+exports its absolute path. Keep the commit pinned and update it deliberately
+whenever compiler/suite contracts advance together. Do not switch this checkout
+to an unpinned moving branch or remove the aggregate gate merely to keep CI
+green.

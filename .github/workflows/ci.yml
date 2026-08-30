@@ -18,8 +18,16 @@ jobs:
           - runner: macos-latest
             asan_options: "detect_leaks=0:halt_on_error=1"
     runs-on: ${{ matrix.runner }}
+    env:
+      TSCC_REGRESSION_SUITE_DIR: ${{ github.workspace }}/tscc-regression-suite
     steps:
       - uses: actions/checkout@v4
+      - name: Check out pinned regression contract
+        uses: actions/checkout@v4
+        with:
+          repository: tscc-project/tscc-regression-suite
+          ref: c80d065e673bd1a7e0e1769835e12dc13cc54836
+          path: tscc-regression-suite
       - name: Install test oracles
         run: |
           npm install -g typescript

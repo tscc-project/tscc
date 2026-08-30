@@ -6,6 +6,7 @@ PREFIX ?= /usr/local
 BINDIR ?= $(PREFIX)/bin
 DATADIR ?= $(PREFIX)/share/tscc
 SANITIZER_FLAGS ?= -O1 -g -fno-omit-frame-pointer -fsanitize=address,undefined
+TSCC_REGRESSION_SUITE_DIR ?= ../tscc-regression-suite
 SAN_TARGET := .build/tscc-sanitize
 MEMORY_SMOKE := .build/tscc-parser-memory-san
 SOURCES := src/main.cpp src/tscc/Diagnostic.cpp src/tscc/Source.cpp src/tscc/Lexer.cpp src/tscc/Parser.cpp src/tscc/Semantic.cpp src/tscc/Binder.cpp src/tscc/Type.cpp src/tscc/Checker.cpp src/tscc/CompilationUnit.cpp src/tscc/SourceEdit.cpp src/tscc/Transpiler.cpp src/tscc/Project.cpp src/tscc/Config.cpp src/tscc/Compiler.cpp
@@ -95,7 +96,8 @@ test-regression: tscc
 
 test-js-interop: tscc test-product-boundary
 	test -n "$(JS_RUNTIME)" || (echo "set JS_RUNTIME to the JS++ CLI" >&2; exit 2)
-	python3 ../tscc-regression-suite/run_interop.py --tscc "$(CURDIR)/tscc" --js "$(JS_RUNTIME)"
+	test -f "$(TSCC_REGRESSION_SUITE_DIR)/run_interop.py" || (echo "TSCC regression suite not found at $(TSCC_REGRESSION_SUITE_DIR)" >&2; exit 2)
+	python3 "$(TSCC_REGRESSION_SUITE_DIR)/run_interop.py" --tscc "$(CURDIR)/tscc" --js "$(JS_RUNTIME)"
 
 test-preview-interop: test-js-interop
 
@@ -118,7 +120,8 @@ test-feature-matrix:
 	python3 tools/check_feature_matrix.py
 
 test-preview-contract:
-	python3 ../tscc-regression-suite/validate_preview_contract.py
+	test -f "$(TSCC_REGRESSION_SUITE_DIR)/validate_preview_contract.py" || (echo "TSCC regression suite not found at $(TSCC_REGRESSION_SUITE_DIR)" >&2; exit 2)
+	python3 "$(TSCC_REGRESSION_SUITE_DIR)/validate_preview_contract.py"
 test-diagnostics: tscc
 	bash tests/diagnostic_contract.sh
 test-project-output-contract: tscc
