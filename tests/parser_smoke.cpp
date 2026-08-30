@@ -76,6 +76,7 @@ const typedObject: {name: string; x: number} = {name: "Grace", x: 2};
             case SemanticNodeKind::ParameterDeclaration: ++parameters; break;
             case SemanticNodeKind::BraceRegion: ++braces; break;
             case SemanticNodeKind::ReturnStatement: ++returns; break;
+            case SemanticNodeKind::ExpressionRoot: break;
             case SemanticNodeKind::LexicalRegion: break;
             case SemanticNodeKind::CatchDeclaration: break;
         }
