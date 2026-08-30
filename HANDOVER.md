@@ -447,3 +447,13 @@ archives. The archive installs the binary, license, contract, preview docs and
 frozen examples. LeakSanitizer/Valgrind remains external under the ptrace-managed
 runner. Exact evidence and limitations are in
 `docs/evidence/compiler-preview-candidate.json`.
+
+## Post-preview reassessment (2026-08-30)
+
+The next order is evidence-first: (1) PC0 run external leak/Valgrind and second-
+platform package checks for both products; (2) TCP6 trial TSCC on a curated set of
+real small projects and classify every failure; (3) EP6 add a pinned selected
+Test262/conformance harness around the embedded subset; (4) choose TCP7 from trial
+evidence, with default/namespace/re-export type propagation and practical package
+resolution the current likely candidates. Do not begin promises, broad class
+semantics or a package resolver until evidence selects them.
