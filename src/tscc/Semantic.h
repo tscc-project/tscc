@@ -15,6 +15,7 @@ enum class SemanticNodeKind {
     ParameterDeclaration,
     BraceRegion,
     ReturnStatement,
+    ExpressionRoot,
     LexicalRegion,
     CatchDeclaration,
 };

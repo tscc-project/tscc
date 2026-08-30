@@ -363,3 +363,11 @@ String literals prefer exact declared properties; dynamic string and number keys
 select CP38's canonical index identities, with number keys falling back to a
 string index. Four cases raise the corpus to 573 and 549/0/24. General array,
 tuple, symbol-key and indexed-write checking remain deferred.
+
+## CP41 durable statement expression ownership (2026-08-30)
+
+Standalone, branch/loop-header and throw call roots are retained as semantic
+nodes with durable token ranges. The checker consumes those nodes alongside
+initializer and return owners; its binding-reference discovery scan is gone.
+Program-graph evidence pins retained roots and the 573-case corpus remains
+549/0/24. Full statement AST children beyond callable roots remain incremental.

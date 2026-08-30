@@ -186,6 +186,31 @@ SemanticModel build_semantic_model(const std::vector<Token>& tokens, const Progr
                                        name, static_cast<std::size_t>(-1), i, end});
         }
     }
+
+    // Retain callable expression roots in the semantic graph. The checker can
+    // now consume these owned ranges instead of rediscovering calls from the
+    // binding-reference table. Nested calls remain children of the outer range.
+    for (std::size_t begin = 0; begin < tokens.size(); ++begin) {
+        if (tokens[begin].kind != TokenKind::Identifier) continue;
+        std::size_t open = begin + 1;
+        while (open < tokens.size() && tokens[open].kind == TokenKind::Comment) ++open;
+        while (open + 1 < tokens.size() && tokens[open].text == ".") {
+            ++open;
+            while (open < tokens.size() && tokens[open].kind == TokenKind::Comment) ++open;
+            if (open >= tokens.size() || tokens[open].kind != TokenKind::Identifier) break;
+            ++open;
+            while (open < tokens.size() && tokens[open].kind == TokenKind::Comment) ++open;
+        }
+        if (open >= tokens.size() || tokens[open].text != "(") continue;
+        const auto close = matching(tokens, open, "(", ")");
+        if (close >= tokens.size()) continue;
+        bool contained = false;
+        for (const auto& node : model.nodes)
+            if (node.kind == SemanticNodeKind::ExpressionRoot && begin > node.begin_token && close < node.end_token)
+                { contained = true; break; }
+        if (!contained)
+            model.nodes.push_back({SemanticNodeKind::ExpressionRoot, begin, close + 1});
+    }
     return model;
 }
 

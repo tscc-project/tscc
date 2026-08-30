@@ -224,33 +224,13 @@ bool check_program(const SourceFile& source, const std::vector<Token>& tokens,
                             expression.type, expected, types.store, diagnostics);
     }
 
-    // Calls are checked wherever they occur, including standalone statements,
-    // loop/branch headers and throw expressions. The retained call node remains
-    // the sole owner of argument typing; this scan only discovers source roots.
-    for (const auto& reference : binding.references) {
-        bool already_owned=false;for(const auto&range:owned_expression_ranges)if(reference.token>=range.first&&reference.token<range.second){already_owned=true;break;}if(already_owned)continue;
-        if (reference.symbol >= types.symbol_types.size()) continue;
-        std::size_t open = reference.token + 1;
-        while (open < tokens.size() && tokens[open].kind == TokenKind::Comment) ++open;
-        bool member_call=false;
-        while(open+1<tokens.size()&&tokens[open].text=="."){
-            ++open;while(open<tokens.size()&&tokens[open].kind==TokenKind::Comment)++open;
-            if(open>=tokens.size()||tokens[open].kind!=TokenKind::Identifier)break;
-            member_call=true;++open;while(open<tokens.size()&&tokens[open].kind==TokenKind::Comment)++open;
-        }
-        const bool declared_function = reference.symbol < types.function_signatures.size() &&
-                                       types.function_signatures[reference.symbol].valid;
-        if(member_call&&types.store.kind(types.symbol_types[reference.symbol])!=TypeKind::Object)continue;
-        if (!member_call&&!declared_function&&!types.store.callable(types.symbol_types[reference.symbol])) continue;
-        if (open >= tokens.size() || tokens[open].text != "(") continue;
-        std::size_t end = open + 1; int depth = 1;
-        for (; end < tokens.size() && depth; ++end) {
-            if (tokens[end].text == "(") ++depth;
-            else if (tokens[end].text == ")") --depth;
-        }
-        if (depth) continue;
-        const auto expression = expression_type(tokens, expressions, reference.token, end, binding, types);
-        report_expression_error(source, tokens, expression, diagnostics);
+    // Standalone, branch/loop-header and throw calls are retained semantic
+    // roots. Initializers and returns already own their complete expressions.
+    for (const auto& node : model.nodes) {
+        if (node.kind != SemanticNodeKind::ExpressionRoot) continue;
+        bool already_owned=false;for(const auto&range:owned_expression_ranges)if(node.begin_token>=range.first&&node.end_token<=range.second){already_owned=true;break;}if(already_owned)continue;
+        const auto expression=expression_type(tokens,expressions,node.begin_token,node.end_token,binding,types);
+        report_expression_error(source,tokens,expression,diagnostics);
     }
 
     std::unordered_set<std::size_t> declaration_names;
