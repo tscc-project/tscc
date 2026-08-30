@@ -200,8 +200,11 @@ These are bounded current directions and must be revised after each checkpoint:
     value imports are root-scope binder symbols. Ordinary CommonJS live references
     now positively resolve to import identity while supported local shadows resolve
     elsewhere; the legacy bridge remains for unbound destructuring, arrows,
-    classes, and template interpolation. Imported symbol types remain deliberately
-    `unknown`: this checkpoint does not claim export tables or cross-module types.
+    classes, and template interpolation.
+13. **Completed preview cross-module type propagation:** relative named value
+    imports receive cloned exported structural and callable types in the program
+    graph. Type IDs remain unit-local. Default imports, namespaces, re-exports and
+    package resolution remain outside this bounded preview slice.
 
 Every checkpoint requires unchanged/equivalent transpiler output and runtime
 evidence plus measured performance/RSS impact. Do not require the entire language

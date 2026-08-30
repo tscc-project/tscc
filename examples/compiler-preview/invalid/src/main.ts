@@ -1,2 +1,3 @@
-const values: number[] = [20, "wrong"];
-console.log(values[0]);
+import { total } from "./model";
+
+const result = total({ name: "preview", values: [20, "wrong"] });

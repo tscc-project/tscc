@@ -416,3 +416,13 @@ After JS++ EP3, do TCP3 semantic closure with cross-module type propagation as
 the leading failed acceptance item. Follow JS++ EP4 with TCP4's module-free
 runtime intersection, then run EP5 and TCP5 candidate gates. Do not broaden into
 classes/generics/overloads unless the frozen preview corpus demonstrates a need.
+
+## TCP3 cross-module semantic closure (2026-08-30)
+
+`ProgramGraph` now imports exported named value types after every unit is owned
+and checked. Structural object, array, tuple, union, literal and callable types
+are cloned into the importing unit's `TypeStore`, so no unit-local `TypeId`
+crosses the file boundary. A graph-aware checker pass now accepts the frozen
+positive project and rejects its cross-module callable/object mismatch. This
+slice covers relative named value imports only; default/namespace/re-export type
+surfaces remain deferred because the preview does not require them.

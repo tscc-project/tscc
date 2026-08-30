@@ -75,12 +75,12 @@ TCP0 is frozen. Its main output is a reviewable contract manifest, not another
 feature. Later checkpoints must point to a failed preview acceptance item or
 remain outside this milestone.
 
-## Reassessment after TCP0-TCP2
+## Reassessment after TCP0-TCP3
 
-Project/output mechanics are no longer the primary preview blocker. TCP3 should
-close semantic gaps exposed by the frozen projects, led by cross-module exported
-and imported type identity; imported values currently compile conservatively as
-`unknown`, so the positive project executes but is not fully checked across its
-module boundary. TCP4 then freezes a deliberately module-free emitted-JavaScript
+Project/output mechanics and the frozen project's cross-module semantic gap are
+closed. TCP3 clones exported structural and callable types into relative named
+value imports without sharing unit-local type IDs; the positive project is fully
+checked across its boundary and the negative project pins an imported call
+mismatch. TCP4 now freezes a deliberately module-free emitted-JavaScript
 intersection for JS++ rather than making ECMAScript/CommonJS module loading a
 runtime dependency. TCP5 is candidate evidence, not open-ended feature growth.

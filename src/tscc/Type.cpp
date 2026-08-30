@@ -2,6 +2,7 @@
 #include "TypeParser.h"
 #include "TypeParser.cpp"
 #include <algorithm>
+#include <functional>
 #include <unordered_map>
 
 namespace tscc {
@@ -58,6 +59,21 @@ TypeStore::TypeStore()
 
 TypeKind TypeStore::kind(TypeId id) const {
     return id < types_.size() ? types_[id].kind : TypeKind::Unknown;
+}
+TypeId TypeStore::import_from(const TypeStore&source,TypeId id)const{
+    std::unordered_map<TypeId,TypeId>memo;
+    std::function<TypeId(TypeId)>copy=[&](TypeId current)->TypeId{
+        if(current<=source.undefined())return current;
+        if(auto found=memo.find(current);found!=memo.end())return found->second;
+        if(current>=source.types_.size())return unknown();
+        const auto&type=source.types_[current];TypeId result=unknown();
+        if(type.kind==TypeKind::Literal)result=literal(copy(type.base),type.literal);
+        else if(type.kind==TypeKind::Union){std::vector<TypeId>members;for(auto member:type.members)members.push_back(copy(member));result=union_of(std::move(members));}
+        else if(type.kind==TypeKind::Function){std::vector<TypeId>parameters;for(auto parameter:type.parameters)parameters.push_back(copy(parameter));result=function_of(std::move(parameters),copy(type.result),type.required_parameters,type.rest);}
+        else if(type.kind==TypeKind::Object){std::vector<TypeProperty>properties;for(const auto&property:type.properties)properties.push_back({property.name,copy(property.type),property.optional,property.readonly});if(type.literal=="array")result=array_of(copy(type.result));else if(type.literal=="tuple"){std::vector<TypeId>elements;for(auto element:type.parameters)elements.push_back(copy(element));result=tuple_of(std::move(elements));}else result=object_of(std::move(properties),copy(type.string_index),copy(type.number_index),copy(type.call_signature));}
+        memo[current]=result;return result;
+    };
+    return copy(id);
 }
 TypeId TypeStore::widen(TypeId id)const{return kind(id)==TypeKind::Literal?types_[id].base:id;}
 

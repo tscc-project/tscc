@@ -41,6 +41,7 @@ public:
     TypeId string_index(TypeId)const;
     TypeId number_index(TypeId)const;
     TypeKind kind(TypeId) const;
+    TypeId import_from(const TypeStore&,TypeId) const;
     TypeId widen(TypeId) const;
     std::string name(TypeId) const;
 private:

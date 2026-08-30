@@ -1,4 +1,5 @@
 #include "Project.h"
+#include "Checker.h"
 #include "Source.h"
 #include <algorithm>
 #include <system_error>
@@ -12,6 +13,22 @@ static bool resolve_relative(const fs::path&importer,const std::string&spec,fs::
  if(base.has_extension()){candidates.push_back(base);if(base.extension()==".js"){auto x=base;x.replace_extension(".ts");candidates.push_back(x);}if(base.extension()==".jsx"){auto x=base;x.replace_extension(".tsx");candidates.push_back(x);}}
  else{candidates.push_back(base.string()+".ts");candidates.push_back(base.string()+".tsx");candidates.push_back(base/"index.ts");candidates.push_back(base/"index.tsx");}
  std::error_code ec;for(auto&c:candidates){if(fs::is_regular_file(c,ec)){resolved=fs::absolute(c,ec).lexically_normal();return true;}ec.clear();}return false;
+}
+struct ImportBinding{std::string local,exported;fs::path dependency;};
+static std::vector<ImportBinding>import_bindings(const CompilationUnit&unit){
+ std::vector<ImportBinding>out;const auto&tokens=unit.tokens;
+ for(const auto&range:unit.binding.import_ranges){std::size_t module=range.first;while(module<=range.second&&tokens[module].kind!=TokenKind::String)++module;if(module>range.second)continue;fs::path dependency;if(!resolve_relative(unit.source.path,tokens[module].text.substr(1,tokens[module].text.size()-2),dependency))continue;std::size_t from=range.first+1;while(from<module&&tokens[from].text!="from")++from;if(from==module)continue;std::size_t open=range.first+1;while(open<from&&tokens[open].text!="{")++open;if(open>=from)continue;for(std::size_t i=open+1;i<from&&tokens[i].text!="}";){if(tokens[i].text==","||tokens[i].text=="type"){++i;continue;}if(tokens[i].kind!=TokenKind::Identifier&&tokens[i].text!="default"){++i;continue;}auto exported=tokens[i++].text,local=exported;if(i+1<from&&tokens[i].text=="as"){local=tokens[i+1].text;i+=2;}out.push_back({local,exported,dependency});while(i<from&&tokens[i].text!=","&&tokens[i].text!="}")++i;}}
+ return out;
+}
+static bool exported_symbol(const CompilationUnit&unit,const BoundSymbol&symbol){
+ const auto&tokens=unit.tokens;std::size_t begin=symbol.declaration_token;while(begin>0&&tokens[begin-1].text!=";"&&tokens[begin-1].text!="}")--begin;for(auto i=begin;i<symbol.declaration_token;++i)if(tokens[i].text=="export")return true;return false;
+}
+static bool link_import_types(std::vector<ProgramFile>&files,const std::unordered_map<std::string,std::size_t>&identities){
+ bool ok=true;
+ for(auto&file:files){bool linked=false;for(const auto&binding:import_bindings(*file.unit)){auto dep=identities.find(key_for(binding.dependency));if(dep==identities.end())continue;const auto&exporter=*files[dep->second].unit;TypeId exported=exporter.types.store.unknown();for(std::size_t i=0;i<exporter.binding.symbols.size();++i)if(exporter.binding.symbols[i].name==binding.exported&&exported_symbol(exporter,exporter.binding.symbols[i])){exported=exporter.types.symbol_types[i];break;}if(exported==exporter.types.store.unknown())continue;for(std::size_t i=0;i<file.unit->binding.symbols.size();++i)if(file.unit->binding.symbols[i].kind==SymbolKind::Import&&file.unit->binding.symbols[i].name==binding.local){file.unit->types.symbol_types[i]=file.unit->types.store.import_from(exporter.types.store,exported);linked=true;break;}}
+  if(linked){Diagnostics graph_check;ExpressionModel expressions;if(!check_program(file.unit->source,file.unit->tokens,file.unit->program,file.unit->semantic,file.unit->binding,file.unit->types,expressions,graph_check))ok=false;file.unit->diagnostics.append(std::move(graph_check));}
+ }
+ return ok;
 }
 bool discover_module_dependencies(const fs::path&path,const SourceFile&source,const std::vector<Token>&tokens,std::vector<fs::path>&deps,Diagnostics&diagnostics){
  deps.clear();if(source.text.find("import")==std::string::npos&&source.text.find("from")==std::string::npos)return true;
@@ -28,6 +45,6 @@ bool ProgramGraph::build(const std::vector<std::string>&roots,bool follow){
  }
  // Resolve forward edge placeholders after every canonical identity exists.
  for(auto&file:files_)for(const auto&path:file.dependency_paths){const auto it=identities_.find(key_for(path));if(it!=identities_.end())file.dependencies.push_back(it->second);}
- bool ok=!diagnostics_.has_errors();for(const auto&file:files_)ok=!file.unit->diagnostics.has_errors()&&ok;return ok;
+ bool ok=!diagnostics_.has_errors();if(follow)ok=link_import_types(files_,identities_)&&ok;for(const auto&file:files_)ok=!file.unit->diagnostics.has_errors()&&ok;return ok;
 }
 }
