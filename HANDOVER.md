@@ -347,3 +347,11 @@ object-literal assignability; callable objects reuse canonical function
 variance, contextual typing, argument, arity and result checks. The corpus is
 569 cases at 545/0/24. Computed element-access typing, multiple overload
 signatures, mapped types and generic signatures remain deferred.
+
+## CP39 annotation parser decomposition (2026-08-30)
+
+Type annotation grammar now lives behind `TypeParser.h` in a dedicated recursive
+parser implementation. Parameter lists, function types, object members, methods,
+index signatures, call signatures and unions are parsed through small productions
+instead of the former monolithic routine. Existing 569-case evidence remains
+545/0/24; this architecture checkpoint intentionally adds no support claim.
