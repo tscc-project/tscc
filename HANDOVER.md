@@ -387,3 +387,10 @@ TCP0 inventory, TCP1 diagnostics, TCP2 project/output behavior, TCP3 semantic
 closure, TCP4 runtime intersection and TCP5 candidate evidence. The frozen
 multi-file positive/negative demonstration decides readiness; this is not a
 drop-in `tsc` compatibility claim.
+
+## TCP0 contract inventory (2026-08-30)
+
+`docs/compiler-preview-contract.json` freezes the CLI, checked subset,
+emitted-only families, exclusions and candidate gates. The positive and negative
+multi-file projects live under `examples/compiler-preview/`. Production remains
+free of Node, `tsc` and JS++ dependencies.

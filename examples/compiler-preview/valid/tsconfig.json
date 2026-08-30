@@ -1,0 +1,1 @@
+{"compilerOptions":{"rootDir":"src","outDir":"out","target":"es2022","module":"commonjs","noEmitOnError":true},"files":["src/model.ts","src/main.ts"]}

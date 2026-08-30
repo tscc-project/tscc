@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "milestone": "tscc Compiler Preview",
+  "status": "contract-frozen",
+  "production_dependencies": [],
+  "cli": ["source-files", "--project", "--outDir", "--rootDir", "--module", "--jsx", "--target", "--removeComments", "--noEmit", "--noEmitOnError", "--noResolve", "--pretty"],
+  "module_modes": ["preserve", "esnext", "commonjs"],
+  "target": "es2022",
+  "jsx": ["preserve"],
+  "checked_subset": ["primitive-literal-union", "assignment", "bounded-branch-narrowing", "callable-variables", "contextual-callbacks", "structural-objects", "methods-inheritance", "index-call-signatures", "bounded-arrays-tuples"],
+  "emitted_not_fully_checked": ["enums", "namespaces", "parameter-properties", "generic-erasure", "tsx-preserve", "esm-commonjs-lowering"],
+  "excluded": ["generic-semantics", "overload-resolution", "class-semantics", "declaration-libraries", "package-node-modules-resolution", "path-mapping", "source-maps", "declaration-emit", "incremental-watch"],
+  "positive_project": "examples/compiler-preview/valid/tsconfig.json",
+  "negative_project": "examples/compiler-preview/invalid/tsconfig.json",
+  "candidate_gates": ["deterministic-diagnostics", "deterministic-output", "both-emit-policies", "reference-runtime", "jspp-intersection", "asan-ubsan", "fuzz", "representative-projects", "reproducible-package"]
+}
