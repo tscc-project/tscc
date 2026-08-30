@@ -426,3 +426,12 @@ crosses the file boundary. A graph-aware checker pass now accepts the frozen
 positive project and rejects its cross-module callable/object mismatch. This
 slice covers relative named value imports only; default/namespace/re-export type
 surfaces remain deferred because the preview does not require them.
+
+## TCP4 module-free JS++ intersection (2026-08-30)
+
+`examples/compiler-preview/jspp-intersection.ts` freezes the runtime boundary:
+typed interface/tuple use, an ordinary typed function, an object/array literal
+and numeric completion, with no modules or host APIs. `make
+test-preview-interop JS_RUNTIME=...` compiles it through production TSCC and
+requires both Node and JS++ to return `42`. The independent intersection is now
+7/7. This is emitted-subset evidence, not a JS++ module-loading claim.

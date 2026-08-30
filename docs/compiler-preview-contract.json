@@ -12,5 +12,6 @@
   "excluded": ["generic-semantics", "overload-resolution", "class-semantics", "declaration-libraries", "package-node-modules-resolution", "path-mapping", "source-maps", "declaration-emit", "incremental-watch"],
   "positive_project": "examples/compiler-preview/valid/tsconfig.json",
   "negative_project": "examples/compiler-preview/invalid/tsconfig.json",
+  "jspp_intersection_source": "examples/compiler-preview/jspp-intersection.ts",
   "candidate_gates": ["deterministic-diagnostics", "deterministic-output", "both-emit-policies", "reference-runtime", "jspp-intersection", "asan-ubsan", "fuzz", "representative-projects", "reproducible-package"]
 }

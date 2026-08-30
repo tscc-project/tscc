@@ -84,3 +84,8 @@ checked across its boundary and the negative project pins an imported call
 mismatch. TCP4 now freezes a deliberately module-free emitted-JavaScript
 intersection for JS++ rather than making ECMAScript/CommonJS module loading a
 runtime dependency. TCP5 is candidate evidence, not open-ended feature growth.
+
+TCP4 freezes that intersection at
+`examples/compiler-preview/jspp-intersection.ts`. Its emitted JavaScript passes
+Node and JS++ with the same explicit completion value. The source deliberately
+contains no import/export syntax, filesystem access or host-specific globals.

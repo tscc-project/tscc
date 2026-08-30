@@ -83,6 +83,8 @@ test-js-interop: tscc test-product-boundary
 	test -n "$(JS_RUNTIME)" || (echo "set JS_RUNTIME to the JS++ CLI" >&2; exit 2)
 	python3 ../tscc-regression-suite/run_interop.py --tscc "$(CURDIR)/tscc" --js "$(JS_RUNTIME)"
 
+test-preview-interop: test-js-interop
+
 check-regression-sync:
 	bash tools/check_regression_sync.sh
 
