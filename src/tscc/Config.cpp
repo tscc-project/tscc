@@ -67,6 +67,14 @@ bool load_tsconfig(const std::string& path, CompilerOptions& options,
     if(!f){diagnostics.error(path,1,1,"cannot read project configuration");return false;}
     std::ostringstream ss;ss<<f.rdbuf();const std::string s=strip_jsonc(ss.str());
     const fs::path dir=fs::absolute(fs::path(path)).parent_path();
+    std::smatch compiler_options;
+    if(std::regex_search(s,compiler_options,std::regex("\\\"compilerOptions\\\"\\s*:\\s*\\{([^}]*)\\}"))){
+        const std::vector<std::string>known={"outDir","rootDir","target","module","jsx","removeComments","noEmit","noEmitOnError"};
+        std::regex key("\\\"([^\\\"]+)\\\"\\s*:");
+        for(auto it=std::sregex_iterator(compiler_options[1].first,compiler_options[1].second,key),end=std::sregex_iterator();it!=end;++it){
+            const auto name=(*it)[1].str();if(std::find(known.begin(),known.end(),name)==known.end()){diagnostics.error(path,1,1,"unsupported compiler option '"+name+"'",{},"TSCC3001");return false;}
+        }
+    }
     std::string v; bool bv;
     if(get_string(s,"outDir",v)) options.out_dir=(dir/v).lexically_normal().string();
     if(get_string(s,"rootDir",v)) options.root_dir=(dir/v).lexically_normal().string();
@@ -107,6 +115,7 @@ bool load_tsconfig(const std::string& path, CompilerOptions& options,
         }
     }
     if(roots.empty()){diagnostics.error(path,1,1,"project contains no TypeScript input files");return false;}
+    std::sort(roots.begin(),roots.end());
     if(options.root_dir.empty()) options.root_dir=dir.string();
     return true;
 }

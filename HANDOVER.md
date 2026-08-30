@@ -401,3 +401,11 @@ Non-pretty diagnostics are deterministically ordered by file/location/severity/
 code/message and carry stable `TSCC` codes. CLI contract errors use TSCC0001-3,
 ordinary compiler errors use TSCC1000 and warnings use TSCC2000. Missing option
 values fail explicitly. `tests/diagnostic_contract.sh` pins the surface.
+
+## TCP2 project and output contract (2026-08-30)
+
+The preview target is exactly ES2022; module modes are preserve/esnext/commonjs
+and JSX is preserve-only. Project roots are sorted, unknown compiler options fail
+with TSCC3001, and repeated builds are byte-identical. Default error policy emits
+prepared valid siblings; `noEmitOnError` commits none. The focused gate executes
+the frozen positive project and pins both policies.

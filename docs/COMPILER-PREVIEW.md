@@ -17,6 +17,11 @@ output behavior, while rejecting or documenting everything outside it.
   `rootDir`/`outDir`; `noEmit`/`noEmitOnError`; JSONC project configuration; exit
   status; deterministic output paths; and unsupported-option failure.
 
+TCP2 pins ES2022 as the only preview target, preserve/esnext/commonjs module
+modes, JSX preserve, sorted project roots, deterministic repeated output and
+visible rejection of unknown `compilerOptions`. Default mode emits successfully
+prepared siblings while returning failure; `noEmitOnError` commits none.
+
 ### Checked language subset
 
 The first contract should promote only behavior already backed end to end:
