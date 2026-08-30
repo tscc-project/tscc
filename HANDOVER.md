@@ -379,3 +379,11 @@ than collapsing to a primitive. Contextual array literals retain element types;
 tuples retain ordered positional types, exact numeric reads and literal length.
 Six cases raise the corpus to 579 and 555/0/24. Readonly arrays, optional/rest
 tuple elements, array methods and indexed-write checking remain deferred.
+
+## Compiler preview contract gate (2026-08-30)
+
+`docs/COMPILER-PREVIEW.md` defines a bounded compiler finish line. Proceed through
+TCP0 inventory, TCP1 diagnostics, TCP2 project/output behavior, TCP3 semantic
+closure, TCP4 runtime intersection and TCP5 candidate evidence. The frozen
+multi-file positive/negative demonstration decides readiness; this is not a
+drop-in `tsc` compatibility claim.
