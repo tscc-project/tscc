@@ -21,10 +21,12 @@ tscc: $(OBJECTS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(DEPFLAGS) -c $< -o $@
 test-smoke: tscc
 	bash tests/smoke.sh
+test-smoke-core: tscc
+	TSCC_SKIP_REFERENCE=1 bash tests/smoke.sh
 clean:
 	rm -f $(OBJECTS) $(DEPS) tscc
 	rm -rf .build
-.PHONY: all install package package-test test-preview-candidate test test-core test-preview-contract test-diagnostics test-project-output-contract test-smoke test-parser test-parser-recovery test-syntax-identity test-binder test-declaration-scope test-types test-edits test-checker test-compilation-unit test-program-graph test-runtime test-project test-regression test-js-interop test-tsx test-commonjs test-product-boundary test-feature-matrix check-regression-sync test-sanitize memory-safety-smoke clean
+.PHONY: all install package package-test test-preview-candidate test test-core test-preview-contract test-diagnostics test-project-output-contract test-smoke test-smoke-core test-parser test-parser-recovery test-syntax-identity test-binder test-declaration-scope test-types test-edits test-checker test-compilation-unit test-program-graph test-runtime test-project test-regression test-js-interop test-tsx test-commonjs test-product-boundary test-feature-matrix check-regression-sync test-sanitize memory-safety-smoke clean
 
 install: tscc
 	install -d "$(DESTDIR)$(BINDIR)" "$(DESTDIR)$(DATADIR)/docs" "$(DESTDIR)$(DATADIR)/examples"
@@ -133,7 +135,7 @@ test: test-preview-contract test-diagnostics test-project-output-contract test-p
 # runs this on Windows (msys2): the node/tsc differential gates (runtime,
 # project, tsx, commonjs) are fully exercised on Linux and macOS, and the
 # external regression corpus runs on Windows as a native-Python step.
-test-core: test-product-boundary test-feature-matrix test-smoke test-parser test-parser-recovery test-syntax-identity test-binder test-declaration-scope test-types test-edits test-checker test-compilation-unit test-program-graph
+test-core: test-product-boundary test-feature-matrix test-smoke-core test-parser test-parser-recovery test-syntax-identity test-binder test-declaration-scope test-types test-edits test-checker test-compilation-unit test-program-graph
 
 -include $(DEPS)
 

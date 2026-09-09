@@ -556,3 +556,11 @@ their recorded remotes. The JS++ generated site is aligned with `origin/main`,
 while outer `js-website/stage` intentionally retains local commit `cd1aa6c`
 pending an explicit push; do not mistake that known local commit for an
 unclassified working-tree change.
+
+## Post-preview evidence-tool repair (2026-09-09)
+
+`make test-core` now uses `test-smoke-core`, which retains TSCC compilation,
+Node syntax/runtime, version, help and diagnostic smoke coverage while explicitly
+skipping only the TypeScript reference invocation. `make test` continues to use
+the strict `test-smoke` target and therefore still requires `tsc`; do not replace
+aggregate differential evidence with the core-only path.
