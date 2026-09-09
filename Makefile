@@ -7,6 +7,8 @@ BINDIR ?= $(PREFIX)/bin
 DATADIR ?= $(PREFIX)/share/tscc
 SANITIZER_FLAGS ?= -O1 -g -fno-omit-frame-pointer -fsanitize=address,undefined
 TSCC_REGRESSION_SUITE_DIR ?= ../tscc-regression-suite
+ORACLE_BIN ?= $(TSCC_REGRESSION_SUITE_DIR)/tools
+export PATH := $(abspath $(ORACLE_BIN)):$(PATH)
 SAN_TARGET := .build/tscc-sanitize
 MEMORY_SMOKE := .build/tscc-parser-memory-san
 SOURCES := src/main.cpp src/tscc/Diagnostic.cpp src/tscc/Source.cpp src/tscc/Lexer.cpp src/tscc/Parser.cpp src/tscc/Semantic.cpp src/tscc/Binder.cpp src/tscc/Type.cpp src/tscc/Checker.cpp src/tscc/CompilationUnit.cpp src/tscc/SourceEdit.cpp src/tscc/Transpiler.cpp src/tscc/Project.cpp src/tscc/Config.cpp src/tscc/Compiler.cpp
@@ -26,7 +28,7 @@ test-smoke-core: tscc
 clean:
 	rm -f $(OBJECTS) $(DEPS) tscc
 	rm -rf .build
-.PHONY: all install package package-test test-preview-candidate test test-core test-preview-contract test-diagnostics test-project-output-contract test-smoke test-smoke-core test-parser test-parser-recovery test-syntax-identity test-binder test-declaration-scope test-types test-edits test-checker test-compilation-unit test-program-graph test-runtime test-project test-regression test-js-interop test-tsx test-commonjs test-product-boundary test-feature-matrix check-regression-sync test-sanitize memory-safety-smoke clean
+.PHONY: all install package package-test test-preview-candidate test test-core test-oracles test-preview-contract test-diagnostics test-project-output-contract test-smoke test-smoke-core test-parser test-parser-recovery test-syntax-identity test-binder test-declaration-scope test-types test-edits test-checker test-compilation-unit test-program-graph test-runtime test-project test-regression test-js-interop test-tsx test-commonjs test-product-boundary test-feature-matrix check-regression-sync test-sanitize memory-safety-smoke clean
 
 install: tscc
 	install -d "$(DESTDIR)$(BINDIR)" "$(DESTDIR)$(DATADIR)/docs" "$(DESTDIR)$(DATADIR)/examples"
@@ -129,7 +131,9 @@ test-diagnostics: tscc
 test-project-output-contract: tscc
 	bash tests/project_output_contract.sh
 
-test: test-preview-contract test-diagnostics test-project-output-contract test-product-boundary test-feature-matrix test-smoke test-parser test-parser-recovery test-syntax-identity test-binder test-declaration-scope test-types test-edits test-checker test-compilation-unit test-program-graph test-runtime test-project test-regression test-tsx test-commonjs
+test-oracles:
+	python3 "$(TSCC_REGRESSION_SUITE_DIR)/check_oracles.py" --node "$(abspath $(ORACLE_BIN))/node" --tsc "$(abspath $(ORACLE_BIN))/tsc"
+test: test-oracles test-preview-contract test-diagnostics test-project-output-contract test-product-boundary test-feature-matrix test-smoke test-parser test-parser-recovery test-syntax-identity test-binder test-declaration-scope test-types test-edits test-checker test-compilation-unit test-program-graph test-runtime test-project test-regression test-tsx test-commonjs
 
 # Compiler-core gates that do not require a native node/tsc round-trip. CI
 # runs this on Windows (msys2): the node/tsc differential gates (runtime,

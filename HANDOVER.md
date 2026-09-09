@@ -520,7 +520,7 @@ self-contained `test-core`; Linux/macOS failed before compiler testing.
 
 `TSCC_REGRESSION_SUITE_DIR` now owns the suite location, defaulting to the
 existing sibling layout for local aggregate work. Unix CI checks out regression
-suite commit `c80d065e673bd1a7e0e1769835e12dc13cc54836` into the workspace and
+suite commit `8a6ecd9a4f6ea9658cd7011286e575bd33c57d9f` into the workspace and
 exports its absolute path. Keep the commit pinned and update it deliberately
 whenever compiler/suite contracts advance together. Do not switch this checkout
 to an unpinned moving branch or remove the aggregate gate merely to keep CI
@@ -565,3 +565,11 @@ Node syntax/runtime, version, help and diagnostic smoke coverage while explicitl
 skipping only the TypeScript reference invocation. `make test` continues to use
 the strict `test-smoke` target and therefore still requires `tsc`; do not replace
 aggregate differential evidence with the core-only path.
+
+## Pinned oracle environment (2026-09-09)
+
+The canonical sibling regression suite owns a locked Node 22.22.1 and TypeScript
+7.0.2 environment. The aggregate `make test` gate prepends its versioned wrappers
+to `PATH` and runs `test-oracles` before differential work. CI provisions the
+pinned suite, uses Node 22.22.1 and installs its lockfile with `npm ci`; global or
+ambient TypeScript is no longer accepted as release-quality evidence.

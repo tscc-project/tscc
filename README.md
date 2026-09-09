@@ -62,10 +62,14 @@ tscc --help
 
 ```bash
 make
+cd ../tscc-regression-suite && npm ci && cd ../tscc
 make test
 ```
 
-The aggregate target runs smoke, parser, checker, runtime, project/module, independent regression, TSX, and CommonJS validation. Focused targets such as `make test-checker` remain available during iteration.
+The aggregate target first verifies the sibling suite's pinned Node 22.22.1 and
+TypeScript 7.0.2 oracles, then runs smoke, parser, checker, runtime,
+project/module, independent regression, TSX, and CommonJS validation. Focused
+targets such as `make test-checker` remain available during iteration.
 
 
 ## Parser / AST checkpoint

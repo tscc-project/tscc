@@ -5,6 +5,8 @@ import argparse, json, subprocess, tempfile, concurrent.futures, re, sys
 
 ap=argparse.ArgumentParser()
 ap.add_argument('--tscc',required=True)
+ap.add_argument('--tsc',default='tsc')
+ap.add_argument('--node',default='node')
 ap.add_argument('--workers',type=int,default=min(24,os.cpu_count() or 8))
 a=ap.parse_args()
 root=Path(__file__).resolve().parent
@@ -38,7 +40,7 @@ with tempfile.TemporaryDirectory(prefix='tscc-reg-ref-') as td:
     # Runtime and syntax-negative cases are parser/emit-reference questions.
     ref_cases=by_kind['runtime']+by_kind['emit']+by_kind['syntax-negative']+by_kind['semantic-only']
     ref_files=[str(p) for _,p in ref_cases]
-    ref=subprocess.run(['tsc','--noCheck','--pretty','false','--target','es2022','--jsx','preserve','--moduleDetection','force','--noEmit',*ref_files],capture_output=True,text=True)
+    ref=subprocess.run([a.tsc,'--noCheck','--pretty','false','--target','es2022','--jsx','preserve','--moduleDetection','force','--noEmit',*ref_files],capture_output=True,text=True)
     no_check_diags=diag_files(ref.stdout+ref.stderr,file_map)
     for c,_ in by_kind['runtime']:
         reference_status[c['name']]=('bad-runtime-ref' if c['name'] in no_check_diags else 'ok')
@@ -57,7 +59,7 @@ with tempfile.TemporaryDirectory(prefix='tscc-reg-ref-') as td:
         # Keep the semantic oracle independent of TypeScript's changing default
         # module mode. These cases historically exercise the CommonJS checking
         # contract; TypeScript 7 changed its implicit default to preserve.
-        full=subprocess.run(['tsc','--pretty','false','--target','es2022','--module','commonjs','--moduleDetection','force','--skipLibCheck','--noEmit',*sem_files],capture_output=True,text=True)
+        full=subprocess.run([a.tsc,'--pretty','false','--target','es2022','--module','commonjs','--moduleDetection','force','--skipLibCheck','--noEmit',*sem_files],capture_output=True,text=True)
         full_diags=diag_files(full.stdout+full.stderr,file_map)
         for c,_ in by_kind['semantic-only']:
             if reference_status[c['name']]=='pending-semantic':
@@ -95,7 +97,7 @@ with tempfile.TemporaryDirectory(prefix='tscc-reg-ref-') as td:
                     return ('pass',c['name'],'')
                 return ('fail',c['name'],f'emit mismatch\nOUTPUT:\n{text}')
             env=dict(os.environ); env['NO_COLOR']='1'; env['FORCE_COLOR']='0'
-            run=subprocess.run(['node',str(emitted)],capture_output=True,text=True,env=env)
+            run=subprocess.run([a.node,str(emitted)],capture_output=True,text=True,env=env)
             actual=run.stdout.strip()
             if run.returncode==0 and actual==c['expect']:return ('pass',c['name'],'')
             return ('fail',c['name'],f'expect={c["expect"]!r} actual={actual!r}\n{run.stderr}\nJS:\n{emitted.read_text()}')

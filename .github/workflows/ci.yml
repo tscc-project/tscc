@@ -29,11 +29,14 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: tscc-project/tscc-regression-suite
-          ref: c80d065e673bd1a7e0e1769835e12dc13cc54836
+          ref: 8a6ecd9a4f6ea9658cd7011286e575bd33c57d9f
           path: tscc-regression-suite
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.22.1
       - name: Install test oracles
-        run: |
-          npm install -g typescript
+        run: npm ci
+        working-directory: tscc-regression-suite
       - name: Build
         run: make -j2
         working-directory: tscc
@@ -52,7 +55,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22.22.1
       - uses: msys2/setup-msys2@v2
         with:
           msystem: UCRT64
@@ -62,6 +65,5 @@ jobs:
       - name: Build and core tests (msys2)
         shell: msys2 {0}
         run: |
-          npm install -g typescript
           make -j2
           make test-core
