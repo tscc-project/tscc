@@ -105,25 +105,24 @@ deliberate trade-offs rather than hidden inside semantic progress.
 
 ## Current priorities
 
-1. Define the first bounded compatibility checkpoint on the path to the stated
-   production type-checking goal: TypeScript range, checked language subset,
-   ECMAScript targets, module/project resolution, diagnostics, and unsupported
-   behavior.
-2. Reconcile/document the actual parser/syntax/transpiler/project architecture.
-3. Build an evidence-backed feature matrix distinguishing parse, transform/emit,
-   runtime, negative diagnostics, and semantic-only gaps.
-4. Prioritize incomplete semantic slices and architecture weaknesses over adding
-   more syntax.
-5. Maintain the standalone regression suite as canonical external contract owner
-   and enforce parity of its executable corpus with the implementation mirror.
-6. Expand runtime/differential, side-effect, scope, malformed/recovery, and
-   real-world project coverage.
-7. Run native safety validation and introduce targeted fuzzing/stress work.
-8. Reproduce and contextualize performance across current TS, TSX, project, and
-   CommonJS workloads; monitor RSS and semantic comparability.
-9. Reconcile README and website claims/examples/support matrix with current tests.
-10. Validate a clean release-like candidate for the explicitly promised scope and
-    decide production status with Nick.
+TCP0-TCP5 completed the first bounded compiler-preview contract. Current work is
+therefore evidence acquisition rather than redefining that already-qualified
+finish line:
+
+1. Keep the 579-case external contract, 7/7 runtime intersection, machine-readable
+   preview contract and repository mirrors synchronized.
+2. Pin a reproducible TypeScript/Node oracle environment and rerun the complete
+   retained baseline from committed repository states.
+3. Obtain PC0V external Valgrind evidence and retain PC0P as an explicit
+   cross-platform packaging gate.
+4. Build TCP6A around pinned, licence-compatible real small projects and classify
+   failures by compiler stage before implementing fixes.
+5. Combine those results with JS++ selected-Test262 and embedding-host evidence at
+   a decision gate.
+6. Choose TCP7 from measured blockers. Broader import-type propagation and
+   practical package resolution are candidates, not predetermined commitments.
+7. Continue using complete semantic slices, sanitizer coverage and performance/RSS
+   comparison for every architecture or compatibility expansion.
 
 ## Reconciliation findings to resolve
 

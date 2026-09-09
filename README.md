@@ -21,12 +21,20 @@ This historical first checkpoint was intentionally not a type checker. Later che
 
 tscc now has a separate `Checker` pass and a deliberately narrow type contract. For simple variable declarations, explicit `number`, `string`, and `boolean` annotations are checked against direct primitive literal initializers (including signed numeric literals). Those annotated primitive facts also flow through bound identifier initializers and direct assignments, so `const text: string = "x"; const value: number = text` is rejected with a source-positioned diagnostic.
 
-This is the beginning of type checking, not a general TypeScript type system. The checker owns primitive/literal/union/nullish facts, bounded expressions and assignments, ordinary-function signatures, strict equality/`typeof` branch facts, structural object literals/annotations, and basic object aliases/interfaces. Callable expressions, overloads, generics, broad declaration semantics, general control-flow joins and definite assignment remain unchecked. The independent 533-case corpus records 509 passes, no failures, and 24 explicit semantic skips.
+This is meaningful type checking, not a general TypeScript type system. The
+checker owns primitive/literal/union/nullish facts, bounded expressions and
+assignments, ordinary and variable callables, contextual callbacks, strict
+equality/`typeof` branch facts, structural objects, aliases/interfaces, methods,
+inheritance, index/call signatures, arrays and tuples. Overloads, generic
+semantics, class semantics, broad control-flow joins and definite assignment
+remain unchecked. The independent 579-case corpus records 555 passes, no
+failures, and 24 explicit semantic skips.
 
 Static default, namespace, and named value imports now have binder-owned root
 symbols. This identity protects ordinary CommonJS live reads from supported local
-shadows; imported types intentionally remain `unknown` because tscc does not yet
-own module export tables or cross-file type propagation. Compilation also separates
+shadows. Relative named imports can receive cloned exported structural and
+callable types; default, namespace and re-export type propagation remain outside
+the preview contract. Compilation also separates
 file preparation from output policy: default mode emits successfully prepared
 files, `--noEmitOnError` suppresses the whole prepared set after any error, and
 `--noEmit` suppresses output unconditionally.
