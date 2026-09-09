@@ -573,3 +573,14 @@ The canonical sibling regression suite owns a locked Node 22.22.1 and TypeScript
 to `PATH` and runs `test-oracles` before differential work. CI provisions the
 pinned suite, uses Node 22.22.1 and installs its lockfile with `npm ci`; global or
 ambient TypeScript is no longer accepted as release-quality evidence.
+
+## Post-preview retained baseline (2026-09-09)
+
+Checkpoint 5 reran the complete aggregate against pinned Node 22.22.1 and
+TypeScript 7.0.2 at TSCC `c6f453d`, suite `8a6ecd9` and JS++ `38603fb`.
+The result is 555 pass, zero fail and 24 deliberate semantic skips, plus the 7/7
+test-only runtime intersection. Reproducible and installed packages, a freshly
+built ASan/UBSan candidate, 400 deterministic mutations and representative
+projects passed. A fresh sibling `git archive` export independently rebuilt and
+passed the same aggregate, package and sanitizer gates. Exact evidence is retained
+in `docs/evidence/post-preview-checkpoint-5.json`; PC0V and PC0P remain pending.

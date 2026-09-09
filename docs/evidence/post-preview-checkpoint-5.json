@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "checkpoint": "post-preview-checkpoint-5",
+  "date": "2026-09-09",
+  "candidate": {
+    "repository": "tscc",
+    "commit": "c6f453dc1af7588e89332f4e416dc0e911feb513",
+    "version": "0.15.0"
+  },
+  "external_contract": {
+    "repository": "tscc-regression-suite",
+    "commit": "8a6ecd9a4f6ea9658cd7011286e575bd33c57d9f",
+    "node": "22.22.1",
+    "typescript": "7.0.2",
+    "pass": 555,
+    "fail": 0,
+    "skip": 24
+  },
+  "jspp_intersection": {
+    "js_commit": "38603fb35e1619070d86fa9b2d303ab95ab14f41",
+    "pass": 7,
+    "fail": 0,
+    "classification": "test-only intersection"
+  },
+  "environment": {
+    "platform": "Linux x86_64",
+    "compiler": "g++ 13.3.0",
+    "python": "3.12.13"
+  },
+  "gates": {
+    "live_tree_aggregate": "pass",
+    "diagnostic_contract": "pass",
+    "project_output_contract": "pass",
+    "product_boundary": "pass",
+    "feature_matrix": "pass",
+    "regression_mirror_sync": "pass",
+    "runtime_project_tsx_commonjs": "pass",
+    "reproducible_package": "pass",
+    "installed_package": "pass",
+    "asan_ubsan_smoke": "pass",
+    "deterministic_mutations": 400,
+    "representative_projects": "pass",
+    "committed_archive_aggregate": "pass",
+    "committed_archive_package": "pass",
+    "committed_archive_asan_ubsan": "pass"
+  },
+  "notes": [
+    "Node emitted an environment-specific experimental proxy-agent warning; tests and product diagnostics were unaffected.",
+    "PC0V external Valgrind confirmation and PC0P remote platform packaging remain separate pending checkpoints."
+  ]
+}
