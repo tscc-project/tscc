@@ -6,6 +6,7 @@
 *.pdb
 /.build/
 /tscc
+/benchmarks/.tmp*/
 
 # Compiler/test residue
 *.log

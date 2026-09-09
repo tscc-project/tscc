@@ -538,3 +538,21 @@ steps with `working-directory: tscc`. This matches the aggregate workspace model
 used locally. Windows retains its self-contained default checkout and
 `test-core`. Keep the two Unix checkouts as siblings unless the suite validator
 is explicitly redesigned around a passed compiler-repository path.
+
+## Post-preview workspace hygiene (2026-09-09)
+
+The tracked `benchmarks/.tmp100` JavaScript files were generated output retained
+from the initial repository commit, not benchmark inputs or historical evidence.
+No current benchmark, test, documentation page or release path reads them; active
+benchmark runners create disposable output under `benchmarks/.tmp`,
+`benchmarks/.cjs-tmp` and `benchmarks/.tsx-tmp`. The obsolete files are removed
+and `benchmarks/.tmp*/` is ignored so later generated output cannot re-enter the
+repository accidentally.
+
+The coordinated workspace contains Nift source repositories on `stage` and
+generated deployment repositories at their `public/main` gitlinks. At this
+checkpoint the TSCC website source and generated repositories are aligned with
+their recorded remotes. The JS++ generated site is aligned with `origin/main`,
+while outer `js-website/stage` intentionally retains local commit `cd1aa6c`
+pending an explicit push; do not mistake that known local commit for an
+unclassified working-tree change.
