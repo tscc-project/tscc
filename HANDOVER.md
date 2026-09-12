@@ -477,12 +477,14 @@ The original preview campaigns are complete rather than open-ended:
 PC0 is now split so unavailable tooling does not turn into a false pass or block
 all useful work:
 
-1. **PC0V - external native-memory confirmation:** run TSCC's retained Valgrind
-   lifetime/project gates and the JS++ frozen host, lifecycle and VM gates under
-   Valgrind on Nick's Ubuntu machine. DeepSeek can perform this later because
-   Valgrind is installed there. Record versions, exact commands, exit codes,
-   leak/error summaries and repository heads. Do not weaken suppressions or
-   classify environment failures as product passes.
+1. **PC0V - external native-memory confirmation:** complete at TSCC `1bc3047`
+   and JS++ `15df113` (2026-09-13). TSCC's retained Valgrind lifetime gate and
+   the JS++ frozen host, lifecycle, VM and heap gates all pass under Valgrind
+   3.26.0 with zero errors and zero bytes in use at exit. The JS++ run exposed
+   a standalone-execution lifetime defect that was fixed in `15df113`; discovery
+   and post-fix evidence are retained in both repositories. See the PC0V
+   section below. Do not weaken suppressions or classify environment failures
+   as product passes.
 2. **PC0P - second-platform packaging:** TSCC already has Ubuntu/macOS/Windows CI
    and multi-platform release workflows. JS++ still needs CI/package coverage
    beyond the locally qualified Linux ABI. Adding or running remote workflows is
@@ -583,4 +585,25 @@ test-only runtime intersection. Reproducible and installed packages, a freshly
 built ASan/UBSan candidate, 400 deterministic mutations and representative
 projects passed. A fresh sibling `git archive` export independently rebuilt and
 passed the same aggregate, package and sanitizer gates. Exact evidence is retained
-in `docs/evidence/post-preview-checkpoint-5.json`; PC0V and PC0P remain pending.
+in `docs/evidence/post-preview-checkpoint-5.json`; PC0V is now complete (see
+below) and PC0P remains pending.
+
+## PC0V external native-memory confirmation (2026-09-13)
+
+PC0V is complete at TSCC `1bc3047` and JS++ `15df113`, on Linux 7.0.0-29 x86_64
+with c++ 15.2.0 and Valgrind 3.26.0.
+
+- The retained aggregate gate `make test` passed at `1bc3047` against pinned
+  Node 22.22.1 and TypeScript 7.0.2: 555 pass, zero fail, 24 deliberate skips.
+- `make valgrind-memory-safety-checkpoint-5` passed: exit 0, zero errors,
+  `in use at exit: 0 bytes`, 46,083 allocations matched by 46,083 frees, "All
+  heap blocks were freed -- no leaks are possible". Evidence is preserved as
+  distinct post-preview PC0V output at
+  `docs/evidence/memory-safety/post-preview-pc0v-valgrind.json`; the historical
+  Checkpoint 5 evidence under that directory is unchanged.
+- JS++ PC0V required fixing a standalone local-heap lifetime defect found during
+  the run (JS++ `15df113`). All JS++ Valgrind workloads now pass; see the JS++
+  handover for that fix and contract.
+- The machine-readable summary is `docs/evidence/post-preview-pc0v.json`.
+  PC0V is not a general TypeScript compatibility or broad memory-safety claim;
+  PC0P second-platform packaging remains pending.

@@ -23,8 +23,9 @@ compatibility claims.
 
 The next campaign is evidence acquisition rather than immediate feature breadth:
 
-1. PC0V external Valgrind confirmation on Nick's Ubuntu machine, delegated to
-   DeepSeek when convenient;
+1. PC0V external Valgrind confirmation is now complete at TSCC `1bc3047` and
+   JS++ `15df113` (2026-09-13); it required and received a JS++ standalone
+   local-heap lifetime fix, and all declared workloads pass under Valgrind.
 2. PC0P second-platform packaging, noting TSCC already has multi-platform CI
    while JS++ currently has only the qualified Linux package;
 3. EP6A pinned selected-Test262 infrastructure and classifications;
@@ -33,9 +34,9 @@ The next campaign is evidence acquisition rather than immediate feature breadth:
 5. a decision gate that selects TCP7 and the next JS++ vertical slice from those
    results.
 
-PC0V is pending external evidence, not failed. Work may prepare EP6A and TCP6A
-without pretending Valgrind has run, but no broader release claim should bypass
-the external memory and platform confirmations.
+PC0V is complete at the tested heads; PC0P remains pending. Work may prepare
+EP6A and TCP6A, but no broader release claim should bypass the remaining
+platform confirmation.
 
 ## Product boundary
 

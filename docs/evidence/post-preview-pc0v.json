@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "checkpoint": "post-preview-pc0v",
+  "date": "2026-09-13",
+  "candidate": {
+    "repository": "tscc",
+    "commit": "1bc30473c5ef150b95d28f2a8b40a4a667be8298",
+    "version": "0.15.0"
+  },
+  "environment": {
+    "platform": "Linux 7.0.0-29-generic x86_64",
+    "compiler": "c++ (Ubuntu 15.2.0-16ubuntu1) 15.2.0",
+    "valgrind": "valgrind-3.26.0",
+    "python": "3.14.4"
+  },
+  "aggregate_gate": {
+    "target": "make test",
+    "result": "555 pass / 0 fail / 24 deliberate skips",
+    "oracles": "Node 22.22.1, TypeScript 7.0.2",
+    "pass": true
+  },
+  "valgrind_gate": {
+    "target": "make valgrind-memory-safety-checkpoint-5",
+    "command": [
+      "./.build/tscc-memory-lifetime",
+      "40"
+    ],
+    "iterations": 1,
+    "exit": 0,
+    "errors": 0,
+    "heap_summary": "in use at exit: 0 bytes in 0 blocks; 46,083 allocs matched by 46,083 frees; 9,514,702 bytes allocated",
+    "leak_summary": "All heap blocks were freed -- no leaks are possible",
+    "peak_rss_kib": 176412,
+    "pass": true,
+    "evidence": "docs/evidence/memory-safety/post-preview-pc0v-valgrind.json"
+  },
+  "notes": [
+    "TSCC PC0V is the post-preview external native-memory confirmation run at the retained clean head 1bc3047. The historical Checkpoint 5 evidence under docs/evidence/memory-safety/ is unchanged and is not reinterpreted.",
+    "This is compiler-lifetime evidence at one head, not a general TypeScript compatibility or broad memory-safety claim.",
+    "PC0V is complete only at the tested TSCC commit 1bc3047 and JS++ commit 15df113; PC0P second-platform packaging remains pending."
+  ]
+}
