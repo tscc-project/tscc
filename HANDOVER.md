@@ -478,13 +478,13 @@ PC0 is now split so unavailable tooling does not turn into a false pass or block
 all useful work:
 
 1. **PC0V - external native-memory confirmation:** complete at TSCC `1bc3047`
-   and JS++ `15df113` (2026-09-13). TSCC's retained Valgrind lifetime gate and
+   and JS++ `d35999f` (2026-09-13). TSCC's retained Valgrind lifetime gate and
    the JS++ frozen host, lifecycle, VM and heap gates all pass under Valgrind
    3.26.0 with zero errors and zero bytes in use at exit. The JS++ run exposed
-   a standalone-execution lifetime defect that was fixed in `15df113`; discovery
-   and post-fix evidence are retained in both repositories. See the PC0V
-   section below. Do not weaken suppressions or classify environment failures
-   as product passes.
+   a standalone-execution lifetime defect that was corrected after ownership
+   review (JS++ `d35999f`); discovery and post-fix evidence are retained in both
+   repositories. See the PC0V section below. Do not weaken suppressions or
+   classify environment failures as product passes.
 2. **PC0P - second-platform packaging:** TSCC already has Ubuntu/macOS/Windows CI
    and multi-platform release workflows. JS++ still needs CI/package coverage
    beyond the locally qualified Linux ABI. Adding or running remote workflows is
@@ -590,7 +590,7 @@ below) and PC0P remains pending.
 
 ## PC0V external native-memory confirmation (2026-09-13)
 
-PC0V is complete at TSCC `1bc3047` and JS++ `15df113`, on Linux 7.0.0-29 x86_64
+PC0V is complete at TSCC `1bc3047` and JS++ `d35999f`, on Linux 7.0.0-29 x86_64
 with c++ 15.2.0 and Valgrind 3.26.0.
 
 - The retained aggregate gate `make test` passed at `1bc3047` against pinned
@@ -601,9 +601,12 @@ with c++ 15.2.0 and Valgrind 3.26.0.
   distinct post-preview PC0V output at
   `docs/evidence/memory-safety/post-preview-pc0v-valgrind.json`; the historical
   Checkpoint 5 evidence under that directory is unchanged.
-- JS++ PC0V required fixing a standalone local-heap lifetime defect found during
-  the run (JS++ `15df113`). All JS++ Valgrind workloads now pass; see the JS++
-  handover for that fix and contract.
+- JS++ PC0V required correcting a standalone local-heap lifetime defect found
+  during the run. The first candidate repair was superseded after ownership
+  review by JS++ `d35999f`, which defines one coherent heap/global ownership
+  model, rejects the invalid caller-global-without-caller-heap combination, and
+  makes self-referential returned values lifetime-safe. All JS++ Valgrind
+  workloads now pass; see the JS++ handover for that model and contract.
 - The machine-readable summary is `docs/evidence/post-preview-pc0v.json`.
   PC0V is not a general TypeScript compatibility or broad memory-safety claim;
   PC0P second-platform packaging remains pending.

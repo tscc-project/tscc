@@ -24,8 +24,9 @@ compatibility claims.
 The next campaign is evidence acquisition rather than immediate feature breadth:
 
 1. PC0V external Valgrind confirmation is now complete at TSCC `1bc3047` and
-   JS++ `15df113` (2026-09-13); it required and received a JS++ standalone
-   local-heap lifetime fix, and all declared workloads pass under Valgrind.
+   JS++ `d35999f` (2026-09-13); it required a JS++ standalone local-heap
+   lifetime correction that was reviewed and finalized at `d35999f`, and all
+   declared workloads pass under Valgrind.
 2. PC0P second-platform packaging, noting TSCC already has multi-platform CI
    while JS++ currently has only the qualified Linux package;
 3. EP6A pinned selected-Test262 infrastructure and classifications;

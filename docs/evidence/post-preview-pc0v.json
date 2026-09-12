@@ -37,6 +37,6 @@
   "notes": [
     "TSCC PC0V is the post-preview external native-memory confirmation run at the retained clean head 1bc3047. The historical Checkpoint 5 evidence under docs/evidence/memory-safety/ is unchanged and is not reinterpreted.",
     "This is compiler-lifetime evidence at one head, not a general TypeScript compatibility or broad memory-safety claim.",
-    "PC0V is complete only at the tested TSCC commit 1bc3047 and JS++ commit 15df113; PC0P second-platform packaging remains pending."
+    "PC0V is complete only at the tested TSCC commit 1bc3047 and JS++ commit d35999f; PC0P second-platform packaging remains pending."
   ]
 }
