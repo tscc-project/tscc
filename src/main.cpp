@@ -19,6 +19,7 @@ static void help() {
         << "  --outDir <dir>             Redirect emitted JavaScript\n"
         << "  --rootDir <dir>            Preserve source paths relative to this directory\n"
         << "  --module <name>            Module mode (preserve/esnext or initial commonjs transform)\n"
+        << "  --moduleResolution <mode>  Resolution mode (relative or node)\n"
         << "  --jsx <mode>               JSX mode (preserve currently supported)\n"
         << "  --target <name>            Target label (currently es2022-compatible erasure)\n"
         << "  --removeComments           Remove comments\n"
@@ -46,6 +47,7 @@ int main(int argc, char** argv) {
         if (arg == "--outDir") { if(!require_value("--outDir"))return 2; options.out_dir = argv[++i]; continue; }
         if (arg == "--rootDir") { if(!require_value("--rootDir"))return 2; options.root_dir = argv[++i]; continue; }
         if (arg == "--module") { if(!require_value("--module"))return 2; options.module = argv[++i]; continue; }
+        if (arg == "--moduleResolution") { if(!require_value("--moduleResolution"))return 2; options.module_resolution = argv[++i]; continue; }
         if (arg == "--jsx") { if(!require_value("--jsx"))return 2; options.jsx = argv[++i]; continue; }
         if (arg == "--target") { if(!require_value("--target"))return 2; options.target = argv[++i]; continue; }
         if (arg == "--removeComments") { options.remove_comments = true; continue; }

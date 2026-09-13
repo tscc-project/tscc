@@ -8,6 +8,7 @@ struct CompilerOptions {
     std::string root_dir;
     std::string target="es2022";
     std::string module="preserve";
+    std::string module_resolution="relative";
     std::string jsx;
     bool remove_comments=false,no_emit=false,no_emit_on_error=false,pretty=true;
     bool follow_imports=true;

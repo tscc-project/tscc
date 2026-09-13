@@ -30,9 +30,10 @@ int compile_files(const std::vector<std::string>&roots,const CompilerOptions&o){
  Diagnostics d;int emitted=0;std::vector<PreparedOutput>prepared;
  if(o.target!="es2022")d.error("",1,1,"unsupported target '"+o.target+"' (compiler preview target: es2022)",{},"TSCC3001");
  if(o.module!="preserve"&&o.module!="esnext"&&o.module!="commonjs")d.error("",1,1,"unsupported module mode '"+o.module+"' (supported: preserve, esnext, commonjs)",{},"TSCC3001");
+ if(o.module_resolution!="relative"&&o.module_resolution!="node")d.error("",1,1,"unsupported module resolution mode '"+o.module_resolution+"' (supported: relative, node)",{},"TSCC3001");
  if(!o.jsx.empty()&&o.jsx!="preserve")d.error("",1,1,"unsupported JSX mode '"+o.jsx+"' (currently supported: preserve)",{},"TSCC3001");
  if(d.has_errors()){d.print(o.pretty);return 2;}
- const fs::path root=o.root_dir.empty()?common_root(roots):fs::path(o.root_dir);ProgramGraph graph;graph.build(roots,o.follow_imports);d.append(graph.diagnostics());
+ const fs::path root=o.root_dir.empty()?common_root(roots):fs::path(o.root_dir);ProgramGraph graph;graph.build(roots,o.follow_imports,o.module_resolution);d.append(graph.diagnostics());
  for(auto&file:graph.files()){auto&unit=*file.unit;if(!unit.declaration_file&&!unit.diagnostics.has_errors()&&unit.stage==CompilationStage::Checked){PreparedOutput output;if(prepare(unit,o,root,output))prepared.push_back(std::move(output));}d.append(unit.diagnostics);}
  const bool compile_errors=d.has_errors();if(!o.no_emit&&(!compile_errors||!o.no_emit_on_error)){Diagnostics emit_d;commit_outputs(prepared,emit_d,emitted);d.append(std::move(emit_d));}d.print(o.pretty);if(d.has_errors())return 2;if(!o.no_emit)std::cout<<"tscc: emitted "<<emitted<<(emitted==1?" file\n":" files\n");return 0;
 }

@@ -127,15 +127,20 @@ the absence of TSCC project evidence.
 
 ## Post-PC0V compiler program: CP43-CP72
 
-Status: CP43-CP50 completed on 13 September 2026. TCP6A now passes all three
+Status: CP43-CP52 completed on 13 September 2026. TCP6A now passes all three
 initial project shapes. Declaration inputs join the canonical graph without
 emitting JavaScript, their callable facts reach consumers, default/namespace
 imports carry types, and re-export aliases/cycles converge deterministically.
 The 579-case wall remains 555 pass, 0 fail and 24 explicit semantic skips. The
-first reassessment keeps practical resolution (CP51) next: package entry metadata
-is now the shallowest boundary between the proven relative/declaration graph and
-real installed packages. See `docs/evidence/cp45-tcp7-decision.md` for the
-original scoring and `docs/evidence/cp50-reassessment.md` for the retained update.
+first reassessment selected practical resolution (CP51), now complete with a
+structured resolution result, modern/declaration extensions, directory/package
+entries and explicit ambiguity. CP52 adds the deliberately named `node` mode,
+ascending `node_modules` boundaries, scoped/subpath packages and selected
+`types`/`typings`/`exports`/`default`/`main` entries while preserving the default
+relative-only boundary. CP53 is next and begins by replacing the regex-based
+configuration reader: it cannot safely represent nested `paths` or inheritance.
+See `docs/evidence/cp45-tcp7-decision.md` and
+`docs/evidence/cp50-reassessment.md` for the retained decisions.
 
 These 30 checkpoints are the current route from the bounded compiler preview
 toward a proper TypeScript compiler. CP43-CP45 are ordered commitments. CP46-CP72
