@@ -22,6 +22,9 @@ static void help() {
         << "  --moduleResolution <mode>  Resolution mode (relative or node)\n"
         << "  --jsx <mode>               JSX mode (preserve currently supported)\n"
         << "  --target <name>            Target label (currently es2022-compatible erasure)\n"
+        << "  --lib <names>              Comma-separated hermetic library bundles\n"
+        << "  --types <names>            Comma-separated hermetic environment bundles\n"
+        << "  --noLib                    Compile without the default library bundle\n"
         << "  --removeComments           Remove comments\n"
         << "  --noEmit                   Parse/transpile without writing files\n"
         << "  --noEmitOnError            Commit no outputs when any input has errors\n"
@@ -33,6 +36,7 @@ int main(int argc, char** argv) {
     tscc::CompilerOptions options;
     std::vector<std::string> files;
     std::string project;
+    auto list=[](const std::string&value){std::vector<std::string>out;std::size_t at=0;while(at<=value.size()){auto comma=value.find(',',at);auto item=value.substr(at,comma==std::string::npos?std::string::npos:comma-at);if(!item.empty())out.push_back(item);if(comma==std::string::npos)break;at=comma+1;}return out;};
 
     for (int i = 1; i < argc; ++i) {
         const std::string arg = argv[i];
@@ -50,6 +54,9 @@ int main(int argc, char** argv) {
         if (arg == "--moduleResolution") { if(!require_value("--moduleResolution"))return 2; options.module_resolution = argv[++i]; continue; }
         if (arg == "--jsx") { if(!require_value("--jsx"))return 2; options.jsx = argv[++i]; continue; }
         if (arg == "--target") { if(!require_value("--target"))return 2; options.target = argv[++i]; continue; }
+        if (arg == "--lib") { if(!require_value("--lib"))return 2; options.lib=list(argv[++i]); continue; }
+        if (arg == "--types") { if(!require_value("--types"))return 2; options.types=list(argv[++i]); continue; }
+        if (arg == "--noLib") { options.no_lib=true; options.lib.clear(); continue; }
         if (arg == "--removeComments") { options.remove_comments = true; continue; }
         if (arg == "--noEmit") { options.no_emit = true; continue; }
         if (arg == "--noEmitOnError") { options.no_emit_on_error = true; continue; }

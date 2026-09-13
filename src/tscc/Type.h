@@ -65,5 +65,6 @@ struct TypeModel {
 TypeModel build_type_model(const std::vector<Token>&, const Program&,
                            const SemanticModel&, const BindingModel&,
                            TypeModel* seed=nullptr);
+bool add_library_bundle(TypeModel&,const std::string&);
 
 } // namespace tscc

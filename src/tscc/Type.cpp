@@ -57,6 +57,22 @@ TypeStore::TypeStore()
              {TypeKind::BigInt,0,"",{},{},{},0,0,false}, {TypeKind::Function,0,"",{},{},{},0,0,false},
              {TypeKind::Null,0,"",{},{},{},0,0,false}, {TypeKind::Undefined,0,"",{},{},{},0,0,false}} {}
 
+bool add_library_bundle(TypeModel&model,const std::string&name){
+    auto method=[&](std::vector<TypeId>p,TypeId result){auto required=p.size();return model.store.function_of(std::move(p),result,required,false);};
+    if(name=="es2022"){
+        model.named_types["Date"]=model.store.object_of({{"getTime",method({},model.store.number()),false,true},{"toISOString",method({},model.store.string()),false,true}});
+        model.named_types["RegExp"]=model.store.object_of({{"test",method({model.store.string()},model.store.boolean()),false,true}});
+        model.named_types["Error"]=model.store.object_of({{"message",model.store.string(),false,false},{"name",model.store.string(),false,false}});
+        return true;
+    }
+    if(name=="node"){
+        model.named_types["Buffer"]=model.store.object_of({{"length",model.store.number(),false,true},{"toString",method({},model.store.string()),false,true}});
+        model.named_types["ProcessEnv"]=model.store.object_of({},model.store.union_of({model.store.string(),model.store.undefined()}));
+        return true;
+    }
+    return false;
+}
+
 TypeKind TypeStore::kind(TypeId id) const {
     return id < types_.size() ? types_[id].kind : TypeKind::Unknown;
 }
@@ -113,7 +129,7 @@ TypeModel build_type_model(const std::vector<Token>& tokens, const Program& prog
     TypeModel model=seed?std::move(*seed):TypeModel{};
     for(const auto&node:program.root.children){if(node.kind!=SyntaxKind::InterfaceDeclaration&&node.kind!=SyntaxKind::TypeAliasDeclaration)continue;auto name=node.begin_token+1;while(name<tokens.size()&&tokens[name].kind==TokenKind::Comment)++name;if(name>=tokens.size()||tokens[name].kind!=TokenKind::Identifier)continue;std::size_t begin=name+1;if(node.kind==SyntaxKind::InterfaceDeclaration){while(begin<=node.end_token&&tokens[begin].text!="{")++begin;}else{while(begin<=node.end_token&&tokens[begin].text!="=")++begin;if(begin<=node.end_token)++begin;}if(begin>node.end_token)continue;auto at=begin;auto shape=parse_annotation(tokens,at,node.end_token+1,model.store,&model.named_types);while(at<=node.end_token&&(tokens[at].kind==TokenKind::Comment||tokens[at].text==";"))++at;if(shape==model.store.unknown()||at<=node.end_token)continue;if(node.kind==SyntaxKind::InterfaceDeclaration){std::vector<TypeProperty>inherited;bool extends=false,valid=true;for(auto p=name+1;p<begin;++p){if(tokens[p].kind==TokenKind::Comment||tokens[p].text==",")continue;if(tokens[p].text=="extends"){extends=true;continue;}if(extends&&tokens[p].kind==TokenKind::Identifier){auto base=model.named_types.find(tokens[p].text);if(base==model.named_types.end()||model.store.kind(base->second)!=TypeKind::Object){valid=false;break;}for(const auto&property:model.store.properties(base->second)){auto existing=std::find_if(inherited.begin(),inherited.end(),[&](const auto&item){return item.name==property.name;});if(existing==inherited.end())inherited.push_back(property);else if(existing->type!=property.type||existing->optional!=property.optional||existing->readonly!=property.readonly){valid=false;break;}}}}if(!valid)continue;for(const auto&property:model.store.properties(shape)){auto existing=std::find_if(inherited.begin(),inherited.end(),[&](const auto&item){return item.name==property.name;});if(existing==inherited.end())inherited.push_back(property);else *existing=property;}if(!inherited.empty())shape=model.store.object_of(std::move(inherited));}auto found=model.named_types.find(tokens[name].text);if(found!=model.named_types.end()&&node.kind==SyntaxKind::InterfaceDeclaration&&model.store.kind(found->second)==TypeKind::Object&&model.store.kind(shape)==TypeKind::Object){auto merged=model.store.properties(found->second);for(const auto&property:model.store.properties(shape)){auto existing=std::find_if(merged.begin(),merged.end(),[&](const auto&p){return p.name==property.name;});if(existing==merged.end())merged.push_back(property);else if(existing->type==property.type&&existing->optional==property.optional&&existing->readonly==property.readonly){}else{merged.clear();break;}}if(!merged.empty())shape=model.store.object_of(std::move(merged));else continue;}model.named_types[tokens[name].text]=shape;}
     model.symbol_types.assign(binding.symbols.size(), model.store.unknown());
-    model.function_signatures.resize(binding.symbols.size());
+    model.function_signatures.assign(binding.symbols.size(),{});
     for (std::size_t i = 0; i < binding.symbols.size(); ++i) {
         const auto node_index = binding.symbols[i].semantic_node;
         if (node_index >= semantic.nodes.size()) continue;

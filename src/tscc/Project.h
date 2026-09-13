@@ -48,7 +48,8 @@ public:
                const std::string& module_resolution="relative",
                const std::string& base_url="",
                const std::vector<std::pair<std::string,std::vector<std::string>>>& paths={},
-               const std::vector<std::string>& root_dirs={});
+               const std::vector<std::string>& root_dirs={},
+               const std::vector<std::string>& libraries={});
     std::vector<ProgramFile>& files(){return files_;}
     const std::vector<ProgramFile>& files()const{return files_;}
     const std::vector<std::size_t>& roots()const{return roots_;}

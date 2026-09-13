@@ -13,8 +13,10 @@ struct CompilerOptions {
     std::string jsx;
     std::string base_url;
     std::vector<std::string> root_dirs;
+    std::vector<std::string> lib={"es2022"};
+    std::vector<std::string> types;
     std::vector<std::pair<std::string,std::vector<std::string>>> paths;
-    bool remove_comments=false,no_emit=false,no_emit_on_error=false,pretty=true;
+    bool remove_comments=false,no_emit=false,no_emit_on_error=false,no_lib=false,pretty=true;
     bool follow_imports=true;
 };
 int compile_files(const std::vector<std::string>& files,const CompilerOptions& options);
