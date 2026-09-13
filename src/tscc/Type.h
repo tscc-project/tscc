@@ -41,6 +41,7 @@ public:
     TypeId parameter_default(TypeId)const;
     void define_generic(const std::string&,std::vector<TypeId>,std::vector<TypeId>,std::vector<TypeId>,TypeId)const;
     TypeId instantiate_generic(const std::string&,const std::vector<TypeId>&,bool* =nullptr)const;
+    void infer_candidates(TypeId,TypeId,std::unordered_map<TypeId,std::vector<TypeId>>&,std::size_t=0)const;
     const Type* callable(TypeId)const;
     const TypeProperty* property(TypeId,const std::string&)const;
     const std::vector<TypeProperty>& properties(TypeId)const;
