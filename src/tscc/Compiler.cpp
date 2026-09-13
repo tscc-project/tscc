@@ -3,6 +3,7 @@
 #include "Project.h"
 #include "Source.h"
 #include "Transpiler.h"
+#include "JSX.h"
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -16,6 +17,7 @@ static bool prepare(CompilationUnit&unit,const CompilerOptions&o,const fs::path&
  if(o.module!="preserve"&&o.module!="esnext"&&o.module!="commonjs"){d.error(s.path,1,1,"unsupported module mode '"+o.module+"' (supported: preserve, esnext, commonjs)");return false;}
  if(tsx&&o.jsx!="preserve"){d.error(s.path,1,1,"TSX input requires --jsx preserve in this compiler checkpoint");return false;}
  if(!o.jsx.empty()&&o.jsx!="preserve"){d.error(s.path,1,1,"unsupported JSX mode '"+o.jsx+"' (currently supported: preserve)");return false;}
+ if(tsx&&s.text.find("namespace JSX")!=std::string::npos&&!check_jsx_semantics(unit))return false;
  TranspileOptions to;to.target=o.target;to.module=o.module;to.remove_comments=o.remove_comments;if(!transpile_unit(unit,to))return false;
  fs::path input=fs::absolute(s.path).lexically_normal(),output;if(o.out_dir.empty()){output=input;output.replace_extension(tsx?".jsx":".js");}else{fs::path rel=input.lexically_relative(fs::absolute(root).lexically_normal());if(rel.empty()||rel.string().rfind("..",0)==0)rel=input.filename();output=fs::path(o.out_dir)/rel;output.replace_extension(tsx?".jsx":".js");}
  unit.output_path=output.string();prepared={&unit,std::move(output)};return true;

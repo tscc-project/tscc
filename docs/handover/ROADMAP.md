@@ -275,6 +275,13 @@ relevant, and handover/feature-matrix claims are reconciled.
 66. **JSX/TSX semantics.** Type JSX elements, attributes, children, intrinsic
     elements and component calls against explicit library contracts; then add
     selected JSX emit modes without weakening preserve mode.
+    **Completed as a bounded contract 2026-09-13:** an explicit
+    `namespace JSX { interface IntrinsicElements { ... } }` opts a TSX unit into
+    intrinsic-tag, attribute, required-property, primitive attribute-value and
+    callable component-props checking. Preserve output is unchanged. Contextual
+    expression typing, spread attributes, `ElementClass`, library augmentation
+    across files and runtime JSX transforms remain outside this slice. See
+    `docs/evidence/cp66-jsx-semantics.md`.
 67. **Runtime-bearing TypeScript semantics.** Move enums, namespaces and parameter
     properties from tested lowering with partial binding to checked symbol/type
     semantics, including merging and cross-module behavior.

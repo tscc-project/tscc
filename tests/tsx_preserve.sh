@@ -40,3 +40,30 @@ fi
 grep -Fq 'TSX input requires --jsx preserve' "$TMP/mode.log"
 
 echo "tscc TSX preserve test passed"
+
+# An explicit JSX namespace opts into the bounded semantic contract.
+cat >"$TMP/semantic.tsx" <<'TSX'
+namespace JSX { export interface IntrinsicElements {
+  panel: { title: string; count?: number; children?: unknown };
+} }
+interface CardProps { title: string; count?: number }
+declare function Card(props: CardProps): unknown;
+const good = <panel title="hello" count={2}><Card title="ok" /></panel>;
+TSX
+"$ROOT/tscc" --pretty false --jsx preserve --outDir "$TMP/semantic-out" "$TMP/semantic.tsx" >/dev/null
+grep -Fq '<panel title="hello" count={2}>' "$TMP/semantic-out/semantic.jsx"
+
+cat >"$TMP/semantic-bad.tsx" <<'TSX'
+namespace JSX { export interface IntrinsicElements { panel: { title: string } } }
+const wrongType = <panel title={3} />;
+const unknownProp = <panel title="ok" extra="no" />;
+const missingProp = <panel />;
+const unknownTag = <missing title="x" />;
+TSX
+if "$ROOT/tscc" --pretty false --jsx preserve --noEmit "$TMP/semantic-bad.tsx" >"$TMP/semantic-bad.log" 2>&1; then
+  echo "invalid JSX props unexpectedly checked" >&2; exit 1
+fi
+grep -Fq "not assignable to JSX property 'title'" "$TMP/semantic-bad.log"
+grep -Fq "Property 'extra' does not exist" "$TMP/semantic-bad.log"
+grep -Fq "JSX property 'title' is required" "$TMP/semantic-bad.log"
+grep -Fq "intrinsic element 'missing' is not declared" "$TMP/semantic-bad.log"

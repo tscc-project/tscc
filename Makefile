@@ -11,7 +11,7 @@ ORACLE_BIN ?= $(TSCC_REGRESSION_SUITE_DIR)/tools
 export PATH := $(abspath $(ORACLE_BIN)):$(PATH)
 SAN_TARGET := .build/tscc-sanitize
 MEMORY_SMOKE := .build/tscc-parser-memory-san
-SOURCES := src/main.cpp src/tscc/Diagnostic.cpp src/tscc/Source.cpp src/tscc/Lexer.cpp src/tscc/Parser.cpp src/tscc/Semantic.cpp src/tscc/ControlFlow.cpp src/tscc/Binder.cpp src/tscc/Type.cpp src/tscc/Checker.cpp src/tscc/CompilationUnit.cpp src/tscc/SourceEdit.cpp src/tscc/Transpiler.cpp src/tscc/Project.cpp src/tscc/Config.cpp src/tscc/Compiler.cpp
+SOURCES := src/main.cpp src/tscc/Diagnostic.cpp src/tscc/Source.cpp src/tscc/Lexer.cpp src/tscc/Parser.cpp src/tscc/Semantic.cpp src/tscc/ControlFlow.cpp src/tscc/Binder.cpp src/tscc/Type.cpp src/tscc/Checker.cpp src/tscc/CompilationUnit.cpp src/tscc/SourceEdit.cpp src/tscc/Transpiler.cpp src/tscc/JSX.cpp src/tscc/Project.cpp src/tscc/Config.cpp src/tscc/Compiler.cpp
 SAN_OBJECTS := $(patsubst %.cpp,.build/san/%.o,$(SOURCES))
 SAN_DEPS := $(SAN_OBJECTS:.o=.d)
 OBJECTS := $(SOURCES:.cpp=.o)
