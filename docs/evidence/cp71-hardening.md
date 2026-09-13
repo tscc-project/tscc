@@ -69,8 +69,11 @@ Final summaries
   possible").
 - No invalid reads or writes, no use of uninitialised values, no mismatched
   allocation/deallocation, no double frees.
-- File descriptors: 3 open (3 inherited, standard) at exit in every run; no
-  file-descriptor or temporary-output leaks attributable to TSCC.
+- File descriptors: 3 open (3 inherited, standard) at exit in every run;
+  `--track-fds=yes` records no descriptor opened by TSCC still open at exit in
+  the measured workloads. Temporary-output staging (`.tscc-tmp-*` rename-then-
+  commit) is exercised by these workloads, but absence of leftover staging
+  files is not separately asserted here.
 
 Defects found and fixed: none. No Valgrind finding required a source change, so
 no suppressions were added.

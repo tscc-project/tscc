@@ -231,6 +231,55 @@ void report_operator_error(const SourceFile& source, const std::vector<Token>& t
         std::string("Operator '") + op + "' cannot be applied to types '" +
         types.name(types.widen(left)) + "' and '" + types.name(types.widen(right)) + "'.", source.line_text(line));
 }
+
+// JSX attribute assignments use `name={value}` or `name="value"` inside an
+// opening element tag. The `=` there is a syntactic separator, not an
+// assignment operator, but the flat token stream exposes the same shape as a
+// genuine assignment (`identifier = expression`). Record those `=` positions so
+// the general assignment scan can ignore them without weakening real
+// assignment checking. The scan mirrors the JSX element detection used by the
+// semantic checker, descends into `{...}` attribute-value containers so nested
+// JSX elements are classified too, and is only consulted for `.tsx` sources.
+void collect_jsx_attribute_equals(const std::vector<Token>& tokens,std::size_t begin,std::size_t end,
+                                  std::unordered_set<std::size_t>& out){
+    for(std::size_t i=begin;i+1<end;++i){
+        if(tokens[i].text!="<"||tokens[i+1].text=="/"||tokens[i+1].text==">")continue;
+        if(tokens[i+1].kind!=TokenKind::Identifier&&tokens[i+1].kind!=TokenKind::Keyword)continue;
+        std::size_t p=i+2;
+        while(p<end&&(tokens[p].text=="."||tokens[p].kind==TokenKind::Identifier)&&tokens[p].begin==tokens[p-1].end)++p;
+        if(p<end&&tokens[p].text=="<"&&tokens[p].begin==tokens[p-1].end){
+            int depth=0;std::size_t g=p;
+            for(;g<end;++g){if(tokens[g].text=="<")++depth;else if(tokens[g].text==">"&&--depth==0)break;}
+            if(g>=end)continue;
+            p=g+1;
+        }
+        int braces=0;std::size_t open=p;
+        for(;open<end;++open){
+            if(tokens[open].text=="{")++braces;
+            else if(tokens[open].text=="}"&&braces)--braces;
+            else if(tokens[open].text==">"&&!braces)break;
+        }
+        if(open>=end)continue;
+        for(std::size_t a=p;a<open;++a){
+            if(tokens[a].kind==TokenKind::Comment||tokens[a].text=="/")continue;
+            if(tokens[a].text=="{"){
+                std::size_t close=a;int depth=0;
+                for(;close<open;++close){if(tokens[close].text=="{")++depth;else if(tokens[close].text=="}"&&--depth==0)break;}
+                collect_jsx_attribute_equals(tokens,a+1,close<open?close:open,out);
+                if(close<open)a=close;
+                continue;
+            }
+            if(tokens[a].kind!=TokenKind::Identifier&&tokens[a].kind!=TokenKind::Keyword)continue;
+            std::size_t eq=a+1;
+            while(eq<open&&tokens[eq].kind==TokenKind::Comment)++eq;
+            if(eq<open&&tokens[eq].text=="="){
+                out.insert(eq);
+                a=eq;
+            }
+        }
+        i=open;
+    }
+}
 }
 
 bool check_program(const SourceFile& source, const std::vector<Token>& tokens,
@@ -239,6 +288,9 @@ bool check_program(const SourceFile& source, const std::vector<Token>& tokens,
                    ExpressionModel& expressions, const ControlFlowModel&control_flow,Diagnostics& diagnostics) {
     std::vector<std::pair<std::size_t,std::size_t>>owned_expression_ranges;
     auto class_error=[&](std::size_t token,const std::string&message){if(token>=tokens.size())return;const auto[line,column]=source.line_col(tokens[token].begin);diagnostics.error(source.path,line,column,message,source.line_text(line));};
+    std::unordered_set<std::size_t> jsx_attribute_equals;
+    if(source.path.size()>=4&&source.path.compare(source.path.size()-4,4,".tsx")==0)
+        collect_jsx_attribute_equals(tokens,0,tokens.size(),jsx_attribute_equals);
     for(const auto&issue:types.class_issues)class_error(issue.token,issue.message);
     auto own_member=[&](const TypeModel::ClassInfo&info,const TypeModel::ClassMember&member){return member.begin_token>info.body_begin_token&&member.begin_token<info.body_end_token;};
     auto access_rank=[](TypeModel::Accessibility access){return access==TypeModel::Accessibility::Public?2:access==TypeModel::Accessibility::Protected?1:0;};
@@ -251,7 +303,7 @@ bool check_program(const SourceFile& source, const std::vector<Token>& tokens,
     auto facts_at=[&](std::size_t position){std::unordered_map<std::size_t,TypeId>facts;std::vector<const FlowRegion*>regions;for(const auto&graph:control_flow.functions)for(const auto&region:graph.flow_regions)if(position>=region.begin_token&&position<region.end_token)regions.push_back(&region);std::sort(regions.begin(),regions.end(),[](auto*a,auto*b){return a->end_token-a->begin_token>b->end_token-b->begin_token;});for(const auto*region:regions)for(const auto&predicate:region->predicates){const auto symbol=binding.symbol_for_reference(predicate.reference_token);if(symbol>=types.symbol_types.size())continue;auto current=facts.count(symbol)?facts[symbol]:types.symbol_types[symbol];const bool negate=predicate.negated!=(!region->true_branch);TypeId narrowed=types.store.unknown();if(predicate.kind==FlowPredicateKind::Truthy)narrowed=negate?current:types.store.non_nullable(current);else if(predicate.kind==FlowPredicateKind::Typeof){const auto value=literal_value(tokens[predicate.value_token].text);auto kind=value=="string"?TypeKind::String:value=="number"?TypeKind::Number:value=="boolean"?TypeKind::Boolean:value=="bigint"?TypeKind::BigInt:value=="undefined"?TypeKind::Undefined:TypeKind::Unknown;narrowed=kind==TypeKind::Unknown?current:types.store.narrow_primitive(current,kind,negate);}else if(predicate.kind==FlowPredicateKind::Equality)narrowed=types.store.narrow_literal(current,literal_type(predicate.value_token),negate);else if(predicate.kind==FlowPredicateKind::Discriminant)narrowed=types.store.narrow_discriminant(current,tokens[predicate.property_token].text,literal_type(predicate.value_token),negate);else if(predicate.kind==FlowPredicateKind::PropertyPresence)narrowed=types.store.narrow_property(current,literal_value(tokens[predicate.value_token].text),negate);else if(predicate.kind==FlowPredicateKind::Instanceof){for(const auto&info:types.classes)if(info.name==tokens[predicate.value_token].text){narrowed=negate?current:info.instance_type;break;}}if(narrowed!=types.store.unknown())facts[symbol]=narrowed;}return facts;};
     auto scope_at=[&](std::size_t token){std::size_t found=0,best=tokens.size()+1;for(std::size_t i=0;i<binding.scopes.size();++i)if(token>=binding.scopes[i].begin_token&&token<binding.scopes[i].end_token&&binding.scopes[i].end_token-binding.scopes[i].begin_token<best){found=i;best=binding.scopes[i].end_token-binding.scopes[i].begin_token;}return found;};
     auto scope_contains=[&](std::size_t ancestor,std::size_t child){while(child<binding.scopes.size()){if(child==ancestor)return true;child=binding.scopes[child].parent;}return false;};
-    auto assignment_facts_at=[&](std::size_t position){std::unordered_map<std::size_t,TypeId>facts;const auto use_scope=scope_at(position);for(std::size_t op=1;op+1<position;++op){if(tokens[op].text!="=")continue;std::size_t left=op;while(left&&tokens[left-1].kind==TokenKind::Comment)--left;if(!left)continue;--left;if(tokens[left].kind!=TokenKind::Identifier)continue;const auto symbol=binding.symbol_for_reference(left);if(symbol>=types.symbol_types.size())continue;std::size_t assignment_scope=scope_at(left);if(!scope_contains(assignment_scope,use_scope))continue;std::size_t value=op+1;while(value<position&&tokens[value].kind==TokenKind::Comment)++value;auto assigned=literal_type(value);if(assigned!=types.store.unknown())facts[symbol]=types.store.widen(assigned);}return facts;};
+    auto assignment_facts_at=[&](std::size_t position){std::unordered_map<std::size_t,TypeId>facts;const auto use_scope=scope_at(position);for(std::size_t op=1;op+1<position;++op){if(tokens[op].text!="="||jsx_attribute_equals.count(op))continue;std::size_t left=op;while(left&&tokens[left-1].kind==TokenKind::Comment)--left;if(!left)continue;--left;if(tokens[left].kind!=TokenKind::Identifier)continue;const auto symbol=binding.symbol_for_reference(left);if(symbol>=types.symbol_types.size())continue;std::size_t assignment_scope=scope_at(left);if(!scope_contains(assignment_scope,use_scope))continue;std::size_t value=op+1;while(value<position&&tokens[value].kind==TokenKind::Comment)++value;auto assigned=literal_type(value);if(assigned!=types.store.unknown())facts[symbol]=types.store.widen(assigned);}return facts;};
     auto merge_assignment_facts=[&](std::unordered_map<std::size_t,TypeId>&facts,std::size_t position){for(const auto&item:assignment_facts_at(position))facts[item.first]=item.second;};
     for (const auto& node : model.nodes) {
         if (node.kind != SemanticNodeKind::VariableDeclaration ||
@@ -321,6 +373,7 @@ bool check_program(const SourceFile& source, const std::vector<Token>& tokens,
         const auto& op = tokens[assignment].text;
         if (op != "=" && op != "+=" && op != "-=" && op != "*=" &&
             op != "/=" && op != "%=" && op != "**=") continue;
+        if (jsx_attribute_equals.count(assignment)) continue;
         std::size_t left = assignment;
         while (left > 0 && tokens[left-1].kind == TokenKind::Comment) --left;
         if (left == 0) continue;
@@ -375,8 +428,8 @@ bool check_program(const SourceFile& source, const std::vector<Token>& tokens,
             report_operator_error(source, tokens, assignment, op, expected, rhs,
                                   types.store, diagnostics);
     }
-    auto assigned_in=[&](std::size_t symbol,std::size_t begin,std::size_t end){for(std::size_t op=begin+1;op<end&&op<tokens.size();++op)if(tokens[op].text=="="){std::size_t left=op;while(left>begin&&tokens[left-1].kind==TokenKind::Comment)--left;if(left>begin&&binding.symbol_for_reference(left-1)==symbol)return true;}return false;};
-    for(std::size_t symbol=0;symbol<binding.symbols.size();++symbol){const auto&bound=binding.symbols[symbol];if(bound.kind!=SymbolKind::Variable||bound.variable_kind==VariableKind::Var)continue;std::size_t before=bound.declaration_token;while(before&&tokens[before-1].kind==TokenKind::Comment)--before;if(!before||(tokens[before-1].text!="let"&&tokens[before-1].text!="const"))continue;const VariableDeclaration*declaration=nullptr;for(const auto&candidate:program.variables)if(candidate.name_token==bound.declaration_token){declaration=&candidate;break;}if(!declaration||declaration->type_end_token<=declaration->type_begin_token||declaration->initializer_end_token>declaration->initializer_begin_token)continue;for(const auto&reference:binding.references){if(reference.symbol!=symbol||reference.token<=bound.declaration_token)continue;std::size_t after=reference.token+1;while(after<tokens.size()&&tokens[after].kind==TokenKind::Comment)++after;if(after<tokens.size()&&tokens[after].text=="=")continue;bool assigned=false;const auto use_scope=scope_at(reference.token);for(std::size_t op=bound.declaration_token+1;op<reference.token;++op)if(tokens[op].text=="="){std::size_t left=op;while(left&&tokens[left-1].kind==TokenKind::Comment)--left;if(left&&binding.symbol_for_reference(left-1)==symbol&&scope_contains(scope_at(left-1),use_scope)){assigned=true;break;}}if(!assigned){const FlowRegion*true_region=nullptr,*false_region=nullptr;for(const auto&region:control_flow.flow_regions)if(region.end_token<reference.token&&!region.loop){if(region.true_branch)true_region=&region;else false_region=&region;if(true_region&&false_region&&assigned_in(symbol,true_region->begin_token,true_region->end_token)&&assigned_in(symbol,false_region->begin_token,false_region->end_token)){assigned=true;break;}}}if(!assigned){const auto[line,column]=source.line_col(tokens[reference.token].begin);diagnostics.error(source.path,line,column,"Variable '"+bound.name+"' is used before being assigned.",source.line_text(line));break;}}
+    auto assigned_in=[&](std::size_t symbol,std::size_t begin,std::size_t end){for(std::size_t op=begin+1;op<end&&op<tokens.size();++op)if(tokens[op].text=="="&&!jsx_attribute_equals.count(op)){std::size_t left=op;while(left>begin&&tokens[left-1].kind==TokenKind::Comment)--left;if(left>begin&&binding.symbol_for_reference(left-1)==symbol)return true;}return false;};
+    for(std::size_t symbol=0;symbol<binding.symbols.size();++symbol){const auto&bound=binding.symbols[symbol];if(bound.kind!=SymbolKind::Variable||bound.variable_kind==VariableKind::Var)continue;std::size_t before=bound.declaration_token;while(before&&tokens[before-1].kind==TokenKind::Comment)--before;if(!before||(tokens[before-1].text!="let"&&tokens[before-1].text!="const"))continue;const VariableDeclaration*declaration=nullptr;for(const auto&candidate:program.variables)if(candidate.name_token==bound.declaration_token){declaration=&candidate;break;}if(!declaration||declaration->type_end_token<=declaration->type_begin_token||declaration->initializer_end_token>declaration->initializer_begin_token)continue;for(const auto&reference:binding.references){if(reference.symbol!=symbol||reference.token<=bound.declaration_token)continue;std::size_t after=reference.token+1;while(after<tokens.size()&&tokens[after].kind==TokenKind::Comment)++after;if(after<tokens.size()&&tokens[after].text=="=")continue;bool assigned=false;const auto use_scope=scope_at(reference.token);for(std::size_t op=bound.declaration_token+1;op<reference.token;++op)if(tokens[op].text=="="&&!jsx_attribute_equals.count(op)){std::size_t left=op;while(left&&tokens[left-1].kind==TokenKind::Comment)--left;if(left&&binding.symbol_for_reference(left-1)==symbol&&scope_contains(scope_at(left-1),use_scope)){assigned=true;break;}}if(!assigned){const FlowRegion*true_region=nullptr,*false_region=nullptr;for(const auto&region:control_flow.flow_regions)if(region.end_token<reference.token&&!region.loop){if(region.true_branch)true_region=&region;else false_region=&region;if(true_region&&false_region&&assigned_in(symbol,true_region->begin_token,true_region->end_token)&&assigned_in(symbol,false_region->begin_token,false_region->end_token)){assigned=true;break;}}}if(!assigned){const auto[line,column]=source.line_col(tokens[reference.token].begin);diagnostics.error(source.path,line,column,"Variable '"+bound.name+"' is used before being assigned.",source.line_text(line));break;}}
     }
     return !diagnostics.has_errors();
 }
