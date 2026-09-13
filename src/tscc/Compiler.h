@@ -16,7 +16,7 @@ struct CompilerOptions {
     std::vector<std::string> lib={"es2022"};
     std::vector<std::string> types;
     std::vector<std::pair<std::string,std::vector<std::string>>> paths;
-    bool remove_comments=false,no_emit=false,no_emit_on_error=false,no_lib=false,pretty=true,source_map=false,declaration=false,declaration_map=false;
+    bool remove_comments=false,no_emit=false,no_emit_on_error=false,no_lib=false,pretty=true,source_map=false,declaration=false,declaration_map=false,incremental=false;
     bool follow_imports=true;
 };
 int compile_files(const std::vector<std::string>& files,const CompilerOptions& options);

@@ -314,6 +314,13 @@ relevant, and handover/feature-matrix claims are reconciled.
 70. **Incremental compiler service.** Add reusable programs, dependency-aware
     invalidation, cancellation and watch mode with clean/incremental equivalence
     gates for output and diagnostics.
+    **Completed as an incremental-output foundation 2026-09-13:**
+    `--incremental` records deterministic graph identity, compares staged bytes
+    with existing artifacts and preserves unchanged output mtimes. Clean and
+    incremental output equivalence is gated. Reusable in-memory semantic graphs,
+    dependency-directed rechecking, cancellation and watch mode remain the next
+    service layer rather than being implied by write avoidance. See
+    `docs/evidence/cp70-incremental-foundation.md`.
 71. **Production hardening campaign.** Exercise larger graphs and real projects,
     adversarial/generated input, parser and semantic fuzzing, sanitizer/Valgrind,
     performance/RSS budgets, failure recovery and supported-platform packages.
