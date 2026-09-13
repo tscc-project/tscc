@@ -12,7 +12,7 @@
 namespace tscc {
 
 using TypeId = std::size_t;
-enum class TypeKind { Unknown, Number, String, Boolean, BigInt, Function, Null, Undefined, Symbol, Literal, Union, Object, TypeParameter };
+enum class TypeKind { Unknown, Number, String, Boolean, BigInt, Function, Null, Undefined, Symbol, Never, Literal, Union, Intersection, Object, TypeParameter, Keyof, IndexedAccess, Mapped, Conditional, TemplateLiteral };
 enum TupleElementFlag : unsigned char { TupleRequired = 0, TupleOptional = 1, TupleRest = 2 };
 struct TypeProperty{std::string name;TypeId type=0;bool optional=false;bool readonly=false;};
 struct Type { TypeKind kind = TypeKind::Unknown;TypeId base=0;std::string literal;std::vector<TypeId> members;std::vector<TypeProperty>properties;std::vector<TypeId>parameters;TypeId result=0;std::size_t required_parameters=0;bool rest=false;TypeId string_index=0;TypeId number_index=0;TypeId call_signature=0;TypeId symbol_index=0;std::vector<unsigned char> element_flags;bool readonly_collection=false; };
@@ -29,8 +29,10 @@ public:
     TypeId null() const { return 6; }
     TypeId undefined() const { return 7; }
     TypeId symbol() const { return 8; }
+    TypeId never() const { return 9; }
     TypeId literal(TypeId,const std::string&) const;
     TypeId union_of(std::vector<TypeId>) const;
+    TypeId intersection_of(std::vector<TypeId>)const;
     TypeId non_nullable(TypeId) const;
     TypeId narrow_primitive(TypeId,TypeKind,bool=false)const;
     TypeId narrow_literal(TypeId,TypeId,bool=false)const;
@@ -46,6 +48,9 @@ public:
     bool readonly_collection(TypeId)const;
     TypeId indexed_access(TypeId,TypeId)const;
     TypeId keyof_type(TypeId)const;
+    TypeId mapped_of(TypeId key_parameter,TypeId keys,TypeId value,int optional_mode=0,int readonly_mode=0)const;
+    TypeId conditional_of(TypeId check,TypeId constraint,TypeId when_true,TypeId when_false)const;
+    TypeId template_literal(const std::string&,const std::unordered_map<std::string,TypeId>* =nullptr)const;
     TypeId function_of(std::vector<TypeId>,TypeId,std::size_t,bool)const;
     TypeId type_parameter(const std::string&,TypeId=0,TypeId=0)const;
     TypeId substitute(TypeId,const std::unordered_map<TypeId,TypeId>&,std::size_t=0)const;

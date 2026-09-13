@@ -39,6 +39,14 @@ int main() {
     if(types.store.symbol_index(indexed)!=types.store.number())fail("symbol index signature missing");
     const auto keys=types.store.keyof_type(indexed);
     if(!types.store.assignable(types.store.literal(types.store.string(),"name"),keys)||!types.store.assignable(types.store.literal(types.store.number(),"7"),keys)||!types.store.assignable(types.store.symbol(),keys))fail("keyof key domains missing");
+    const auto intersection=types.store.intersection_of({types.store.object_of({{"a",types.store.number(),false,false}}),types.store.object_of({{"b",types.store.string(),false,false}})});
+    if(!types.store.property(intersection,"a")||!types.store.property(intersection,"b"))fail("canonical intersection merge missing");
+    if(types.store.intersection_of({types.store.string(),types.store.number()})!=types.store.never())fail("disjoint intersection did not reduce to never");
+    const auto conditional=types.store.conditional_of(types.store.string(),types.store.string(),types.store.number(),types.store.boolean());
+    if(conditional!=types.store.number())fail("concrete conditional type did not reduce");
+    std::unordered_map<std::string,TypeId>template_names{{"Suffix",types.store.union_of({types.store.literal(types.store.string(),"A"),types.store.literal(types.store.string(),"B")})}};
+    const auto template_type=types.store.template_literal("`get${Suffix}`",&template_names);
+    if(!types.store.assignable(types.store.literal(types.store.string(),"getA"),template_type)||types.store.assignable(types.store.literal(types.store.string(),"getC"),template_type))fail("template literal expansion missing");
     if (types.symbol_types.size() != binding.symbols.size()) fail("type facts lost symbol identity");
     for (std::size_t i = 0; i < binding.symbols.size(); ++i) {
         const auto& name = binding.symbols[i].name;

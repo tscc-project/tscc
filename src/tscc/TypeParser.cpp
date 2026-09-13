@@ -10,19 +10,26 @@ public:
         : tokens(t), cursor(i), end(end), store(store), named(named) {}
 
     TypeId parse() {
-        auto first = postfix_primary();
+        auto first = intersection();
         if (first == store.unknown()) return first;
         std::vector<TypeId> members{first};
         while (take("|")) {
-            auto member = postfix_primary();
+            auto member = intersection();
             if (member == store.unknown()) return member;
             members.push_back(member);
         }
-        noise();if(cursor<end){const auto&next=tokens[cursor].text;if(next!=","&&next!=">"&&next!=")"&&next!="]"&&next!="}"&&next!=";")return store.unknown();}
-        return store.union_of(std::move(members));
+        auto type=store.union_of(std::move(members));
+        if(take("extends")){
+            auto constraint=intersection();if(constraint==store.unknown()||!take("?"))return store.unknown();
+            auto when_true=parse();if(when_true==store.unknown()||!take(":"))return store.unknown();
+            auto when_false=parse();return when_false==store.unknown()?when_false:store.conditional_of(type,constraint,when_true,when_false);
+        }
+        noise();if(cursor<end){const auto&next=tokens[cursor].text;if(next!=","&&next!=">"&&next!=")"&&next!="]"&&next!="}"&&next!=";"&&next!=":"&&next!="?")return store.unknown();}
+        return type;
     }
 
 private:
+    TypeId intersection(){auto first=postfix_primary();if(first==store.unknown())return first;std::vector<TypeId>members{first};while(take("&")){auto member=postfix_primary();if(member==store.unknown())return member;members.push_back(member);}return store.intersection_of(std::move(members));}
     TypeId postfix_primary() {
         auto type = primary();
         if (type == store.unknown()) return type;
@@ -45,6 +52,7 @@ private:
     TypeId atom(const Token& token) const {
         if (token.kind == TokenKind::String)
             return store.literal(store.string(), token.text.substr(1, token.text.size() - 2));
+        if(token.kind==TokenKind::Template)return store.template_literal(token.text,named);
         if (token.kind == TokenKind::Number)
             return store.literal(token.text.back() == 'n' ? store.bigint() : store.number(), token.text);
         if (token.text == "true" || token.text == "false") return store.literal(store.boolean(), token.text);
@@ -55,6 +63,8 @@ private:
         if (token.text == "symbol") return store.symbol();
         if (token.text == "null") return store.null();
         if (token.text == "undefined") return store.undefined();
+        if (token.text == "never") return store.never();
+        if(auto found=inferred.find(token.text);found!=inferred.end())return found->second;
         if (named) { auto found = named->find(token.text); if (found != named->end()) return found->second; }
         return store.unknown();
     }
@@ -62,6 +72,7 @@ private:
         noise();
         if (cursor >= end) return store.unknown();
         if(take("keyof")){auto operand=postfix_primary();return operand==store.unknown()?operand:store.keyof_type(operand);}
+        if(take("infer")){noise();if(cursor>=end||tokens[cursor].kind!=TokenKind::Identifier)return store.unknown();const auto name=tokens[cursor++].text;auto type=store.type_parameter(name);inferred[name]=type;return type;}
         if(take("readonly")){
             auto value=postfix_primary();
             if(value==store.unknown())return value;
@@ -71,7 +82,7 @@ private:
             return element==store.unknown()?store.unknown():store.array_of(element,true);
         }
         if (tokens[cursor].text == "{") return object();
-        if (tokens[cursor].text == "(") return function("=>");
+        if (tokens[cursor].text == "(") {const auto saved=cursor;auto callable=function("=>");if(callable!=store.unknown())return callable;cursor=saved;if(!take("("))return store.unknown();auto grouped=parse();return grouped!=store.unknown()&&take(")")?grouped:store.unknown();}
         if (tokens[cursor].text == "[") return tuple();
         const auto name=tokens[cursor].text;auto type=atom(tokens[cursor++]);
         if(take("<")){std::vector<TypeId>arguments;while(cursor<end&&tokens[cursor].text!=">"){auto argument=parse();if(argument==store.unknown())return argument;arguments.push_back(argument);if(!take(","))break;}if(!take(">"))return store.unknown();if((name=="Array"||name=="ReadonlyArray")&&arguments.size()==1)type=store.array_of(arguments[0],name=="ReadonlyArray");else type=store.instantiate_generic(name,arguments);}
@@ -145,8 +156,26 @@ private:
         else return false;
         return true;
     }
+    TypeId mapped_body(){
+        int readonly_mode=0,optional_mode=0;
+        if(take("readonly"))readonly_mode=1;else if(take("+")){if(!take("readonly"))return store.unknown();readonly_mode=1;}else if(take("-")){if(!take("readonly"))return store.unknown();readonly_mode=-1;}
+        if(!take("[")){return store.unknown();}noise();if(cursor>=end||tokens[cursor].kind!=TokenKind::Identifier)return store.unknown();const auto key_name=tokens[cursor++].text;if(!take("in"))return store.unknown();
+        auto keys=parse();if(keys==store.unknown()||!take("]"))return store.unknown();
+        if(take("?"))optional_mode=1;else if(take("+")){if(!take("?"))return store.unknown();optional_mode=1;}else if(take("-")){if(!take("?"))return store.unknown();optional_mode=-1;}
+        if(!take(":"))return store.unknown();
+        auto local=named?*named:std::unordered_map<std::string,TypeId>{};
+        auto key_parameter=store.type_parameter(key_name);local[key_name]=key_parameter;
+        AnnotationParser value_parser(tokens,cursor,end,store,&local);auto value=value_parser.parse();
+        if(value==store.unknown())return value;
+        while(take(";")||take(",")){}
+        if(!take("}"))return store.unknown();
+        return store.mapped_of(key_parameter,keys,value,optional_mode,readonly_mode);
+    }
     TypeId object() {
         if (!take("{")) return store.unknown();
+        noise();{
+            auto probe=cursor;int square=0;bool mapped=false;for(;probe<end;++probe){const auto&t=tokens[probe].text;if(t=="[")++square;else if(t=="]"){if(square)--square;else break;}else if(square&&t=="in"){mapped=true;break;}else if(!square&&(t=="}"||t==":"||t==";"))break;}if(mapped)return mapped_body();
+        }
         std::vector<TypeProperty> properties;
         TypeId string_index = store.unknown(), number_index = store.unknown(),symbol_index=store.unknown(), call = store.unknown();
         while (cursor < end) {
@@ -177,6 +206,7 @@ private:
     }
     const std::vector<Token>& tokens; std::size_t& cursor; std::size_t end;
     const TypeStore& store; const std::unordered_map<std::string, TypeId>* named;
+    mutable std::unordered_map<std::string,TypeId>inferred;
 };
 }
 

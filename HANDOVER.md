@@ -691,6 +691,24 @@ the preview's established permissive behavior, while fresh object literals used
 with `satisfies` reject unknown keys. Assertion type-range ownership now balances
 nested object/tuple/generic delimiters so those checks reach the canonical typer.
 See `docs/evidence/cp64-richer-collections.md` and
-`tests/richer_collections.sh`. The pinned wall remains 555/0/24. CP65 advanced
-type operators is next and should be split into bounded operator slices rather
-than introduced as one monolithic evaluator.
+`tests/richer_collections.sh`. The pinned wall remains 555/0/24.
+
+## CP65 bounded advanced type operators (2026-09-13)
+
+The canonical `TypeStore` now retains intersections and deferred `keyof`, indexed
+access, mapped and conditional identities where generic operands prevent eager
+reduction. Substitution reduces those identities deterministically, distributes
+naked type-parameter conditionals, supports bounded `infer`, preserves mapped
+optional/readonly modifiers, and expands finite template-literal unions.
+
+The utility foundation includes `Partial`, `Required`, `Readonly`, `Pick`,
+`Omit`, `Record`, `Exclude`, `Extract`, `NonNullable` and `ReturnType`. Complexity
+is fail-closed: substitution depth is capped at 64 and combinatorial operator
+surfaces at 256 members. This is not complete TypeScript type metaprogramming:
+key-remapped mapped types, recursive conditional aliases, unresolved generic
+template interpolation, intrinsic string manipulation and the full standard
+utility catalogue remain explicit future work.
+
+Focused evidence is `tests/advanced_types.sh` plus canonical-store assertions in
+`tests/type_model_smoke.cpp`; see `docs/evidence/cp65-advanced-types.md`. The
+pinned wall remains 555/0/24. CP66 JSX/TSX semantics is next.

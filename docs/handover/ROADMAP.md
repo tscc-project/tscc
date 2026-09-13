@@ -127,7 +127,7 @@ the absence of TSCC project evidence.
 
 ## Post-PC0V compiler program: CP43-CP72
 
-Status: CP43-CP64 completed on 13 September 2026. TCP6A now passes all three
+Status: CP43-CP65 completed on 13 September 2026. TCP6A now passes all three
 initial project shapes. Declaration inputs join the canonical graph without
 emitting JavaScript, their callable facts reach consumers, default/namespace
 imports carry types, and re-export aliases/cycles converge deterministically.
@@ -153,7 +153,8 @@ edges, predecessor joins and reachability. CP63 moves truthiness, equality,
 discriminant, `typeof`, `instanceof`, property-presence, assignment and
 definite-assignment facts onto that foundation. CP64 adds canonical optional and
 rest tuple metadata, readonly collection identity, indexed writes, key operators,
-numeric/symbol index domains and an explicit excess-property policy. CP65 is next.
+numeric/symbol index domains and an explicit excess-property policy. CP65 adds
+bounded advanced operators and their utility-type foundation. CP66 is next.
 See `docs/evidence/cp45-tcp7-decision.md` and
 `docs/evidence/cp50-reassessment.md` for the retained decisions.
 
@@ -260,6 +261,14 @@ relevant, and handover/feature-matrix claims are reconciled.
 65. **Advanced type operators.** Add intersections, conditional and mapped types,
     template-literal types and utility-type prerequisites as separately bounded
     slices with instantiation-depth and complexity limits.
+    **Completed 2026-09-13:** canonical/deferred operator nodes now cover
+    intersections, `keyof`/indexed access, homomorphic and finite-key mapped
+    types, distributive conditional substitution with bounded `infer`, and
+    finite template-literal expansion. Core utility transforms share those
+    primitives. Substitution stops after 64 levels and combinatorial operator
+    surfaces stop or widen at 256 members. Key remapping, recursive conditional
+    aliases and complete intrinsic utility parity remain outside this bounded
+    slice. See `docs/evidence/cp65-advanced-types.md`.
 
 ### TypeScript surface, output and production operation
 
