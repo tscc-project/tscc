@@ -106,23 +106,156 @@ deliberate trade-offs rather than hidden inside semantic progress.
 ## Current priorities
 
 TCP0-TCP5 completed the first bounded compiler-preview contract. Current work is
-therefore evidence acquisition rather than redefining that already-qualified
-finish line:
+therefore evidence-led expansion rather than redefining that already-qualified
+finish line. PC0V is complete at TSCC `1bc3047` and JS++ `d35999f`; native
+lifetime uncertainty is no longer the next compiler blocker:
 
 1. Keep the 579-case external contract, 7/7 runtime intersection, machine-readable
    preview contract and repository mirrors synchronized.
-2. Pin a reproducible TypeScript/Node oracle environment and rerun the complete
-   retained baseline from committed repository states.
-3. Obtain PC0V external Valgrind evidence and retain PC0P as an explicit
-   cross-platform packaging gate.
-4. Build TCP6A around pinned, licence-compatible real small projects and classify
+2. Keep the pinned TypeScript 7.0.2/Node 22.22.1 oracle environment and complete
+   PC0V evidence as retained regression gates.
+3. Build TCP6A around pinned, licence-compatible real small projects and classify
    failures by compiler stage before implementing fixes.
-5. Combine those results with JS++ selected-Test262 and embedding-host evidence at
-   a decision gate.
-6. Choose TCP7 from measured blockers. Broader import-type propagation and
+4. Choose TCP7 from measured blockers. Broader import-type propagation and
    practical package resolution are candidates, not predetermined commitments.
-7. Continue using complete semantic slices, sanitizer coverage and performance/RSS
+5. Continue using complete semantic slices, sanitizer coverage and performance/RSS
    comparison for every architecture or compatibility expansion.
+
+PC0P remains a parallel JS++ packaging gate and EP6A remains a parallel JS++
+conformance campaign. Neither should keep TSCC idle or select TSCC features in
+the absence of TSCC project evidence.
+
+## Post-PC0V compiler program: CP43-CP72
+
+These 30 checkpoints are the current route from the bounded compiler preview
+toward a proper TypeScript compiler. CP43-CP45 are ordered commitments. CP46-CP72
+are a dependency-aware backlog whose order must be revised at each decision gate
+using real-project evidence. A checkpoint is complete only when its stated
+behavior is on the production compilation path, focused and independent tests
+pass, the 579-case wall remains classified, performance/RSS are measured where
+relevant, and handover/feature-matrix claims are reconciled.
+
+### Evidence and architectural closure
+
+43. **TCP6A trial contract and runner.** Define a manifest for pinned,
+    licence-compatible small TypeScript projects; record source revision,
+    install/build commands, supported configuration, expected oracle result,
+    timeouts and offline cache rules. Classify every outcome as acquisition,
+    configuration, parser, binder, checker, resolution, lowering, emission,
+    runtime, diagnostic, crash or timeout. The runner must not turn unsupported
+    behavior into a pass.
+44. **TCP6A baseline and reduced blockers.** Run the unmodified compiler against
+    the trial set, retain machine-readable results, minimize at least the leading
+    failures into independent regression fixtures, and publish a capability map.
+    This checkpoint adds evidence, not opportunistic fixes.
+45. **TCP7 evidence decision.** Rank blockers by projects unlocked, dependency
+    depth, semantic risk and architectural leverage. Select the next two bounded
+    vertical slices and explicitly defer the rest. Re-run this decision after
+    CP50, CP56, CP62 and CP68.
+46. **Unknown-expression accounting.** Give every checker-owned expression a
+    durable supported/unknown classification and reason. Reject or conservatively
+    type unsupported checked syntax instead of silently treating it as a sound
+    fact. Add corpus telemetry so later grammar work targets measured unknowns.
+47. **Binding completion for selected projects.** Complete nested/computed
+    destructuring, arrow/class member bindings, hoisting and default-parameter
+    temporal regions needed by the selected trials. Retire matching CommonJS
+    shadow heuristics only after identity-parity tests pass.
+
+### Modules, resolution and declaration inputs
+
+48. **Canonical export tables.** Make value/type namespaces, aliases and exported
+    symbol identity explicit per compilation unit. Replace source scans used for
+    named-import type propagation with graph-owned export facts.
+49. **Default and namespace imports.** Propagate callable, object, array, tuple,
+    union and literal types through default and namespace imports, including
+    shadowing and missing-member diagnostics.
+50. **Re-exports, type-only edges and cycles.** Support named/star re-exports,
+    import/export type, aliases and cyclic module graphs with deterministic
+    fixed-point behavior and no unit-local `TypeId` leakage.
+51. **Practical relative resolution.** Resolve supported extensions, directory
+    indexes and package entry metadata with canonical identities, ambiguity
+    diagnostics and deterministic search order. Preserve `--noResolve` exactly.
+52. **Versioned package resolution.** Add a deliberately named Node-style module
+    resolution mode covering `node_modules`, package boundaries, `types` and the
+    selected `exports` conditions. Do not claim all `tsc` resolution modes from
+    one implementation.
+53. **Configuration mapping.** Implement the trial-selected `baseUrl`, `paths`,
+    `rootDirs`, include/exclude/files and module-resolution settings with config
+    inheritance, cycle detection and path-attributed diagnostics.
+54. **Declaration-file frontend.** Parse and bind the `.d.ts` declarations needed
+    by the trial corpus: ambient modules, exported values/types, interfaces,
+    aliases, functions and classes. Declaration files emit no JavaScript.
+55. **Standard library contract.** Introduce explicit, versioned library bundles
+    and `lib`/`types` selection. Resolve built-in global types without ambient
+    machine state and test compilation with and without default libraries.
+
+### Core type-system expansion
+
+56. **Generic identity and explicit substitution.** Add type parameters,
+    constraints, defaults, explicit type arguments and recursion guards across
+    functions, aliases, interfaces and classes before attempting broad inference.
+57. **Generic inference.** Infer type arguments from calls and contextual return
+    positions with deterministic candidate combination, constraint checking and
+    diagnostics for unresolved or conflicting inference.
+58. **Overload sets and resolution.** Preserve ordered overload declarations,
+    select applicable signatures, report no-match/ambiguity cleanly and keep the
+    implementation signature out of the public callable surface.
+59. **Class symbols and two-sided types.** Model constructor/static and instance
+    sides, fields, methods, constructors, parameter properties and `this` using
+    canonical symbols and types rather than erasure-only class knowledge.
+60. **Class relationships.** Add inheritance, `super`, implemented interfaces,
+    visibility, readonly, abstract members and override compatibility with
+    deterministic base-cycle diagnostics.
+61. **Complete expression ownership for selected grammar.** Replace remaining
+    checker discovery ranges with durable expression/statement child identities;
+    add selected logical, comparison, conditional, update, `new`, optional-chain,
+    non-null and assertion/satisfies nodes without creating a parallel typer.
+62. **Control-flow graph foundation.** Build per-function basic blocks and edges
+    for branches, loops, short circuiting, returns, throws, try/catch/finally and
+    reachability. Prove stable graph identity and conservative joins before
+    widening diagnostics.
+63. **Flow-sensitive narrowing and assignment.** Add truthiness, equality,
+    discriminants, `typeof`, `instanceof`, property-presence, assignment and
+    definite-assignment facts with loop fixed points and lexical restoration.
+64. **Richer object and collection types.** Add optional/rest tuple elements,
+    readonly arrays/tuples, indexed writes, excess-property policy, `keyof`,
+    indexed access and symbol/numeric keys on the canonical structural model.
+65. **Advanced type operators.** Add intersections, conditional and mapped types,
+    template-literal types and utility-type prerequisites as separately bounded
+    slices with instantiation-depth and complexity limits.
+
+### TypeScript surface, output and production operation
+
+66. **JSX/TSX semantics.** Type JSX elements, attributes, children, intrinsic
+    elements and component calls against explicit library contracts; then add
+    selected JSX emit modes without weakening preserve mode.
+67. **Runtime-bearing TypeScript semantics.** Move enums, namespaces and parameter
+    properties from tested lowering with partial binding to checked symbol/type
+    semantics, including merging and cross-module behavior.
+68. **Source maps and diagnostic polish.** Emit deterministic source maps with
+    exact mappings through erasure and lowering; improve related locations,
+    category/codes and recovery diagnostics against reduced real-project cases.
+69. **Declaration emit and output integrity.** Emit `.d.ts` and declaration maps
+    for the supported checked surface. Define collision, stale-output and
+    project-wide commit/recovery behavior beyond best-effort sibling renames.
+70. **Incremental compiler service.** Add reusable programs, dependency-aware
+    invalidation, cancellation and watch mode with clean/incremental equivalence
+    gates for output and diagnostics.
+71. **Production hardening campaign.** Exercise larger graphs and real projects,
+    adversarial/generated input, parser and semantic fuzzing, sanitizer/Valgrind,
+    performance/RSS budgets, failure recovery and supported-platform packages.
+72. **Compatibility and release decision.** Publish the exact supported syntax,
+    checking, configuration, resolution, emit and platform matrices; compare
+    separately with checked `tsc` and `tsc --noCheck`; decide from retained
+    evidence whether production-transpiler and production-checker milestones are
+    earned, and release only under a separately authorized release process.
+
+This program intentionally does not promise that CP70 equals complete `tsc`
+compatibility. Decorators, project references, every historical module-resolution
+mode, plugins/transformers and newly added TypeScript syntax enter through the
+same evidence and compatibility process. A proper compiler is one with a truthful,
+useful and dependable supported contract—not one that silently accepts every
+spelling it can erase.
 
 ## Reconciliation findings to resolve
 
@@ -210,12 +343,11 @@ evidence plus measured performance/RSS impact. Do not require the entire languag
 to migrate before a bounded binder slice can ship, and do not accept semantic
 infrastructure that remains disconnected from production compilation.
 
-Reassess the next semantic slice from final validation evidence. The likely next
-direction is function signatures and call checking because it extends durable
-types vertically without first requiring a complete module system. Module export
-tables and cross-file type propagation remain valuable, but should follow a clear
-file-local callable/object type contract rather than transporting only `unknown`
-facts between files.
+This earlier assessment selected function signatures and call checking. CP31-CP38
+subsequently delivered canonical callable identities, contextual callbacks,
+nested structural expressions, interface inheritance, index signatures and call
+signatures. It is no longer the current decision point. TCP6A real-project
+evidence now selects the next semantic slice under CP43-CP45 above.
 
 ## 2026-08-17 campaign assessment
 

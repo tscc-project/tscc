@@ -21,23 +21,22 @@ preview at 171/171. Their module-free runtime intersection is 7/7. These are
 evidence-backed preview contracts, not broad TypeScript or ECMAScript
 compatibility claims.
 
-The next campaign is evidence acquisition rather than immediate feature breadth:
+The next campaign is TSCC evidence acquisition rather than immediate feature
+breadth:
 
 1. PC0V external Valgrind confirmation is now complete at TSCC `1bc3047` and
    JS++ `d35999f` (2026-09-13); it required a JS++ standalone local-heap
    lifetime correction that was reviewed and finalized at `d35999f`, and all
    declared workloads pass under Valgrind.
-2. PC0P second-platform packaging, noting TSCC already has multi-platform CI
-   while JS++ currently has only the qualified Linux package;
-3. EP6A pinned selected-Test262 infrastructure and classifications;
-4. TCP6A a pinned, license-compatible real-project trial manifest and failure
+2. TCP6A a pinned, license-compatible real-project trial manifest and failure
    classifier;
-5. a decision gate that selects TCP7 and the next JS++ vertical slice from those
-   results.
+3. a TCP7 decision gate that selects the next TSCC vertical slices from project
+   failures rather than feature prestige.
 
-PC0V is complete at the tested heads; PC0P remains pending. Work may prepare
-EP6A and TCP6A, but no broader release claim should bypass the remaining
-platform confirmation.
+PC0V is complete at the tested heads. PC0P second-platform JS++ packaging and
+EP6A selected-Test262 work remain valuable parallel JS++ campaigns, but neither
+blocks TCP6A or decides TSCC priorities. The detailed TSCC CP43-CP72 program is
+maintained in `docs/handover/ROADMAP.md`.
 
 ## Product boundary
 

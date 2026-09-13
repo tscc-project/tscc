@@ -449,15 +449,15 @@ frozen examples. LeakSanitizer/Valgrind remains external under the ptrace-manage
 runner. Exact evidence and limitations are in
 `docs/evidence/compiler-preview-candidate.json`.
 
-## Post-preview reassessment (2026-08-30)
+## Post-preview reassessment (2026-08-30, historical)
 
-The next order is evidence-first: (1) PC0 run external leak/Valgrind and second-
-platform package checks for both products; (2) TCP6 trial TSCC on a curated set of
-real small projects and classify every failure; (3) EP6 add a pinned selected
-Test262/conformance harness around the embedded subset; (4) choose TCP7 from trial
-evidence, with default/namespace/re-export type propagation and practical package
-resolution the current likely candidates. Do not begin promises, broad class
-semantics or a package resolver until evidence selects them.
+This assessment set the evidence-first order: PC0 external lifetime/platform
+work, TCP6 real-project trials, EP6 selected conformance, then a TCP7 decision.
+PC0V was later completed at TSCC `1bc3047` and JS++ `d35999f`; PC0P remains a
+parallel JS++ platform gate. TCP6A is now the active TSCC step. Default/namespace/
+re-export type propagation and practical package resolution remain candidates,
+not commitments, until project evidence ranks them. Do not begin broad class,
+generic or package-resolution work merely because PC0V passed.
 
 ## Current game-plan handoff (2026-08-30)
 
@@ -493,21 +493,22 @@ all useful work:
 
 After the current commits are pushed, the next development sequence is:
 
-1. **EP6A:** add a pinned selected-Test262 harness with explicit pass, fail,
-   unsupported, harness-inapplicable, crash and timeout classifications. Freeze
-   the imported revision and licensing; do not copy tests informally.
-2. **TCP6A:** define a curated small-project trial manifest and reproducible
+1. **TCP6A:** define a curated small-project trial manifest and reproducible
    runner. Projects must be real, pinned and license-compatible. Classify failures
    by parser, binder, checker, resolution, configuration, emit and runtime rather
    than immediately fixing every incompatibility.
-3. **Evidence review:** combine EP6A/TCP6A results with the later PC0V/PC0P
-   evidence. Choose the smallest vertical fixes that unlock meaningful cases.
-4. **TCP7 decision gate:** current candidates are default/namespace/re-export
+2. **TCP6A baseline:** run the unmodified compiler, retain machine-readable
+   results and reduce the leading failures into independent regression cases.
+3. **TCP7 decision gate:** current candidates are default/namespace/re-export
    type propagation and practical package resolution. Select one only when the
    trial corpus demonstrates it is the leading compiler blocker.
-5. **JS++ decision gate:** choose jobs/promises, modules or another compatibility
-   slice only after Test262 and embedding-host evidence identifies the leading
-   engine limitation.
+4. **Bounded compiler expansion:** follow the dependency-aware CP43-CP72 program
+   in `docs/handover/ROADMAP.md`, reassessing after each evidence gate.
+
+PC0P second-platform packaging and EP6A selected-Test262 remain independent JS++
+campaigns. They do not block TSCC real-project trials. JS++ remains a test-only
+runtime for the selected TSCC output intersection unless a later decision changes
+that boundary explicitly.
 
 Do not push, tag, release or broaden compatibility claims merely because the
 preview candidates are qualified. Update this section when PC0V, PC0P, EP6A or
