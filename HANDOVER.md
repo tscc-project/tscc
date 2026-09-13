@@ -676,4 +676,21 @@ regions. Straight-line assignment facts are scope-bound, nested facts combine
 deterministically, lexical exits restore declared types, and annotated
 uninitialized `let`/`const` reads receive conservative definite-assignment
 diagnostics. See `docs/evidence/cp63-flow-narrowing.md` and
-`tests/flow_narrowing.sh`. CP64 is next.
+`tests/flow_narrowing.sh`.
+
+## CP64 richer object and collection types (2026-09-13)
+
+The canonical structural model now owns optional/rest tuple element metadata,
+readonly array/tuple identity, string/number/symbol index domains, `keyof` and
+indexed-access resolution. Generic substitution expands concrete variadic tuple
+arguments. Computed assignments reject writes through readonly collections and
+check right-hand values against the same index-domain operation used for reads.
+
+The excess-property policy is deliberate: ordinary structural assignment keeps
+the preview's established permissive behavior, while fresh object literals used
+with `satisfies` reject unknown keys. Assertion type-range ownership now balances
+nested object/tuple/generic delimiters so those checks reach the canonical typer.
+See `docs/evidence/cp64-richer-collections.md` and
+`tests/richer_collections.sh`. The pinned wall remains 555/0/24. CP65 advanced
+type operators is next and should be split into bounded operator slices rather
+than introduced as one monolithic evaluator.

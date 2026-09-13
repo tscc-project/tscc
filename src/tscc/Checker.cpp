@@ -19,8 +19,8 @@ struct ExpressionResult {
 class NodeExpressionTyper {
 public:
     NodeExpressionTyper(const std::vector<Token>& tokens, const ExpressionModel&expressions,const ExpressionNode&expression, const BindingModel& binding,
-                             const TypeModel& types,const std::unordered_map<std::size_t,TypeId>*facts=nullptr,bool allow_object=false,TypeId expected=0)
-        : tokens_(tokens),expressions_(expressions),root_(expression.id),binding_(binding), types_(types), facts_(facts),allow_object_(allow_object),expected_(expected) {}
+                             const TypeModel& types,const std::unordered_map<std::size_t,TypeId>*facts=nullptr,bool allow_object=false,TypeId expected=0,bool enforce_excess=false)
+        : tokens_(tokens),expressions_(expressions),root_(expression.id),binding_(binding), types_(types), facts_(facts),allow_object_(allow_object),enforce_excess_(enforce_excess),expected_(expected) {}
 
     ExpressionResult run() {
         ExpressionResult result;
@@ -42,6 +42,7 @@ private:
     std::size_t error_token_ = static_cast<std::size_t>(-1);
     std::string error_;
     bool allow_object_ = false;
+    bool enforce_excess_ = false;
     TypeId expected_ = 0;
     std::unordered_map<std::size_t,TypeId>contextual_facts_;
 
@@ -67,16 +68,17 @@ private:
         if(node.kind==ExpressionKind::Unknown)return types_.store.unknown();
         if(node.kind==ExpressionKind::Parenthesized)return node.children.size()==1?type(node.children[0],contextual):types_.store.unknown();
         if(node.kind==ExpressionKind::NonNull)return node.children.size()==1?types_.store.non_nullable(type(node.children[0],contextual)):types_.store.unknown();
-        if(node.kind==ExpressionKind::Assertion||node.kind==ExpressionKind::Satisfies){if(node.children.size()!=1||node.type_argument_ranges.size()!=1)return types_.store.unknown();auto at=node.type_argument_ranges[0].first;const auto asserted=parse_type_annotation(tokens_,at,node.type_argument_ranges[0].second,types_.store,&types_.named_types);const auto actual=type(node.children[0],asserted);if(node.kind==ExpressionKind::Satisfies&&actual!=types_.store.unknown()&&asserted!=types_.store.unknown()&&!types_.store.assignable(actual,asserted)&&error_.empty()){error_token_=node.operator_token;error_="Type '"+types_.store.name(types_.store.widen(actual))+"' does not satisfy the expected type '"+types_.store.name(asserted)+"'.";}return node.kind==ExpressionKind::Assertion?asserted:actual;}
+        if(node.kind==ExpressionKind::Assertion||node.kind==ExpressionKind::Satisfies){if(node.children.size()!=1||node.type_argument_ranges.size()!=1)return types_.store.unknown();auto at=node.type_argument_ranges[0].first;const auto asserted=parse_type_annotation(tokens_,at,node.type_argument_ranges[0].second,types_.store,&types_.named_types);const bool previous_excess=enforce_excess_;if(node.kind==ExpressionKind::Satisfies)enforce_excess_=true;const auto actual=type(node.children[0],asserted);enforce_excess_=previous_excess;if(node.kind==ExpressionKind::Satisfies&&types_.store.kind(actual)==TypeKind::Object&&types_.store.kind(asserted)==TypeKind::Object&&error_.empty()){for(const auto&property:types_.store.properties(actual)){const auto&declared=types_.store.properties(asserted);const bool known=std::any_of(declared.begin(),declared.end(),[&](const auto&item){return item.name==property.name;});const bool numeric=!property.name.empty()&&std::all_of(property.name.begin(),property.name.end(),[](unsigned char c){return c>='0'&&c<='9';});if(!known&&types_.store.string_index(asserted)==types_.store.unknown()&&(!numeric||types_.store.number_index(asserted)==types_.store.unknown())){error_token_=node.operator_token;error_="Object literal may only specify known properties, and '"+property.name+"' does not exist in the target type.";break;}}}if(node.kind==ExpressionKind::Satisfies&&actual!=types_.store.unknown()&&asserted!=types_.store.unknown()&&!types_.store.assignable(actual,asserted)&&error_.empty()){error_token_=node.operator_token;error_="Type '"+types_.store.name(types_.store.widen(actual))+"' does not satisfy the expected type '"+types_.store.name(asserted)+"'.";}return node.kind==ExpressionKind::Assertion?asserted:actual;}
         if(node.kind==ExpressionKind::Literal){const auto&token=tokens_[node.operator_token];if(token.kind==TokenKind::Number)return types_.store.literal(!token.text.empty()&&token.text.back()=='n'?types_.store.bigint():types_.store.number(),token.text);if(token.kind==TokenKind::String||token.kind==TokenKind::Template)return types_.store.literal(types_.store.string(),literal_value(token.text));if(token.text=="true"||token.text=="false")return types_.store.literal(types_.store.boolean(),token.text);if(token.text=="null")return types_.store.null();return types_.store.unknown();}
         if(node.kind==ExpressionKind::Identifier){if(node.text=="undefined")return types_.store.undefined();if(node.text=="this"||node.text=="super"){const auto owner=containing_class(node.operator_token);if(owner>=types_.classes.size())return types_.store.unknown();if(node.text=="super"){const auto base=types_.classes[owner].base_class;return base<types_.classes.size()?types_.classes[base].instance_type:types_.store.unknown();}return types_.classes[owner].instance_type;}const auto symbol=binding_.symbol_for_reference(node.operator_token);auto contextual=contextual_facts_.find(symbol);if(contextual!=contextual_facts_.end())return contextual->second;if(facts_){auto fact=facts_->find(symbol);if(fact!=facts_->end())return fact->second;}return symbol<types_.symbol_types.size()?types_.symbol_types[symbol]:types_.store.unknown();}
         if(node.kind==ExpressionKind::New){if(node.children.size()!=1)return types_.store.unknown();return type_new(node.children[0]);}
-        if(node.kind==ExpressionKind::ObjectLiteral){if(!allow_object_)return types_.store.unknown();std::vector<TypeProperty>properties;for(auto property_id:node.children){const auto&property=expressions_.node(property_id);if(property.kind!=ExpressionKind::Property||property.children.size()!=1)return types_.store.unknown();const auto*expected_property=types_.store.property(contextual,property.text);properties.push_back({property.text,type(property.children[0],expected_property?expected_property->type:types_.store.unknown()),false,false});}return types_.store.object_of(std::move(properties));}
+        if(node.kind==ExpressionKind::ObjectLiteral){if(!allow_object_)return types_.store.unknown();std::vector<TypeProperty>properties;for(auto property_id:node.children){const auto&property=expressions_.node(property_id);if(property.kind!=ExpressionKind::Property||property.children.size()!=1)return types_.store.unknown();const auto*expected_property=types_.store.property(contextual,property.text);if(enforce_excess_&&contextual!=types_.store.unknown()&&types_.store.kind(contextual)==TypeKind::Object){const auto&declared=types_.store.properties(contextual);const bool known=std::any_of(declared.begin(),declared.end(),[&](const auto&item){return item.name==property.text;});const bool numeric=!property.text.empty()&&std::all_of(property.text.begin(),property.text.end(),[](unsigned char c){return c>='0'&&c<='9';});const bool indexed=types_.store.string_index(contextual)!=types_.store.unknown()||(numeric&&types_.store.number_index(contextual)!=types_.store.unknown());if(!known&&!indexed&&error_.empty()){error_token_=property.begin_token;error_="Object literal may only specify known properties, and '"+property.text+"' does not exist in the target type.";}}properties.push_back({property.text,type(property.children[0],expected_property?expected_property->type:types_.store.unknown()),false,false});}return types_.store.object_of(std::move(properties));}
         if(node.kind==ExpressionKind::ArrayLiteral){std::vector<TypeId>elements;const auto&tuple=types_.store.tuple_elements(contextual);const auto array_element=types_.store.array_element(contextual);for(std::size_t i=0;i<node.children.size();++i){const auto expected=i<tuple.size()?tuple[i]:array_element;elements.push_back(types_.store.widen(type(node.children[i],expected)));}if(!tuple.empty())return types_.store.tuple_of(std::move(elements));if(array_element!=types_.store.unknown())return types_.store.array_of(types_.store.union_of(std::move(elements)));return types_.store.tuple_of(std::move(elements));}
         if(node.kind==ExpressionKind::Property||node.kind==ExpressionKind::OptionalProperty){
             if(node.computed){
                 if(node.children.size()!=2)return types_.store.unknown();
                 const auto value=type(node.children[0]),key=type(node.children[1]);
+                const auto indexed_access=types_.store.indexed_access(value,key);if(indexed_access!=types_.store.unknown())return indexed_access;
                 const auto key_kind=types_.store.kind(types_.store.widen(key));
                 const auto&key_node=expressions_.node(node.children[1]);
                 if(key_kind==TypeKind::String){
@@ -185,9 +187,9 @@ private:
 
 ExpressionResult expression_type(const std::vector<Token>& tokens, ExpressionModel&expressions,std::size_t begin,
                                  std::size_t end, const BindingModel& binding,
-                                 const TypeModel& types,const std::unordered_map<std::size_t,TypeId>*facts=nullptr,bool allow_object=false,TypeId expected=0) {
+                                 const TypeModel& types,const std::unordered_map<std::size_t,TypeId>*facts=nullptr,bool allow_object=false,TypeId expected=0,bool enforce_excess=false) {
     const auto&root=expressions.intern(tokens,begin,end);
-    return NodeExpressionTyper(tokens,expressions,root,binding,types,facts,allow_object,expected).run();
+    return NodeExpressionTyper(tokens,expressions,root,binding,types,facts,allow_object,expected,enforce_excess).run();
 }
 
 void report_expression_error(const SourceFile& source, const std::vector<Token>& tokens,
@@ -264,9 +266,11 @@ bool check_program(const SourceFile& source, const std::vector<Token>& tokens,
             continue;
         owned_expression_ranges.push_back({declaration.initializer_begin_token,declaration.initializer_end_token});
         auto facts=facts_at(declaration.initializer_begin_token);merge_assignment_facts(facts,declaration.initializer_begin_token);
+        TypeId contextual_expected=expected;bool excess_policy=false;
+        for(std::size_t token=declaration.initializer_begin_token;token<declaration.initializer_end_token;++token)if(tokens[token].text=="satisfies"){auto at=token+1;contextual_expected=parse_type_annotation(tokens,at,declaration.initializer_end_token,types.store,&types.named_types);excess_policy=contextual_expected!=types.store.unknown();break;}
         const auto expression = expression_type(tokens, expressions, declaration.initializer_begin_token,
                                                 declaration.initializer_end_token,
-                                                binding, types,facts.empty()?nullptr:&facts,true,expected);
+                                                binding, types,facts.empty()?nullptr:&facts,true,contextual_expected,excess_policy);
         report_expression_error(source, tokens, expression, diagnostics);
         const auto actual = expression.type;
         if(expected==types.store.unknown()&&types.store.callable(actual))for(std::size_t i=0;i<binding.symbols.size();++i)if(binding.symbols[i].declaration_token==declaration.name_token){types.symbol_types[i]=actual;break;}
@@ -321,6 +325,22 @@ bool check_program(const SourceFile& source, const std::vector<Token>& tokens,
         while (left > 0 && tokens[left-1].kind == TokenKind::Comment) --left;
         if (left == 0) continue;
         --left;
+        if(tokens[left].text=="]"){
+            std::size_t open=left;int depth=1;while(open>0&&depth){--open;if(tokens[open].text=="]")++depth;else if(tokens[open].text=="[")--depth;}
+            std::size_t owner_token=open;while(owner_token>0&&tokens[owner_token-1].kind==TokenKind::Comment)--owner_token;
+            if(owner_token==0||tokens[owner_token-1].kind!=TokenKind::Identifier)continue;
+            --owner_token;
+            const auto owner_symbol=binding.symbol_for_reference(owner_token);if(owner_symbol>=types.symbol_types.size())continue;
+            const auto owner_type=types.symbol_types[owner_symbol];
+            if(types.store.readonly_collection(owner_type)){const auto[line,column]=source.line_col(tokens[open].begin);diagnostics.error(source.path,line,column,"Cannot assign through a read-only array or tuple index.",source.line_text(line));continue;}
+            std::size_t key_token=open+1;while(key_token<left&&tokens[key_token].kind==TokenKind::Comment)++key_token;
+            TypeId key=types.store.unknown();if(key_token<left){if(tokens[key_token].kind==TokenKind::String)key=types.store.literal(types.store.string(),literal_value(tokens[key_token].text));else if(tokens[key_token].kind==TokenKind::Number)key=types.store.literal(types.store.number(),tokens[key_token].text);else{const auto key_symbol=binding.symbol_for_reference(key_token);if(key_symbol<types.symbol_types.size())key=types.symbol_types[key_symbol];}}
+            const auto expected_index=types.store.indexed_access(owner_type,key);if(expected_index==types.store.unknown())continue;
+            std::size_t begin=assignment+1;while(begin<tokens.size()&&tokens[begin].kind==TokenKind::Comment)++begin;std::size_t end=begin;while(end<tokens.size()&&tokens[end].text!=";"&&tokens[end].text!=","&&tokens[end].kind!=TokenKind::End)++end;
+            auto facts=facts_at(begin);merge_assignment_facts(facts,begin);const auto expression=expression_type(tokens,expressions,begin,end,binding,types,facts.empty()?nullptr:&facts);report_expression_error(source,tokens,expression,diagnostics);
+            if(op=="="&&expression.type!=types.store.unknown()&&!types.store.assignable(expression.type,expected_index))report_mismatch(source,tokens,begin,expression.type,expected_index,types.store,diagnostics);
+            continue;
+        }
         if (tokens[left].kind != TokenKind::Identifier || declaration_names.count(left)) continue;
         if(left>=2&&tokens[left-1].text=="."&&(tokens[left-2].kind==TokenKind::Identifier||tokens[left-2].text=="this")){
             TypeId owner_type=types.store.unknown();const auto owner=binding.symbol_for_reference(left-2);if(owner<types.symbol_types.size())owner_type=types.symbol_types[owner];else if(tokens[left-2].text=="this")for(const auto&info:types.classes)if(left-2>info.body_begin_token&&left-2<info.body_end_token){owner_type=info.instance_type;break;}if(const auto*property=types.store.property(owner_type,tokens[left].text);property&&property->readonly){const auto[line,column]=source.line_col(tokens[left].begin);diagnostics.error(source.path,line,column,"Cannot assign to '"+tokens[left].text+"' because it is a read-only property.",source.line_text(line));}continue;

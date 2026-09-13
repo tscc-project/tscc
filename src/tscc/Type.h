@@ -12,9 +12,10 @@
 namespace tscc {
 
 using TypeId = std::size_t;
-enum class TypeKind { Unknown, Number, String, Boolean, BigInt, Function, Null, Undefined, Literal, Union, Object, TypeParameter };
+enum class TypeKind { Unknown, Number, String, Boolean, BigInt, Function, Null, Undefined, Symbol, Literal, Union, Object, TypeParameter };
+enum TupleElementFlag : unsigned char { TupleRequired = 0, TupleOptional = 1, TupleRest = 2 };
 struct TypeProperty{std::string name;TypeId type=0;bool optional=false;bool readonly=false;};
-struct Type { TypeKind kind = TypeKind::Unknown;TypeId base=0;std::string literal;std::vector<TypeId> members;std::vector<TypeProperty>properties;std::vector<TypeId>parameters;TypeId result=0;std::size_t required_parameters=0;bool rest=false;TypeId string_index=0;TypeId number_index=0;TypeId call_signature=0; };
+struct Type { TypeKind kind = TypeKind::Unknown;TypeId base=0;std::string literal;std::vector<TypeId> members;std::vector<TypeProperty>properties;std::vector<TypeId>parameters;TypeId result=0;std::size_t required_parameters=0;bool rest=false;TypeId string_index=0;TypeId number_index=0;TypeId call_signature=0;TypeId symbol_index=0;std::vector<unsigned char> element_flags;bool readonly_collection=false; };
 
 class TypeStore {
 public:
@@ -27,6 +28,7 @@ public:
     TypeId function() const { return 5; }
     TypeId null() const { return 6; }
     TypeId undefined() const { return 7; }
+    TypeId symbol() const { return 8; }
     TypeId literal(TypeId,const std::string&) const;
     TypeId union_of(std::vector<TypeId>) const;
     TypeId non_nullable(TypeId) const;
@@ -35,11 +37,15 @@ public:
     TypeId narrow_discriminant(TypeId,const std::string&,TypeId,bool=false)const;
     TypeId narrow_property(TypeId,const std::string&,bool=false)const;
     bool assignable(TypeId actual,TypeId expected) const;
-    TypeId object_of(std::vector<TypeProperty>,TypeId string_index=0,TypeId number_index=0,TypeId call_signature=0)const;
-    TypeId array_of(TypeId)const;
-    TypeId tuple_of(std::vector<TypeId>)const;
+    TypeId object_of(std::vector<TypeProperty>,TypeId string_index=0,TypeId number_index=0,TypeId call_signature=0,TypeId symbol_index=0)const;
+    TypeId array_of(TypeId,bool readonly=false)const;
+    TypeId tuple_of(std::vector<TypeId>,std::vector<unsigned char> flags={},bool readonly=false)const;
     TypeId array_element(TypeId)const;
     const std::vector<TypeId>& tuple_elements(TypeId)const;
+    const std::vector<unsigned char>& tuple_flags(TypeId)const;
+    bool readonly_collection(TypeId)const;
+    TypeId indexed_access(TypeId,TypeId)const;
+    TypeId keyof_type(TypeId)const;
     TypeId function_of(std::vector<TypeId>,TypeId,std::size_t,bool)const;
     TypeId type_parameter(const std::string&,TypeId=0,TypeId=0)const;
     TypeId substitute(TypeId,const std::unordered_map<TypeId,TypeId>&,std::size_t=0)const;
@@ -53,6 +59,7 @@ public:
     const std::vector<TypeProperty>& properties(TypeId)const;
     TypeId string_index(TypeId)const;
     TypeId number_index(TypeId)const;
+    TypeId symbol_index(TypeId)const;
     TypeKind kind(TypeId) const;
     TypeId import_from(const TypeStore&,TypeId) const;
     TypeId widen(TypeId) const;

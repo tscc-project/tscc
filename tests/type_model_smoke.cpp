@@ -28,6 +28,17 @@ int main() {
     const auto point=types.store.object_of({{"x",types.store.number(),false,false},{"label",types.store.string(),true,true}});if(types.store.kind(point)!=TypeKind::Object||!types.store.property(point,"x")||!types.store.property(point,"label")->readonly)fail("canonical object shape missing");if(types.store.object_of({{"label",types.store.string(),true,true},{"x",types.store.number(),false,false}})!=point)fail("object shape was not canonical");
     const auto named_point=types.named_types.find("Point"),box=types.named_types.find("Box");if(named_point==types.named_types.end()||!types.store.property(named_point->second,"x")||!types.store.property(named_point->second,"label"))fail("merged interface shape missing");if(box==types.named_types.end()||!types.store.property(box->second,"value"))fail("object alias shape missing");
     const auto mapper=types.named_types.find("Mapper");if(mapper==types.named_types.end()||!types.store.callable(mapper->second)||types.store.callable(mapper->second)->parameters[0]!=types.store.string()||types.store.callable(mapper->second)->result!=types.store.number())fail("callable alias missing");if(types.store.function_of({types.store.string()},types.store.number(),1,false)!=mapper->second)fail("callable identity was not canonical");
+    const auto mutable_array=types.store.array_of(types.store.number());
+    const auto readonly_array=types.store.array_of(types.store.number(),true);
+    if(mutable_array==readonly_array||!types.store.readonly_collection(readonly_array))fail("readonly array identity missing");
+    if(!types.store.assignable(mutable_array,readonly_array)||types.store.assignable(readonly_array,mutable_array))fail("readonly collection variance is wrong");
+    const auto tuple=types.store.tuple_of({types.store.string(),types.store.number(),types.store.boolean()},{TupleRequired,TupleOptional,TupleRest},true);
+    if(types.store.tuple_flags(tuple).size()!=3||!(types.store.tuple_flags(tuple)[1]&TupleOptional)||!(types.store.tuple_flags(tuple)[2]&TupleRest))fail("tuple element metadata missing");
+    const auto indexed=types.store.object_of({{"name",types.store.string(),false,false},{"7",types.store.boolean(),false,false}},types.store.unknown(),types.store.unknown(),types.store.unknown(),types.store.number());
+    if(types.store.indexed_access(indexed,types.store.literal(types.store.string(),"name"))!=types.store.string())fail("literal indexed access missing");
+    if(types.store.symbol_index(indexed)!=types.store.number())fail("symbol index signature missing");
+    const auto keys=types.store.keyof_type(indexed);
+    if(!types.store.assignable(types.store.literal(types.store.string(),"name"),keys)||!types.store.assignable(types.store.literal(types.store.number(),"7"),keys)||!types.store.assignable(types.store.symbol(),keys))fail("keyof key domains missing");
     if (types.symbol_types.size() != binding.symbols.size()) fail("type facts lost symbol identity");
     for (std::size_t i = 0; i < binding.symbols.size(); ++i) {
         const auto& name = binding.symbols[i].name;

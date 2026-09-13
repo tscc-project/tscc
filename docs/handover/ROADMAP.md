@@ -127,7 +127,7 @@ the absence of TSCC project evidence.
 
 ## Post-PC0V compiler program: CP43-CP72
 
-Status: CP43-CP63 completed on 13 September 2026. TCP6A now passes all three
+Status: CP43-CP64 completed on 13 September 2026. TCP6A now passes all three
 initial project shapes. Declaration inputs join the canonical graph without
 emitting JavaScript, their callable facts reach consumers, default/namespace
 imports carry types, and re-export aliases/cycles converge deterministically.
@@ -151,7 +151,9 @@ discovery with durable statement/expression identities and completes the
 selected expression grammar. CP62 adds stable per-function CFG blocks, typed
 edges, predecessor joins and reachability. CP63 moves truthiness, equality,
 discriminant, `typeof`, `instanceof`, property-presence, assignment and
-definite-assignment facts onto that foundation. CP64 is next.
+definite-assignment facts onto that foundation. CP64 adds canonical optional and
+rest tuple metadata, readonly collection identity, indexed writes, key operators,
+numeric/symbol index domains and an explicit excess-property policy. CP65 is next.
 See `docs/evidence/cp45-tcp7-decision.md` and
 `docs/evidence/cp50-reassessment.md` for the retained decisions.
 
@@ -248,6 +250,13 @@ relevant, and handover/feature-matrix claims are reconciled.
 64. **Richer object and collection types.** Add optional/rest tuple elements,
     readonly arrays/tuples, indexed writes, excess-property policy, `keyof`,
     indexed access and symbol/numeric keys on the canonical structural model.
+    **Completed 2026-09-13:** collection mutability and tuple element flags are
+    part of canonical type identity and survive import/substitution; variadic
+    tuple substitution flattens concrete tuple arguments. Indexed reads and
+    writes share one key-domain operation. Fresh object literals remain
+    structurally permissive under ordinary assignment for retained compatibility,
+    while `satisfies` performs excess-property checking. See
+    `docs/evidence/cp64-richer-collections.md`.
 65. **Advanced type operators.** Add intersections, conditional and mapped types,
     template-literal types and utility-type prerequisites as separately bounded
     slices with instantiation-depth and complexity limits.
