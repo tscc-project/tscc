@@ -99,11 +99,12 @@ target, so the run above can be regenerated exactly.
 
 Known limitation discovered while building the workload (not a memory-safety
 finding and not triggered under Valgrind): the general checker's assignment scan
-treats a JSX attribute of the form `name={value}` as an assignment when the
-attribute name matches a local `const`, emitting "Cannot assign to ... because
-it is a constant." The workload fixture therefore avoids a JSX attribute name
-that shadows a local const; the underlying diagnostic correctness issue remains
-future work.
+treated a JSX attribute of the form `name={value}` as an assignment when the
+attribute name matched a local `const`, emitting "Cannot assign to ... because
+it is a constant." The workload fixture therefore avoided a JSX attribute name
+that shadows a local const. That diagnostic correctness issue was subsequently
+resolved by CP74 (`a8144ce`), so the CP73 fixtures could be widened in later
+checkpoints.
 
 These are regression budgets for the measured environment, not universal speed
 claims. Third-party application corpora, Windows package installers, crash-safe

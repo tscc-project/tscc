@@ -64,6 +64,7 @@ private:
         if (token.text == "null") return store.null();
         if (token.text == "undefined") return store.undefined();
         if (token.text == "never") return store.never();
+        if (token.text == "unknown" || token.text == "any") { recognized_unknown_ = true; return store.unknown(); }
         if(auto found=inferred.find(token.text);found!=inferred.end())return found->second;
         if (named) { auto found = named->find(token.text); if (found != named->end()) return found->second; }
         return store.unknown();
@@ -197,9 +198,13 @@ private:
             const bool optional = take("?");
             noise();
             TypeId type = store.unknown();
+            recognized_unknown_ = false;
             if (cursor < end && tokens[cursor].text == "(") type = function(":");
             else if (take(":")) type = parse();
-            if (type == store.unknown()) return type;
+            // `unknown`/`any` are valid top types that atom() maps to the unknown
+            // TypeId, which is also the parse-failure sentinel. A property typed
+            // explicitly with one of those keywords must not abort the whole object.
+            if (type == store.unknown() && !recognized_unknown_) return type;
             properties.push_back({std::move(name), type, optional, readonly});
         }
         return store.unknown();
@@ -207,6 +212,7 @@ private:
     const std::vector<Token>& tokens; std::size_t& cursor; std::size_t end;
     const TypeStore& store; const std::unordered_map<std::string, TypeId>* named;
     mutable std::unordered_map<std::string,TypeId>inferred;
+    mutable bool recognized_unknown_ = false;
 };
 }
 

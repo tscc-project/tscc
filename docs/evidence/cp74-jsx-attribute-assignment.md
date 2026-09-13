@@ -35,10 +35,13 @@ expression container still rejected; intrinsic property type checking
 unchanged; and nested JSX inside an attribute-value container classified
 correctly.
 
-## Known limitation discovered (pre-existing, out of scope)
+## Known limitation discovered (pre-existing, out of CP74 scope)
 
-JSX intrinsic property type checking in `JSX.cpp` only reliably applies to the
-members of a multi-member `IntrinsicElements` interface shape in some cases; the
-CP74 workload and regression use interfaces for which the parsed props contract
-behaves deterministically. A deeper audit of the JSX type-annotation parser is
-explicitly future work.
+While writing the CP74 regression, a second pre-existing JSX correctness issue
+surfaced: a `JSX.IntrinsicElements` props member typed `unknown` (for example
+`children?: unknown`) made the whole contract parse as `unknown`, so `JSX.cpp`
+silently skipped attribute checking for that intrinsic tag. The CP74 workload
+and regression therefore used interface shapes whose parsed props contract
+behaves deterministically. That bug was subsequently fixed by CP75, which makes
+the shared type-annotation parser accept `unknown`/`any`-typed object members
+without aborting the object parse.
