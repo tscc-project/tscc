@@ -11,7 +11,7 @@ static bool resolve_relative(const fs::path&importer,const std::string&spec,fs::
  if(!(spec.rfind("./",0)==0||spec.rfind("../",0)==0))return false;
  fs::path base=importer.parent_path()/spec;std::vector<fs::path>candidates;
  if(base.has_extension()){candidates.push_back(base);if(base.extension()==".js"){auto x=base;x.replace_extension(".ts");candidates.push_back(x);}if(base.extension()==".jsx"){auto x=base;x.replace_extension(".tsx");candidates.push_back(x);}}
- else{candidates.push_back(base.string()+".ts");candidates.push_back(base.string()+".tsx");candidates.push_back(base/"index.ts");candidates.push_back(base/"index.tsx");}
+ else{candidates.push_back(base.string()+".ts");candidates.push_back(base.string()+".tsx");candidates.push_back(base.string()+".d.ts");candidates.push_back(base/"index.ts");candidates.push_back(base/"index.tsx");candidates.push_back(base/"index.d.ts");}
  std::error_code ec;for(auto&c:candidates){if(fs::is_regular_file(c,ec)){resolved=fs::absolute(c,ec).lexically_normal();return true;}ec.clear();}return false;
 }
 struct ImportBinding{std::string local,exported;fs::path dependency;};

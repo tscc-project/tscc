@@ -12,10 +12,9 @@ cat >"$TMP/src/main.ts" <<'EOF'
 import {user} from "./api";
 console.log(user("Ada").name);
 EOF
-if "$ROOT/tscc" --pretty false --rootDir "$TMP/src" --outDir "$TMP/dist" \
-    --module commonjs "$TMP/src/main.ts" >"$TMP/out" 2>"$TMP/err"; then
-    echo "expected declaration-only relative module to remain a classified blocker" >&2
-    exit 1
-fi
-grep -F "cannot resolve module './api'" "$TMP/err" >/dev/null
-echo "TCP6A declaration-input blocker remains independently reproduced"
+"$ROOT/tscc" --pretty false --rootDir "$TMP/src" --outDir "$TMP/dist" \
+    --module commonjs "$TMP/src/main.ts" >"$TMP/out" 2>"$TMP/err"
+test -f "$TMP/dist/main.js"
+test ! -e "$TMP/dist/api.js"
+grep -F 'require("./api")' "$TMP/dist/main.js" >/dev/null
+echo "TCP6A declaration input joins graph without JavaScript emission"

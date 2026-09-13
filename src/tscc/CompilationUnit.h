@@ -31,6 +31,7 @@ public:
     UnitOptions options;
     std::string emitted_text;
     std::string output_path;
+    bool declaration_file = false;
     CompilationStage stage = CompilationStage::Source;
 };
 }

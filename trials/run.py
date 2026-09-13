@@ -73,6 +73,10 @@ def main():
                           "stderr": err.strip(), "compile_ms": round(compile_ms, 3)}
             else:
                 oracle = project["oracle"]
+                for runtime_file in project.get("runtime_files", []):
+                    destination = project_root / runtime_file["to"]
+                    destination.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(project_root / runtime_file["from"], destination)
                 code, out, err, runtime_ms = run(oracle["command"], project_root, timeout)
                 if code == 124:
                     result = {"id": project["id"], "status": "fail", "phase": "timeout"}

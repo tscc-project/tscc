@@ -4,9 +4,10 @@
 #include <utility>
 
 namespace tscc {
-CompilationUnit::CompilationUnit(SourceFile input) : source(std::move(input)) {}
+static bool is_declaration_path(const std::string&path){return path.size()>=5&&path.compare(path.size()-5,5,".d.ts")==0;}
+CompilationUnit::CompilationUnit(SourceFile input) : source(std::move(input)),declaration_file(is_declaration_path(source.path)) {}
 CompilationUnit::CompilationUnit(SourceFile input, std::vector<Token> input_tokens)
-    : source(std::move(input)), tokens(std::move(input_tokens)), stage(CompilationStage::Lexed) {}
+    : source(std::move(input)), tokens(std::move(input_tokens)),declaration_file(is_declaration_path(source.path)), stage(CompilationStage::Lexed) {}
 
 bool CompilationUnit::analyze() {
     if (stage == CompilationStage::Source) {

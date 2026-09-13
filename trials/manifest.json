@@ -29,9 +29,9 @@
       "license": "MIT-0",
       "entry": ["src/main.ts"],
       "compiler_options": ["--rootDir", "src", "--outDir", "dist", "--module", "commonjs"],
+      "runtime_files": [{"from": "src/person.js", "to": "dist/person.js"}],
       "oracle": {"kind": "stdout", "command": ["node", "dist/main.js"], "stdout": "Ada\n"},
-      "expected": "unsupported",
-      "expected_phase": "resolution"
+      "expected": "pass"
     }
   ]
 }
