@@ -23,9 +23,15 @@ static std::vector<ImportBinding>import_bindings(const CompilationUnit&unit){
 static bool exported_symbol(const CompilationUnit&unit,const BoundSymbol&symbol){
  const auto&tokens=unit.tokens;std::size_t begin=symbol.declaration_token;while(begin>0&&tokens[begin-1].text!=";"&&tokens[begin-1].text!="}")--begin;for(auto i=begin;i<symbol.declaration_token;++i)if(tokens[i].text=="export")return true;return false;
 }
+static std::vector<ProgramFile::ExportFact> collect_exports(const CompilationUnit&unit){
+ std::vector<ProgramFile::ExportFact>out;
+ for(std::size_t symbol=0;symbol<unit.binding.symbols.size();++symbol){const auto&bound=unit.binding.symbols[symbol];if(exported_symbol(unit,bound))out.push_back({bound.name,symbol,false});}
+ std::sort(out.begin(),out.end(),[](const auto&a,const auto&b){return a.name<b.name||(a.name==b.name&&a.symbol<b.symbol);});
+ return out;
+}
 static bool link_import_types(std::vector<ProgramFile>&files,const std::unordered_map<std::string,std::size_t>&identities){
  bool ok=true;
- for(auto&file:files){bool linked=false;for(const auto&binding:import_bindings(*file.unit)){auto dep=identities.find(key_for(binding.dependency));if(dep==identities.end())continue;const auto&exporter=*files[dep->second].unit;TypeId exported=exporter.types.store.unknown();for(std::size_t i=0;i<exporter.binding.symbols.size();++i)if(exporter.binding.symbols[i].name==binding.exported&&exported_symbol(exporter,exporter.binding.symbols[i])){exported=exporter.types.symbol_types[i];break;}if(exported==exporter.types.store.unknown())continue;for(std::size_t i=0;i<file.unit->binding.symbols.size();++i)if(file.unit->binding.symbols[i].kind==SymbolKind::Import&&file.unit->binding.symbols[i].name==binding.local){file.unit->types.symbol_types[i]=file.unit->types.store.import_from(exporter.types.store,exported);linked=true;break;}}
+ for(auto&file:files){bool linked=false;for(const auto&binding:import_bindings(*file.unit)){auto dep=identities.find(key_for(binding.dependency));if(dep==identities.end())continue;const auto&exporter_file=files[dep->second];const auto&exporter=*exporter_file.unit;TypeId exported=exporter.types.store.unknown();for(const auto&fact:exporter_file.exports)if(!fact.type_only&&fact.name==binding.exported&&fact.symbol<exporter.types.symbol_types.size()){exported=exporter.types.symbol_types[fact.symbol];break;}if(exported==exporter.types.store.unknown())continue;for(std::size_t i=0;i<file.unit->binding.symbols.size();++i)if(file.unit->binding.symbols[i].kind==SymbolKind::Import&&file.unit->binding.symbols[i].name==binding.local){file.unit->types.symbol_types[i]=file.unit->types.store.import_from(exporter.types.store,exported);linked=true;break;}}
   if(linked){Diagnostics graph_check;ExpressionModel expressions;if(!check_program(file.unit->source,file.unit->tokens,file.unit->program,file.unit->semantic,file.unit->binding,file.unit->types,expressions,graph_check))ok=false;file.unit->diagnostics.append(std::move(graph_check));}
  }
  return ok;
@@ -40,7 +46,7 @@ bool ProgramGraph::build(const std::vector<std::string>&roots,bool follow){
  files_.clear();roots_.clear();identities_.clear();diagnostics_=Diagnostics{};std::vector<fs::path>queue;for(const auto&r:roots)queue.push_back(fs::absolute(r).lexically_normal());
  for(std::size_t i=0;i<queue.size();++i){const auto key=key_for(queue[i]);auto known=identities_.find(key);if(known!=identities_.end()){if(i<roots.size())roots_.push_back(known->second);continue;}
   SourceFile source;std::string error;if(!load_source(key,source,error)){diagnostics_.error(key,1,1,error);continue;}const auto index=files_.size();identities_[key]=index;if(i<roots.size())roots_.push_back(index);ProgramFile file;file.unit=std::make_unique<CompilationUnit>(std::move(source));
-  if(file.unit->analyze()&&follow){std::vector<fs::path>deps;if(discover_module_dependencies(queue[i],file.unit->source,file.unit->tokens,deps,file.unit->diagnostics))for(const auto&dep:deps){file.dependency_paths.push_back(dep);if(!identities_.count(key_for(dep)))queue.push_back(dep);}}
+  if(file.unit->analyze()){file.exports=collect_exports(*file.unit);if(follow){std::vector<fs::path>deps;if(discover_module_dependencies(queue[i],file.unit->source,file.unit->tokens,deps,file.unit->diagnostics))for(const auto&dep:deps){file.dependency_paths.push_back(dep);if(!identities_.count(key_for(dep)))queue.push_back(dep);}}}
   files_.push_back(std::move(file));
  }
  // Resolve forward edge placeholders after every canonical identity exists.

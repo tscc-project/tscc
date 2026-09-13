@@ -74,15 +74,20 @@ SemanticModel build_semantic_model(const std::vector<Token>& tokens, const Progr
         std::size_t body = close + 1;
         while (body < tokens.size() && tokens[body].text != "{" &&
                tokens[body].text != ";" && tokens[body].kind != TokenKind::End) ++body;
-        if (body >= tokens.size() || tokens[body].text != "{") continue;
-        const auto body_close = matching(tokens, body, "{", "}");
+        if (body >= tokens.size() || (tokens[body].text != "{" && tokens[body].text != ";")) continue;
+        const bool ambient = tokens[body].text == ";";
+        const auto body_close = ambient ? body : matching(tokens, body, "{", "}");
         if (body_close >= tokens.size()) continue;
         std::size_t name = function_token + 1;
         while (name < open && tokens[name].kind == TokenKind::Comment) ++name;
+        if (ambient)
+            model.nodes.push_back({SemanticNodeKind::LexicalRegion, open, body_close + 1,
+                                   static_cast<std::size_t>(-1), static_cast<std::size_t>(-1),
+                                   open, body_close + 1});
         model.nodes.push_back({SemanticNodeKind::FunctionDeclaration,
                                function_token, body_close + 1,
                                name < open ? name : static_cast<std::size_t>(-1),
-                               static_cast<std::size_t>(-1), body});
+                               static_cast<std::size_t>(-1), ambient ? open : body});
 
         std::size_t part = open + 1;
         int paren = 0, square = 0, brace = 0, angle = 0;
@@ -97,7 +102,7 @@ SemanticModel build_semantic_model(const std::vector<Token>& tokens, const Progr
                 if (parameter_name != static_cast<std::size_t>(-1))
                     model.nodes.push_back({SemanticNodeKind::ParameterDeclaration,
                                            part, i, parameter_name,
-                                           static_cast<std::size_t>(-1), body});
+                                           static_cast<std::size_t>(-1), ambient ? open : body});
                 part = i + 1;
             }
         }
