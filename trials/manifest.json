@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "defaults": {"timeout_seconds": 10},
+  "projects": [
+    {
+      "id": "typed-cli",
+      "path": "projects/typed-cli",
+      "revision": "local-v1",
+      "license": "MIT-0",
+      "entry": ["src/main.ts"],
+      "compiler_options": ["--rootDir", "src", "--outDir", "dist", "--module", "commonjs"],
+      "oracle": {"kind": "stdout", "command": ["node", "dist/main.js"], "stdout": "hello, trails!\n"},
+      "expected": "pass"
+    },
+    {
+      "id": "default-import-library",
+      "path": "projects/default-import-library",
+      "revision": "local-v1",
+      "license": "MIT-0",
+      "entry": ["src/main.ts"],
+      "compiler_options": ["--rootDir", "src", "--outDir", "dist", "--module", "commonjs"],
+      "oracle": {"kind": "stdout", "command": ["node", "dist/main.js"], "stdout": "42\n"},
+      "expected": "pass"
+    },
+    {
+      "id": "declaration-consumer",
+      "path": "projects/declaration-consumer",
+      "revision": "local-v1",
+      "license": "MIT-0",
+      "entry": ["src/main.ts"],
+      "compiler_options": ["--rootDir", "src", "--outDir", "dist", "--module", "commonjs"],
+      "oracle": {"kind": "stdout", "command": ["node", "dist/main.js"], "stdout": "Ada\n"},
+      "expected": "unsupported",
+      "expected_phase": "resolution"
+    }
+  ]
+}

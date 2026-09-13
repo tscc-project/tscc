@@ -1,0 +1,1 @@
+exports.person = name => ({name});
