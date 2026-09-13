@@ -25,7 +25,7 @@ bool CompilationUnit::analyze() {
     binding = bind_semantic_model(tokens, program, semantic);
     types = build_type_model(tokens, program, semantic, binding);
     stage = CompilationStage::Analyzed;
-    if (!check_program(source, tokens, program, semantic, binding, types, expressions, diagnostics)) return false;
+    if (!check_program(source, tokens, program, semantic, binding, types, expressions, control_flow, diagnostics)) return false;
     stage = CompilationStage::Checked;
     return true;
 }

@@ -30,6 +30,10 @@ public:
     TypeId literal(TypeId,const std::string&) const;
     TypeId union_of(std::vector<TypeId>) const;
     TypeId non_nullable(TypeId) const;
+    TypeId narrow_primitive(TypeId,TypeKind,bool=false)const;
+    TypeId narrow_literal(TypeId,TypeId,bool=false)const;
+    TypeId narrow_discriminant(TypeId,const std::string&,TypeId,bool=false)const;
+    TypeId narrow_property(TypeId,const std::string&,bool=false)const;
     bool assignable(TypeId actual,TypeId expected) const;
     TypeId object_of(std::vector<TypeProperty>,TypeId string_index=0,TypeId number_index=0,TypeId call_signature=0)const;
     TypeId array_of(TypeId)const;

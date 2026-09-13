@@ -667,3 +667,13 @@ reachability. See `docs/evidence/cp62-control-flow.md` and
 `tests/control_flow.cpp`. The required CP62 reassessment keeps CP63 next: move
 narrowing and assignment facts onto this CFG and remove the checker's bounded
 token-range flow bridge.
+
+## CP63 flow-sensitive narrowing and assignment (2026-09-13)
+
+CFG-owned predicate regions now drive truthiness, equality, discriminant,
+`typeof`, `instanceof` and property-presence narrowing in true/false and loop
+regions. Straight-line assignment facts are scope-bound, nested facts combine
+deterministically, lexical exits restore declared types, and annotated
+uninitialized `let`/`const` reads receive conservative definite-assignment
+diagnostics. See `docs/evidence/cp63-flow-narrowing.md` and
+`tests/flow_narrowing.sh`. CP64 is next.

@@ -67,6 +67,9 @@ test-control-flow:
 	./.control-flow
 	rm -f .control-flow
 
+test-flow-narrowing: tscc
+	bash tests/flow_narrowing.sh
+
 test-edits:
 	$(CXX) -Isrc $(CXXFLAGS) tests/source_edit_invariants.cpp src/tscc/Diagnostic.cpp src/tscc/Source.cpp src/tscc/SourceEdit.cpp -o .source-edit-test
 	./.source-edit-test
@@ -165,7 +168,7 @@ test-project-output-contract: tscc
 
 test-oracles:
 	python3 "$(TSCC_REGRESSION_SUITE_DIR)/check_oracles.py" --node "$(abspath $(ORACLE_BIN))/node" --tsc "$(abspath $(ORACLE_BIN))/tsc"
-test: test-oracles test-preview-contract test-diagnostics test-project-output-contract test-product-boundary test-feature-matrix test-trial-blockers test-config test-smoke test-parser test-parser-recovery test-syntax-identity test-expression-ownership test-control-flow test-binder test-declaration-scope test-declaration-frontend test-standard-library test-generics test-generic-inference test-overloads test-classes test-class-relationships test-types test-edits test-checker test-compilation-unit test-program-graph test-runtime test-project test-regression test-tsx test-commonjs
+test: test-oracles test-preview-contract test-diagnostics test-project-output-contract test-product-boundary test-feature-matrix test-trial-blockers test-config test-smoke test-parser test-parser-recovery test-syntax-identity test-expression-ownership test-control-flow test-flow-narrowing test-binder test-declaration-scope test-declaration-frontend test-standard-library test-generics test-generic-inference test-overloads test-classes test-class-relationships test-types test-edits test-checker test-compilation-unit test-program-graph test-runtime test-project test-regression test-tsx test-commonjs
 
 # Compiler-core gates that do not require a native node/tsc round-trip. CI
 # runs this on Windows (msys2): the node/tsc differential gates (runtime,

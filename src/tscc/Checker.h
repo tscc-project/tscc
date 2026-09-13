@@ -7,9 +7,10 @@
 #include "Binder.h"
 #include "Expression.h"
 #include "Type.h"
+#include "ControlFlow.h"
 
 namespace tscc {
 bool check_program(const SourceFile&, const std::vector<Token>&, const Program&,
                    const SemanticModel&, const BindingModel&, TypeModel&,
-                   ExpressionModel&, Diagnostics&);
+                   ExpressionModel&, const ControlFlowModel&, Diagnostics&);
 }

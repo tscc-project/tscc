@@ -7,13 +7,6 @@
 
 namespace tscc {
 namespace {
-std::vector<std::size_t> significant_tokens(const std::vector<Token>& tokens,
-                                            std::size_t begin, std::size_t end) {
-    std::vector<std::size_t> result;
-    for (auto i = begin; i < end; ++i)
-        if (tokens[i].kind != TokenKind::Comment) result.push_back(i);
-    return result;
-}
 std::string literal_value(const std::string&text){return text.size()>=2&&(text.front()=='\''||text.front()=='"')?text.substr(1,text.size()-2):text;}
 
 struct ExpressionResult {
@@ -241,8 +234,8 @@ void report_operator_error(const SourceFile& source, const std::vector<Token>& t
 bool check_program(const SourceFile& source, const std::vector<Token>& tokens,
                    const Program& program, const SemanticModel& model,
                    const BindingModel& binding, TypeModel& types,
-                   ExpressionModel& expressions, Diagnostics& diagnostics) {
-    struct FlowFact{std::size_t begin,end,symbol;TypeId type;};std::vector<FlowFact>flow;std::vector<std::pair<std::size_t,std::size_t>>owned_expression_ranges;
+                   ExpressionModel& expressions, const ControlFlowModel&control_flow,Diagnostics& diagnostics) {
+    std::vector<std::pair<std::size_t,std::size_t>>owned_expression_ranges;
     auto class_error=[&](std::size_t token,const std::string&message){if(token>=tokens.size())return;const auto[line,column]=source.line_col(tokens[token].begin);diagnostics.error(source.path,line,column,message,source.line_text(line));};
     for(const auto&issue:types.class_issues)class_error(issue.token,issue.message);
     auto own_member=[&](const TypeModel::ClassInfo&info,const TypeModel::ClassMember&member){return member.begin_token>info.body_begin_token&&member.begin_token<info.body_end_token;};
@@ -252,9 +245,12 @@ bool check_program(const SourceFile& source, const std::vector<Token>& tokens,
         for(const auto&member:info.members){if(!own_member(info,member))continue;if(member.abstract_member&&!info.abstract_class)class_error(member.begin_token,"Abstract members can only appear within an abstract class.");const TypeModel::ClassMember*base_member=nullptr;if(info.base_class<types.classes.size())for(const auto&candidate:types.classes[info.base_class].members)if(candidate.name==member.name&&candidate.is_static==member.is_static){base_member=&candidate;break;}if(member.override_member&&!base_member)class_error(member.begin_token,"This member cannot have an 'override' modifier because it is not declared in the base class.");if(base_member){if(access_rank(member.accessibility)<access_rank(base_member->accessibility))class_error(member.begin_token,"Class member '"+member.name+"' cannot narrow the accessibility of the base member.");TypeId expected_base=base_member->type;if(!member.is_static&&info.declared_base_type!=types.store.unknown())if(const auto*property=types.store.property(info.declared_base_type,member.name))expected_base=property->type;if(member.type!=types.store.unknown()&&expected_base!=types.store.unknown()&&!types.store.assignable(member.type,expected_base))class_error(member.begin_token,"Property '"+member.name+"' in class '"+info.name+"' is not assignable to the same property in base class '"+types.classes[info.base_class].name+"'.");}}
         if(!info.abstract_class&&info.base_class<types.classes.size())for(const auto&required:types.classes[info.base_class].members)if(required.abstract_member){bool implemented=false;for(const auto&member:info.members)if(own_member(info,member)&&member.name==required.name&&!member.abstract_member){implemented=true;break;}if(!implemented)class_error(info.declaration_token,"Non-abstract class '"+info.name+"' does not implement inherited abstract member '"+required.name+"'.");}
     }
-    auto next_sig=[&](std::size_t i){while(i<tokens.size()&&tokens[i].kind==TokenKind::Comment)++i;return i;};
-    auto match=[&](std::size_t open,const char*l,const char*r){int depth=0;for(std::size_t i=open;i<tokens.size();++i){if(tokens[i].text==l)++depth;else if(tokens[i].text==r&&--depth==0)return i;}return tokens.size();};
-    for(std::size_t i=0;i<tokens.size();++i){if(tokens[i].text!="if")continue;auto open=next_sig(i+1);if(open>=tokens.size()||tokens[open].text!="(")continue;auto close=match(open,"(",")");if(close>=tokens.size())continue;auto sig=significant_tokens(tokens,open+1,close);std::size_t ref=static_cast<std::size_t>(-1);TypeId narrowed=types.store.unknown();if(sig.size()==4&&tokens[sig[0]].text=="typeof"&&tokens[sig[1]].kind==TokenKind::Identifier&&tokens[sig[2]].text=="==="&&tokens[sig[3]].kind==TokenKind::String){ref=sig[1];const auto t=literal_value(tokens[sig[3]].text);if(t=="string")narrowed=types.store.string();else if(t=="number")narrowed=types.store.number();else if(t=="boolean")narrowed=types.store.boolean();}else if(sig.size()==3&&tokens[sig[0]].kind==TokenKind::Identifier&&tokens[sig[1]].text=="==="){ref=sig[0];const auto&v=tokens[sig[2]];if(v.text=="null")narrowed=types.store.null();else if(v.text=="undefined")narrowed=types.store.undefined();else if(v.kind==TokenKind::String)narrowed=types.store.literal(types.store.string(),literal_value(v.text));else if(v.kind==TokenKind::Number)narrowed=types.store.literal(v.text.back()=='n'?types.store.bigint():types.store.number(),v.text);else if(v.text=="true"||v.text=="false")narrowed=types.store.literal(types.store.boolean(),v.text);}auto body=next_sig(close+1);if(ref==static_cast<std::size_t>(-1)||narrowed==types.store.unknown()||body>=tokens.size()||tokens[body].text!="{")continue;auto body_end=match(body,"{","}");const auto symbol=binding.symbol_for_reference(ref);if(symbol<binding.symbols.size()&&body_end<tokens.size())flow.push_back({body+1,body_end,symbol,narrowed});}
+    auto literal_type=[&](std::size_t token){if(token>=tokens.size())return types.store.unknown();const auto&v=tokens[token];if(v.text=="null")return types.store.null();if(v.text=="undefined")return types.store.undefined();if(v.kind==TokenKind::String)return types.store.literal(types.store.string(),literal_value(v.text));if(v.kind==TokenKind::Number)return types.store.literal(!v.text.empty()&&v.text.back()=='n'?types.store.bigint():types.store.number(),v.text);if(v.text=="true"||v.text=="false")return types.store.literal(types.store.boolean(),v.text);return types.store.unknown();};
+    auto facts_at=[&](std::size_t position){std::unordered_map<std::size_t,TypeId>facts;std::vector<const FlowRegion*>regions;for(const auto&graph:control_flow.functions)for(const auto&region:graph.flow_regions)if(position>=region.begin_token&&position<region.end_token)regions.push_back(&region);std::sort(regions.begin(),regions.end(),[](auto*a,auto*b){return a->end_token-a->begin_token>b->end_token-b->begin_token;});for(const auto*region:regions)for(const auto&predicate:region->predicates){const auto symbol=binding.symbol_for_reference(predicate.reference_token);if(symbol>=types.symbol_types.size())continue;auto current=facts.count(symbol)?facts[symbol]:types.symbol_types[symbol];const bool negate=predicate.negated!=(!region->true_branch);TypeId narrowed=types.store.unknown();if(predicate.kind==FlowPredicateKind::Truthy)narrowed=negate?current:types.store.non_nullable(current);else if(predicate.kind==FlowPredicateKind::Typeof){const auto value=literal_value(tokens[predicate.value_token].text);auto kind=value=="string"?TypeKind::String:value=="number"?TypeKind::Number:value=="boolean"?TypeKind::Boolean:value=="bigint"?TypeKind::BigInt:value=="undefined"?TypeKind::Undefined:TypeKind::Unknown;narrowed=kind==TypeKind::Unknown?current:types.store.narrow_primitive(current,kind,negate);}else if(predicate.kind==FlowPredicateKind::Equality)narrowed=types.store.narrow_literal(current,literal_type(predicate.value_token),negate);else if(predicate.kind==FlowPredicateKind::Discriminant)narrowed=types.store.narrow_discriminant(current,tokens[predicate.property_token].text,literal_type(predicate.value_token),negate);else if(predicate.kind==FlowPredicateKind::PropertyPresence)narrowed=types.store.narrow_property(current,literal_value(tokens[predicate.value_token].text),negate);else if(predicate.kind==FlowPredicateKind::Instanceof){for(const auto&info:types.classes)if(info.name==tokens[predicate.value_token].text){narrowed=negate?current:info.instance_type;break;}}if(narrowed!=types.store.unknown())facts[symbol]=narrowed;}return facts;};
+    auto scope_at=[&](std::size_t token){std::size_t found=0,best=tokens.size()+1;for(std::size_t i=0;i<binding.scopes.size();++i)if(token>=binding.scopes[i].begin_token&&token<binding.scopes[i].end_token&&binding.scopes[i].end_token-binding.scopes[i].begin_token<best){found=i;best=binding.scopes[i].end_token-binding.scopes[i].begin_token;}return found;};
+    auto scope_contains=[&](std::size_t ancestor,std::size_t child){while(child<binding.scopes.size()){if(child==ancestor)return true;child=binding.scopes[child].parent;}return false;};
+    auto assignment_facts_at=[&](std::size_t position){std::unordered_map<std::size_t,TypeId>facts;const auto use_scope=scope_at(position);for(std::size_t op=1;op+1<position;++op){if(tokens[op].text!="=")continue;std::size_t left=op;while(left&&tokens[left-1].kind==TokenKind::Comment)--left;if(!left)continue;--left;if(tokens[left].kind!=TokenKind::Identifier)continue;const auto symbol=binding.symbol_for_reference(left);if(symbol>=types.symbol_types.size())continue;std::size_t assignment_scope=scope_at(left);if(!scope_contains(assignment_scope,use_scope))continue;std::size_t value=op+1;while(value<position&&tokens[value].kind==TokenKind::Comment)++value;auto assigned=literal_type(value);if(assigned!=types.store.unknown())facts[symbol]=types.store.widen(assigned);}return facts;};
+    auto merge_assignment_facts=[&](std::unordered_map<std::size_t,TypeId>&facts,std::size_t position){for(const auto&item:assignment_facts_at(position))facts[item.first]=item.second;};
     for (const auto& node : model.nodes) {
         if (node.kind != SemanticNodeKind::VariableDeclaration ||
             node.variable_index >= program.variables.size()) continue;
@@ -267,7 +263,7 @@ bool check_program(const SourceFile& source, const std::vector<Token>& tokens,
         if (declaration.initializer_end_token <= declaration.initializer_begin_token)
             continue;
         owned_expression_ranges.push_back({declaration.initializer_begin_token,declaration.initializer_end_token});
-        std::unordered_map<std::size_t,TypeId>facts;std::size_t best=tokens.size();for(const auto&fact:flow)if(declaration.initializer_begin_token>=fact.begin&&declaration.initializer_end_token<=fact.end&&fact.end-fact.begin<=best){facts[fact.symbol]=fact.type;best=fact.end-fact.begin;}
+        auto facts=facts_at(declaration.initializer_begin_token);merge_assignment_facts(facts,declaration.initializer_begin_token);
         const auto expression = expression_type(tokens, expressions, declaration.initializer_begin_token,
                                                 declaration.initializer_end_token,
                                                 binding, types,facts.empty()?nullptr:&facts,true,expected);
@@ -297,8 +293,8 @@ bool check_program(const SourceFile& source, const std::vector<Token>& tokens,
         const auto expected = types.function_signatures[owner].result;
         if (expected == types.store.unknown()) continue;
         owned_expression_ranges.push_back({node.begin_token+1,node.end_token});
-        const auto expression = expression_type(tokens, expressions, node.begin_token + 1, node.end_token,
-                                                binding, types);
+        auto facts=facts_at(node.begin_token+1);merge_assignment_facts(facts,node.begin_token+1);const auto expression = expression_type(tokens, expressions, node.begin_token + 1, node.end_token,
+                                                binding, types,facts.empty()?nullptr:&facts);
         report_expression_error(source, tokens, expression, diagnostics);
         if (expression.error.empty() && expression.type != types.store.unknown() &&
             !types.store.assignable(expression.type,expected))
@@ -311,7 +307,7 @@ bool check_program(const SourceFile& source, const std::vector<Token>& tokens,
     for (const auto& node : model.nodes) {
         if (node.kind != SemanticNodeKind::ExpressionRoot&&node.kind!=SemanticNodeKind::Condition) continue;
         bool already_owned=false;for(const auto&range:owned_expression_ranges)if(node.begin_token>=range.first&&node.end_token<=range.second){already_owned=true;break;}if(already_owned)continue;
-        const auto expression=node.expression_id<expressions.nodes().size()?NodeExpressionTyper(tokens,expressions,expressions.node(node.expression_id),binding,types).run():expression_type(tokens,expressions,node.begin_token,node.end_token,binding,types);
+        auto facts=facts_at(node.begin_token);merge_assignment_facts(facts,node.begin_token);const auto expression=node.expression_id<expressions.nodes().size()?NodeExpressionTyper(tokens,expressions,expressions.node(node.expression_id),binding,types,facts.empty()?nullptr:&facts).run():expression_type(tokens,expressions,node.begin_token,node.end_token,binding,types,facts.empty()?nullptr:&facts);
         report_expression_error(source,tokens,expression,diagnostics);
     }
 
@@ -345,7 +341,7 @@ bool check_program(const SourceFile& source, const std::vector<Token>& tokens,
         std::size_t end = begin;
         while (end < tokens.size() && tokens[end].text != ";" &&
                tokens[end].text != "," && tokens[end].kind != TokenKind::End) ++end;
-        const auto expression = expression_type(tokens, expressions, begin, end, binding, types);
+        auto facts=facts_at(begin);merge_assignment_facts(facts,begin);const auto expression = expression_type(tokens, expressions, begin, end, binding, types,facts.empty()?nullptr:&facts);
         report_expression_error(source, tokens, expression, diagnostics);
         const auto rhs = expression.type;
         if (!expression.error.empty() || rhs == types.store.unknown()) continue;
@@ -358,6 +354,9 @@ bool check_program(const SourceFile& source, const std::vector<Token>& tokens,
         if (result == types.store.unknown() || result != expected)
             report_operator_error(source, tokens, assignment, op, expected, rhs,
                                   types.store, diagnostics);
+    }
+    auto assigned_in=[&](std::size_t symbol,std::size_t begin,std::size_t end){for(std::size_t op=begin+1;op<end&&op<tokens.size();++op)if(tokens[op].text=="="){std::size_t left=op;while(left>begin&&tokens[left-1].kind==TokenKind::Comment)--left;if(left>begin&&binding.symbol_for_reference(left-1)==symbol)return true;}return false;};
+    for(std::size_t symbol=0;symbol<binding.symbols.size();++symbol){const auto&bound=binding.symbols[symbol];if(bound.kind!=SymbolKind::Variable||bound.variable_kind==VariableKind::Var)continue;std::size_t before=bound.declaration_token;while(before&&tokens[before-1].kind==TokenKind::Comment)--before;if(!before||(tokens[before-1].text!="let"&&tokens[before-1].text!="const"))continue;const VariableDeclaration*declaration=nullptr;for(const auto&candidate:program.variables)if(candidate.name_token==bound.declaration_token){declaration=&candidate;break;}if(!declaration||declaration->type_end_token<=declaration->type_begin_token||declaration->initializer_end_token>declaration->initializer_begin_token)continue;for(const auto&reference:binding.references){if(reference.symbol!=symbol||reference.token<=bound.declaration_token)continue;std::size_t after=reference.token+1;while(after<tokens.size()&&tokens[after].kind==TokenKind::Comment)++after;if(after<tokens.size()&&tokens[after].text=="=")continue;bool assigned=false;const auto use_scope=scope_at(reference.token);for(std::size_t op=bound.declaration_token+1;op<reference.token;++op)if(tokens[op].text=="="){std::size_t left=op;while(left&&tokens[left-1].kind==TokenKind::Comment)--left;if(left&&binding.symbol_for_reference(left-1)==symbol&&scope_contains(scope_at(left-1),use_scope)){assigned=true;break;}}if(!assigned){const FlowRegion*true_region=nullptr,*false_region=nullptr;for(const auto&region:control_flow.flow_regions)if(region.end_token<reference.token&&!region.loop){if(region.true_branch)true_region=&region;else false_region=&region;if(true_region&&false_region&&assigned_in(symbol,true_region->begin_token,true_region->end_token)&&assigned_in(symbol,false_region->begin_token,false_region->end_token)){assigned=true;break;}}}if(!assigned){const auto[line,column]=source.line_col(tokens[reference.token].begin);diagnostics.error(source.path,line,column,"Variable '"+bound.name+"' is used before being assigned.",source.line_text(line));break;}}
     }
     return !diagnostics.has_errors();
 }
