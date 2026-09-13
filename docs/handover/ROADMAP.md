@@ -127,7 +127,7 @@ the absence of TSCC project evidence.
 
 ## Post-PC0V compiler program: CP43-CP72
 
-Status: CP43-CP57 completed on 13 September 2026. TCP6A now passes all three
+Status: CP43-CP58 completed on 13 September 2026. TCP6A now passes all three
 initial project shapes. Declaration inputs join the canonical graph without
 emitting JavaScript, their callable facts reach consumers, default/namespace
 imports carry types, and re-export aliases/cycles converge deterministically.
@@ -139,8 +139,11 @@ ascending `node_modules` boundaries, scoped/subpath packages and selected
 `types`/`typings`/`exports`/`default`/`main` entries while preserving the default
 relative-only boundary. CP53 replaces the regex configuration reader with
 Jsonic++, maps the selected JSONC configuration surface, detects inheritance
-cycles, and feeds base URL/path/root mappings into the canonical graph. CP54 is
-next.
+cycles, and feeds base URL/path/root mappings into the canonical graph. CP54-55
+add declaration inputs and a hermetic standard-library contract; CP56-57 add
+generic identity, substitution and deterministic inference. CP58 now preserves
+ordered public overload sets, resolves the most specific applicable function
+signature and keeps implementation signatures private. CP59 is next.
 See `docs/evidence/cp45-tcp7-decision.md` and
 `docs/evidence/cp50-reassessment.md` for the retained decisions.
 

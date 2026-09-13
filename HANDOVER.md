@@ -613,3 +613,17 @@ with c++ 15.2.0 and Valgrind 3.26.0.
 - The machine-readable summary is `docs/evidence/post-preview-pc0v.json`.
   PC0V is not a general TypeScript compatibility or broad memory-safety claim;
   PC0P second-platform packaging remains pending.
+
+## CP58 ordered overload resolution (2026-09-13)
+
+Function declarations sharing a name and lexical scope now expose one ordered
+overload set. Calls independently instantiate and filter candidates, prefer the
+most specific applicable signature with stable declaration-order tie-breaking,
+and emit one controlled no-match diagnostic. When declarations precede a
+function body, the implementation signature is not callable from the public
+surface. Non-overloaded functions preserve the earlier detailed diagnostics.
+
+The focused evidence is `docs/evidence/cp58-overload-resolution.md` and
+`tests/overload_resolution.sh`. The full pinned aggregate remains 555/0/24.
+Method and constructor overloads intentionally remain for CP59-CP60 because they
+require canonical class symbols and instance/static type ownership first.

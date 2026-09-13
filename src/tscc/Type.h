@@ -71,6 +71,10 @@ struct TypeModel {
         bool valid = false;
     };
     std::vector<FunctionSignature> function_signatures;
+    // Indexed by bound symbol. Every symbol in one declaration group points at
+    // the same ordered public overload surface. When overload declarations are
+    // present, the implementation signature is deliberately excluded.
+    std::vector<std::vector<FunctionSignature>> overload_sets;
 };
 
 TypeModel build_type_model(const std::vector<Token>&, const Program&,
