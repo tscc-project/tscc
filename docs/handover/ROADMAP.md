@@ -324,6 +324,13 @@ relevant, and handover/feature-matrix claims are reconciled.
 71. **Production hardening campaign.** Exercise larger graphs and real projects,
     adversarial/generated input, parser and semantic fuzzing, sanitizer/Valgrind,
     performance/RSS budgets, failure recovery and supported-platform packages.
+    **Completed as the first repeatable campaign 2026-09-13:** CI now runs a
+    deterministic 400-mutation parser/checker fuzz gate and a 250-file generated
+    project through incremental, source-map and declaration output under 15-second
+    and 256-MiB ceilings. The full suite, ASan/UBSan lifetime/project workloads,
+    RSS soak, package tests and available Valgrind gate form the local evidence
+    wall. Real third-party projects and broader platform packaging remain ongoing
+    release evidence. See `docs/evidence/cp71-hardening.md`.
 72. **Compatibility and release decision.** Publish the exact supported syntax,
     checking, configuration, resolution, emit and platform matrices; compare
     separately with checked `tsc` and `tsc --noCheck`; decide from retained

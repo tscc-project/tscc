@@ -131,6 +131,8 @@ test-declaration-emit: tscc
 	bash tests/declaration_emit.sh
 test-incremental: tscc
 	bash tests/incremental.sh
+test-hardening: tscc
+	bash tests/production_hardening.sh
 test-project: tscc
 	bash tests/project_modules.sh
 
@@ -226,8 +228,8 @@ $(MEMORY_LIFETIME_SAN):
 
 memory-safety-checkpoint-5: $(MEMORY_LIFETIME_SAN) $(SAN_TARGET)
 	mkdir -p .build/memory-safety
-	env -u LD_PRELOAD python3 scripts/memory_safety.py --project tscc --mode sanitizer --output .build/memory-safety/checkpoint-5-lifetime.json --iterations 1 --command './$(MEMORY_LIFETIME_SAN) 80'
-	env -u LD_PRELOAD python3 scripts/checkpoint5_project_lifetime.py --tscc "$(CURDIR)/$(SAN_TARGET)" --rounds 8 --files 120 --output .build/memory-safety/checkpoint-5-project-sanitizer.json
+	env -u LD_PRELOAD ASAN_OPTIONS=detect_leaks=0:halt_on_error=1:abort_on_error=1 python3 scripts/memory_safety.py --project tscc --mode sanitizer --output .build/memory-safety/checkpoint-5-lifetime.json --iterations 1 --command './$(MEMORY_LIFETIME_SAN) 80'
+	env -u LD_PRELOAD ASAN_OPTIONS=detect_leaks=0:halt_on_error=1:abort_on_error=1 python3 scripts/checkpoint5_project_lifetime.py --tscc "$(CURDIR)/$(SAN_TARGET)" --rounds 8 --files 120 --output .build/memory-safety/checkpoint-5-project-sanitizer.json
 
 memory-safety-checkpoint-5-rss: $(MEMORY_LIFETIME) tscc
 	mkdir -p .build/memory-safety

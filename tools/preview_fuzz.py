@@ -3,7 +3,7 @@ import random, subprocess, sys, tempfile, time
 from pathlib import Path
 
 tscc=sys.argv[1];random.seed(0x54534343)
-seeds=["const x:number=42;","function f(x:number):number{return x+1;}f(2);","interface X{value:number}const x:X={value:1};","const xs:number[]=[1,2];xs[0];"]
+seeds=["const x:number=42;","function f(x:number):number{return x+1;}f(2);","interface X{value:number}const x:X={value:1};","const xs:number[]=[1,2];xs[0];","enum E{A,B=3}const e:E=E.A;","type X<T>=T extends string?T:never;","class C{constructor(public x:number){}}"]
 alphabet="{}[]();,+-*/=!<>?:.'\"abcdefghijklmnopqrstuvwxyz0123456789 "
 with tempfile.TemporaryDirectory(prefix="tscc-preview-fuzz-") as directory:
     source=Path(directory)/"case.ts"

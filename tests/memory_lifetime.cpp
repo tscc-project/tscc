@@ -1,5 +1,6 @@
 #include "tscc/Binder.h"
 #include "tscc/Checker.h"
+#include "tscc/ControlFlow.h"
 #include "tscc/Diagnostic.h"
 #include "tscc/Lexer.h"
 #include "tscc/Parser.h"
@@ -30,7 +31,9 @@ static void compile_memory(const std::string& text,const std::string& path,
         auto semantic=build_semantic_model(tokens,program);
         auto binding=bind_semantic_model(tokens,program,semantic);
         auto types=build_type_model(tokens,program,semantic,binding);
-        ExpressionModel expressions;check_program(source,tokens,program,semantic,binding,types,expressions,diagnostics);
+        ExpressionModel expressions;own_semantic_expressions(tokens,semantic,expressions);
+        auto control_flow=build_control_flow(tokens,semantic,expressions);
+        check_program(source,tokens,program,semantic,binding,types,expressions,control_flow,diagnostics);
         std::string js; TranspileOptions opts; opts.module=module;
         if(!transpile_tokens(source,tokens,opts,js,diagnostics)) parsed=false;
     }

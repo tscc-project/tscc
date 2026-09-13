@@ -48,6 +48,9 @@ jobs:
         working-directory: tscc
         env:
           ASAN_OPTIONS: ${{ matrix.asan_options }}
+      - name: Deterministic fuzz and resource budget
+        run: make test-hardening
+        working-directory: tscc
 
   windows:
     runs-on: windows-latest
