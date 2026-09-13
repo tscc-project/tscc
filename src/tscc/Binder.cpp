@@ -136,8 +136,7 @@ BindingModel bind_semantic_model(const std::vector<Token>& tokens, const Program
     // deliberately syntactic here: default, namespace and named bindings. Type-only
     // imports do not introduce runtime symbols.
     for (std::size_t i = 0; i + 1 < tokens.size(); ++i) {
-        if (tokens[i].text != "import" || tokens[i+1].text == "(" ||
-            tokens[i+1].text == "type") continue;
+        if (tokens[i].text != "import" || tokens[i+1].text == "(") continue;
         std::size_t module = i + 1;
         while (module < tokens.size() && tokens[module].kind != TokenKind::String &&
                tokens[module].text != ";" && tokens[module].kind != TokenKind::End) ++module;
@@ -170,12 +169,15 @@ BindingModel bind_semantic_model(const std::vector<Token>& tokens, const Program
             declaration_tokens.insert(token);
         };
         std::size_t p = i + 1;
+        const bool clause_type_only = p < from && tokens[p].text == "type";
+        if (clause_type_only) ++p;
         if (p < from && tokens[p].kind == TokenKind::Identifier) {
-            add_import(p++);
+            if (!clause_type_only) add_import(p);
+            ++p;
             if (p < from && tokens[p].text == ",") ++p;
         }
         if (p + 2 < from && tokens[p].text == "*" && tokens[p+1].text == "as") {
-            add_import(p + 2);
+            if (!clause_type_only) add_import(p + 2);
         } else if (p < from && tokens[p].text == "{") {
             ++p;
             while (p < from && tokens[p].text != "}") {
@@ -190,8 +192,9 @@ BindingModel bind_semantic_model(const std::vector<Token>& tokens, const Program
                 }
                 const auto imported = p++;
                 if (p + 1 < from && tokens[p].text == "as") {
-                    add_import(p + 1); p += 2;
-                } else add_import(imported);
+                    if (!clause_type_only) add_import(p + 1);
+                    p += 2;
+                } else if (!clause_type_only) add_import(imported);
                 while (p < from && tokens[p].text != "," && tokens[p].text != "}") ++p;
             }
         }

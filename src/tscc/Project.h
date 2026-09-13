@@ -30,7 +30,12 @@ bool discover_module_dependencies(const std::filesystem::path&,const SourceFile&
                                   const std::vector<std::string>& root_dirs={});
 
 struct ProgramFile {
-    struct ExportFact { std::string name; std::size_t file; std::size_t symbol; bool type_only=false; };
+    struct ExportFact {
+        std::string name; std::size_t file; std::size_t symbol;
+        bool type_only=false; std::string type_name;
+        ExportFact(std::string n,std::size_t f,std::size_t s,bool only=false,std::string type={})
+            :name(std::move(n)),file(f),symbol(s),type_only(only),type_name(std::move(type)){}
+    };
     std::unique_ptr<CompilationUnit> unit;
     std::vector<std::size_t> dependencies;
     std::vector<std::filesystem::path> dependency_paths;
