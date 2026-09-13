@@ -206,6 +206,7 @@ SemanticModel build_semantic_model(const std::vector<Token>& tokens, const Progr
             ++open;
             while (open < tokens.size() && tokens[open].kind == TokenKind::Comment) ++open;
         }
+        if(open<tokens.size()&&tokens[open].text=="<"){const auto close=matching(tokens,open,"<",">");if(close>=tokens.size())continue;open=close+1;while(open<tokens.size()&&tokens[open].kind==TokenKind::Comment)++open;}
         if (open >= tokens.size() || tokens[open].text != "(") continue;
         const auto close = matching(tokens, open, "(", ")");
         if (close >= tokens.size()) continue;

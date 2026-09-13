@@ -18,6 +18,7 @@ public:
             if (member == store.unknown()) return member;
             members.push_back(member);
         }
+        noise();if(cursor<end){const auto&next=tokens[cursor].text;if(next!=","&&next!=">"&&next!=")"&&next!="]"&&next!="}"&&next!=";")return store.unknown();}
         return store.union_of(std::move(members));
     }
 
@@ -59,7 +60,9 @@ private:
         if (tokens[cursor].text == "{") return object();
         if (tokens[cursor].text == "(") return function("=>");
         if (tokens[cursor].text == "[") return tuple();
-        return atom(tokens[cursor++]);
+        const auto name=tokens[cursor].text;auto type=atom(tokens[cursor++]);
+        if(take("<")){std::vector<TypeId>arguments;while(cursor<end&&tokens[cursor].text!=">"){auto argument=parse();if(argument==store.unknown())return argument;arguments.push_back(argument);if(!take(","))break;}if(!take(">"))return store.unknown();type=store.instantiate_generic(name,arguments);}
+        return type;
     }
     TypeId tuple() {
         if (!take("[")) return store.unknown();

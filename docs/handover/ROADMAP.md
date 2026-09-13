@@ -127,7 +127,7 @@ the absence of TSCC project evidence.
 
 ## Post-PC0V compiler program: CP43-CP72
 
-Status: CP43-CP55 completed on 13 September 2026. TCP6A now passes all three
+Status: CP43-CP56 completed on 13 September 2026. TCP6A now passes all three
 initial project shapes. Declaration inputs join the canonical graph without
 emitting JavaScript, their callable facts reach consumers, default/namespace
 imports carry types, and re-export aliases/cycles converge deterministically.

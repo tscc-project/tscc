@@ -11,7 +11,7 @@
 namespace tscc {
 
 using TypeId = std::size_t;
-enum class TypeKind { Unknown, Number, String, Boolean, BigInt, Function, Null, Undefined, Literal, Union, Object };
+enum class TypeKind { Unknown, Number, String, Boolean, BigInt, Function, Null, Undefined, Literal, Union, Object, TypeParameter };
 struct TypeProperty{std::string name;TypeId type=0;bool optional=false;bool readonly=false;};
 struct Type { TypeKind kind = TypeKind::Unknown;TypeId base=0;std::string literal;std::vector<TypeId> members;std::vector<TypeProperty>properties;std::vector<TypeId>parameters;TypeId result=0;std::size_t required_parameters=0;bool rest=false;TypeId string_index=0;TypeId number_index=0;TypeId call_signature=0; };
 
@@ -35,6 +35,12 @@ public:
     TypeId array_element(TypeId)const;
     const std::vector<TypeId>& tuple_elements(TypeId)const;
     TypeId function_of(std::vector<TypeId>,TypeId,std::size_t,bool)const;
+    TypeId type_parameter(const std::string&,TypeId=0,TypeId=0)const;
+    TypeId substitute(TypeId,const std::unordered_map<TypeId,TypeId>&,std::size_t=0)const;
+    TypeId parameter_constraint(TypeId)const;
+    TypeId parameter_default(TypeId)const;
+    void define_generic(const std::string&,std::vector<TypeId>,std::vector<TypeId>,std::vector<TypeId>,TypeId)const;
+    TypeId instantiate_generic(const std::string&,const std::vector<TypeId>&,bool* =nullptr)const;
     const Type* callable(TypeId)const;
     const TypeProperty* property(TypeId,const std::string&)const;
     const std::vector<TypeProperty>& properties(TypeId)const;
@@ -45,7 +51,9 @@ public:
     TypeId widen(TypeId) const;
     std::string name(TypeId) const;
 private:
+    struct GenericDefinition{std::vector<TypeId>parameters,constraints,defaults;TypeId body=0;};
     mutable std::vector<Type> types_;
+    mutable std::unordered_map<std::string,GenericDefinition>generics_;
 };
 
 struct TypeModel {
@@ -53,7 +61,9 @@ struct TypeModel {
     std::unordered_map<std::string,TypeId> named_types;
     std::vector<TypeId> symbol_types;
     struct FunctionSignature {
+        struct TypeParameter { std::string name; TypeId type=0,constraint=0,default_type=0; };
         std::vector<TypeId> parameters;
+        std::vector<TypeParameter> type_parameters;
         TypeId result = 0;
         std::size_t required_parameters = 0;
         bool rest = false;
