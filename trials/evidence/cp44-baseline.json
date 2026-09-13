@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "checkpoint": 44,
+  "compiler_commit": "aa73e48",
+  "manifest_schema": 1,
+  "summary": {"pass": 2, "unsupported": 1, "fail": 0},
+  "results": [
+    {"id": "typed-cli", "status": "pass", "oracle": "stdout"},
+    {"id": "default-import-library", "status": "pass", "oracle": "stdout"},
+    {
+      "id": "declaration-consumer",
+      "status": "unsupported",
+      "phase": "resolution",
+      "diagnostic": "TSCC1000: cannot resolve module './person'",
+      "reduced_fixture": "tests/trial_blockers.sh"
+    }
+  ],
+  "gates": {
+    "full_test": "pass",
+    "regression": {"pass": 555, "fail": 0, "skip": 24},
+    "feature_matrix_cases": 579
+  }
+}
