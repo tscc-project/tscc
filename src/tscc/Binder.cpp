@@ -94,6 +94,25 @@ BindingModel bind_semantic_model(const std::vector<Token>& tokens, const Program
                                    node.name_token, containing_scope(binding,node.begin_token),node_index});
     }
 
+    // Runtime-bearing declarations introduce value symbols even though their
+    // bodies are still lowered by the parser. Enum syntax has a durable node;
+    // namespaces are retained as statement nodes, so recognize their header.
+    for (const auto& node : program.root.children) {
+        if (node.kind == SyntaxKind::EnumDeclaration) {
+            auto name = node.begin_token + 1;
+            if (name < tokens.size() && tokens[name].kind == TokenKind::Identifier)
+                binding.symbols.push_back({tokens[name].text, SymbolKind::Enum, name,
+                                           containing_scope(binding, node.begin_token)});
+        } else if (node.begin_token + 1 < tokens.size() &&
+                   (tokens[node.begin_token].text == "namespace" ||
+                    tokens[node.begin_token].text == "module") &&
+                   tokens[node.begin_token + 1].kind == TokenKind::Identifier) {
+            const auto name = node.begin_token + 1;
+            binding.symbols.push_back({tokens[name].text, SymbolKind::Namespace, name,
+                                       containing_scope(binding, node.begin_token)});
+        }
+    }
+
     std::unordered_set<std::size_t> declaration_tokens;
     for (std::size_t node_index = 0; node_index < semantic.nodes.size(); ++node_index) {
         const auto& node = semantic.nodes[node_index];

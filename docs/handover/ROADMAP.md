@@ -285,6 +285,14 @@ relevant, and handover/feature-matrix claims are reconciled.
 67. **Runtime-bearing TypeScript semantics.** Move enums, namespaces and parameter
     properties from tested lowering with partial binding to checked symbol/type
     semantics, including merging and cross-module behavior.
+    **Completed as a bounded local-unit slice 2026-09-13:** enums now introduce
+    value symbols, member-object types and literal unions, so member access and
+    enum-typed assignment participate in the ordinary checker. Constructor
+    parameter properties already use the CP59 class model and are now gated
+    alongside enum and namespace runtime differentials. Namespace lowering and
+    merging remain runtime-verified; exported namespace member typing and
+    cross-module enum/namespace fact propagation remain follow-up compatibility
+    work. See `docs/evidence/cp67-runtime-types.md`.
 68. **Source maps and diagnostic polish.** Emit deterministic source maps with
     exact mappings through erasure and lowering; improve related locations,
     category/codes and recovery diagnostics against reduced real-project cases.

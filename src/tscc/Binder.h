@@ -9,7 +9,7 @@
 
 namespace tscc {
 
-enum class SymbolKind { Variable, Parameter, Function, Class, Import };
+enum class SymbolKind { Variable, Parameter, Function, Class, Enum, Namespace, Import };
 enum class VariableKind { None, Var, Let, Const };
 
 struct BoundScope {
