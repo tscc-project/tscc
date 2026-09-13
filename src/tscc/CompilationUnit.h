@@ -1,5 +1,6 @@
 #pragma once
 #include "Binder.h"
+#include "ControlFlow.h"
 #include "Diagnostic.h"
 #include "Expression.h"
 #include "Lexer.h"
@@ -27,6 +28,7 @@ public:
     BindingModel binding;
     TypeModel types;
     ExpressionModel expressions;
+    ControlFlowModel control_flow;
     Diagnostics diagnostics;
     UnitOptions options;
     std::string emitted_text;

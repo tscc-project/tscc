@@ -127,7 +127,7 @@ the absence of TSCC project evidence.
 
 ## Post-PC0V compiler program: CP43-CP72
 
-Status: CP43-CP61 completed on 13 September 2026. TCP6A now passes all three
+Status: CP43-CP62 completed on 13 September 2026. TCP6A now passes all three
 initial project shapes. Declaration inputs join the canonical graph without
 emitting JavaScript, their callable facts reach consumers, default/namespace
 imports carry types, and re-export aliases/cycles converge deterministically.
@@ -148,7 +148,9 @@ canonical two-sided class symbols and deterministic class relationships,
 including inheritance, interfaces, access, readonly, abstract/override rules,
 `super`, and method/constructor overloads. CP61 replaces residual expression
 discovery with durable statement/expression identities and completes the
-selected expression grammar. CP62 is next.
+selected expression grammar. CP62 adds stable per-function CFG blocks, typed
+edges, predecessor joins and reachability. The CP62 reassessment keeps CP63
+flow-sensitive narrowing next.
 See `docs/evidence/cp45-tcp7-decision.md` and
 `docs/evidence/cp50-reassessment.md` for the retained decisions.
 

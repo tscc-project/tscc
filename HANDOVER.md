@@ -656,4 +656,14 @@ discovery scan is gone. The existing expression typer now receives selected
 logical, comparison, conditional, update, optional-chain, non-null,
 assertion/satisfies and `new` nodes. See
 `docs/evidence/cp61-expression-ownership.md` and
-`tests/expression_ownership.cpp`. CP62 is next.
+`tests/expression_ownership.cpp`.
+
+## CP62 control-flow graph foundation (2026-09-13)
+
+Ordinary and arrow functions now retain canonical control-flow graphs with
+stable entry/exit and statement block identities, typed branch, short-circuit,
+loop/back, exception and finally edges, sorted predecessor joins, and computed
+reachability. See `docs/evidence/cp62-control-flow.md` and
+`tests/control_flow.cpp`. The required CP62 reassessment keeps CP63 next: move
+narrowing and assignment facts onto this CFG and remove the checker's bounded
+token-range flow bridge.

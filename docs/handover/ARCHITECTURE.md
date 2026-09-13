@@ -756,3 +756,13 @@ and the corresponding tests, decisions, roadmap, and public claims.
 - Is this parser validity, semantic validity, or unsupported behavior?
 - Does project/module logic need the feature, or only single-file emission?
 - What external test proves the whole slice?
+
+## Canonical expression and control-flow ownership
+
+As of CP61, `SemanticModel` statement/condition roots retain canonical
+`ExpressionId` children and the checker no longer discovers calls by scanning
+identifier ranges. CP62 builds one `FunctionControlFlow` per ordinary or arrow
+function after semantic expression ownership and before binding/checking. Blocks
+and edges are immutable compilation-unit facts; predecessor sets and reachability
+are computed once. CP63 should attach facts to these identities rather than
+constructing another checker-local graph.

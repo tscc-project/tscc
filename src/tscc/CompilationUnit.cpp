@@ -21,6 +21,7 @@ bool CompilationUnit::analyze() {
     stage = CompilationStage::Parsed;
     semantic = build_semantic_model(tokens, program);
     own_semantic_expressions(tokens, semantic, expressions);
+    control_flow = build_control_flow(tokens, semantic, expressions);
     binding = bind_semantic_model(tokens, program, semantic);
     types = build_type_model(tokens, program, semantic, binding);
     stage = CompilationStage::Analyzed;

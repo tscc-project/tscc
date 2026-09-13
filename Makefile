@@ -11,7 +11,7 @@ ORACLE_BIN ?= $(TSCC_REGRESSION_SUITE_DIR)/tools
 export PATH := $(abspath $(ORACLE_BIN)):$(PATH)
 SAN_TARGET := .build/tscc-sanitize
 MEMORY_SMOKE := .build/tscc-parser-memory-san
-SOURCES := src/main.cpp src/tscc/Diagnostic.cpp src/tscc/Source.cpp src/tscc/Lexer.cpp src/tscc/Parser.cpp src/tscc/Semantic.cpp src/tscc/Binder.cpp src/tscc/Type.cpp src/tscc/Checker.cpp src/tscc/CompilationUnit.cpp src/tscc/SourceEdit.cpp src/tscc/Transpiler.cpp src/tscc/Project.cpp src/tscc/Config.cpp src/tscc/Compiler.cpp
+SOURCES := src/main.cpp src/tscc/Diagnostic.cpp src/tscc/Source.cpp src/tscc/Lexer.cpp src/tscc/Parser.cpp src/tscc/Semantic.cpp src/tscc/ControlFlow.cpp src/tscc/Binder.cpp src/tscc/Type.cpp src/tscc/Checker.cpp src/tscc/CompilationUnit.cpp src/tscc/SourceEdit.cpp src/tscc/Transpiler.cpp src/tscc/Project.cpp src/tscc/Config.cpp src/tscc/Compiler.cpp
 SAN_OBJECTS := $(patsubst %.cpp,.build/san/%.o,$(SOURCES))
 SAN_DEPS := $(SAN_OBJECTS:.o=.d)
 OBJECTS := $(SOURCES:.cpp=.o)
@@ -53,14 +53,19 @@ test-parser-recovery:
 	rm -f .parser-recovery
 
 test-syntax-identity:
-	$(CXX) -Isrc $(CXXFLAGS) tests/syntax_identity.cpp src/tscc/Diagnostic.cpp src/tscc/Source.cpp src/tscc/Lexer.cpp src/tscc/Parser.cpp src/tscc/Semantic.cpp src/tscc/Binder.cpp src/tscc/Type.cpp src/tscc/Checker.cpp src/tscc/CompilationUnit.cpp src/tscc/SourceEdit.cpp src/tscc/Transpiler.cpp -o .syntax-identity
+	$(CXX) -Isrc $(CXXFLAGS) tests/syntax_identity.cpp src/tscc/Diagnostic.cpp src/tscc/Source.cpp src/tscc/Lexer.cpp src/tscc/Parser.cpp src/tscc/Semantic.cpp src/tscc/ControlFlow.cpp src/tscc/Binder.cpp src/tscc/Type.cpp src/tscc/Checker.cpp src/tscc/CompilationUnit.cpp src/tscc/SourceEdit.cpp src/tscc/Transpiler.cpp -o .syntax-identity
 	./.syntax-identity
 	rm -f .syntax-identity
 
 test-expression-ownership:
-	$(CXX) -Isrc $(CXXFLAGS) tests/expression_ownership.cpp src/tscc/Diagnostic.cpp src/tscc/Source.cpp src/tscc/Lexer.cpp src/tscc/Parser.cpp src/tscc/Semantic.cpp src/tscc/Binder.cpp src/tscc/Type.cpp src/tscc/Checker.cpp src/tscc/CompilationUnit.cpp -o .expression-ownership
+	$(CXX) -Isrc $(CXXFLAGS) tests/expression_ownership.cpp src/tscc/Diagnostic.cpp src/tscc/Source.cpp src/tscc/Lexer.cpp src/tscc/Parser.cpp src/tscc/Semantic.cpp src/tscc/ControlFlow.cpp src/tscc/Binder.cpp src/tscc/Type.cpp src/tscc/Checker.cpp src/tscc/CompilationUnit.cpp -o .expression-ownership
 	./.expression-ownership
 	rm -f .expression-ownership
+
+test-control-flow:
+	$(CXX) -Isrc $(CXXFLAGS) tests/control_flow.cpp src/tscc/Diagnostic.cpp src/tscc/Source.cpp src/tscc/Lexer.cpp src/tscc/Parser.cpp src/tscc/Semantic.cpp src/tscc/ControlFlow.cpp src/tscc/Binder.cpp src/tscc/Type.cpp src/tscc/Checker.cpp src/tscc/CompilationUnit.cpp -o .control-flow
+	./.control-flow
+	rm -f .control-flow
 
 test-edits:
 	$(CXX) -Isrc $(CXXFLAGS) tests/source_edit_invariants.cpp src/tscc/Diagnostic.cpp src/tscc/Source.cpp src/tscc/SourceEdit.cpp -o .source-edit-test
@@ -100,12 +105,12 @@ test-checker: tscc
 	bash tests/typecheck_variables.sh
 
 test-compilation-unit:
-	$(CXX) -Isrc $(CXXFLAGS) tests/compilation_unit_smoke.cpp src/tscc/Diagnostic.cpp src/tscc/Source.cpp src/tscc/Lexer.cpp src/tscc/Parser.cpp src/tscc/Semantic.cpp src/tscc/Binder.cpp src/tscc/Type.cpp src/tscc/Checker.cpp src/tscc/CompilationUnit.cpp src/tscc/SourceEdit.cpp src/tscc/Transpiler.cpp -o .compilation-unit-smoke
+	$(CXX) -Isrc $(CXXFLAGS) tests/compilation_unit_smoke.cpp src/tscc/Diagnostic.cpp src/tscc/Source.cpp src/tscc/Lexer.cpp src/tscc/Parser.cpp src/tscc/Semantic.cpp src/tscc/ControlFlow.cpp src/tscc/Binder.cpp src/tscc/Type.cpp src/tscc/Checker.cpp src/tscc/CompilationUnit.cpp src/tscc/SourceEdit.cpp src/tscc/Transpiler.cpp -o .compilation-unit-smoke
 	./.compilation-unit-smoke
 	rm -f .compilation-unit-smoke
 
 test-program-graph:
-	$(CXX) -Isrc $(CXXFLAGS) tests/program_graph_smoke.cpp src/tscc/Diagnostic.cpp src/tscc/Source.cpp src/tscc/Lexer.cpp src/tscc/Parser.cpp src/tscc/Semantic.cpp src/tscc/Binder.cpp src/tscc/Type.cpp src/tscc/Checker.cpp src/tscc/CompilationUnit.cpp src/tscc/Project.cpp -o .program-graph-smoke
+	$(CXX) -Isrc $(CXXFLAGS) tests/program_graph_smoke.cpp src/tscc/Diagnostic.cpp src/tscc/Source.cpp src/tscc/Lexer.cpp src/tscc/Parser.cpp src/tscc/Semantic.cpp src/tscc/ControlFlow.cpp src/tscc/Binder.cpp src/tscc/Type.cpp src/tscc/Checker.cpp src/tscc/CompilationUnit.cpp src/tscc/Project.cpp -o .program-graph-smoke
 	./.program-graph-smoke
 	rm -f .program-graph-smoke
 
@@ -160,7 +165,7 @@ test-project-output-contract: tscc
 
 test-oracles:
 	python3 "$(TSCC_REGRESSION_SUITE_DIR)/check_oracles.py" --node "$(abspath $(ORACLE_BIN))/node" --tsc "$(abspath $(ORACLE_BIN))/tsc"
-test: test-oracles test-preview-contract test-diagnostics test-project-output-contract test-product-boundary test-feature-matrix test-trial-blockers test-config test-smoke test-parser test-parser-recovery test-syntax-identity test-expression-ownership test-binder test-declaration-scope test-declaration-frontend test-standard-library test-generics test-generic-inference test-overloads test-classes test-class-relationships test-types test-edits test-checker test-compilation-unit test-program-graph test-runtime test-project test-regression test-tsx test-commonjs
+test: test-oracles test-preview-contract test-diagnostics test-project-output-contract test-product-boundary test-feature-matrix test-trial-blockers test-config test-smoke test-parser test-parser-recovery test-syntax-identity test-expression-ownership test-control-flow test-binder test-declaration-scope test-declaration-frontend test-standard-library test-generics test-generic-inference test-overloads test-classes test-class-relationships test-types test-edits test-checker test-compilation-unit test-program-graph test-runtime test-project test-regression test-tsx test-commonjs
 
 # Compiler-core gates that do not require a native node/tsc round-trip. CI
 # runs this on Windows (msys2): the node/tsc differential gates (runtime,
@@ -194,7 +199,7 @@ memory-safety-smoke: $(MEMORY_SMOKE)
 
 MEMORY_LIFETIME := .build/tscc-memory-lifetime
 MEMORY_LIFETIME_SAN := .build/tscc-memory-lifetime-san
-MEMORY_LIFETIME_SOURCES := tests/memory_lifetime.cpp src/tscc/Diagnostic.cpp src/tscc/Source.cpp src/tscc/Lexer.cpp src/tscc/Parser.cpp src/tscc/Semantic.cpp src/tscc/Binder.cpp src/tscc/Type.cpp src/tscc/Checker.cpp src/tscc/CompilationUnit.cpp src/tscc/SourceEdit.cpp src/tscc/Transpiler.cpp
+MEMORY_LIFETIME_SOURCES := tests/memory_lifetime.cpp src/tscc/Diagnostic.cpp src/tscc/Source.cpp src/tscc/Lexer.cpp src/tscc/Parser.cpp src/tscc/Semantic.cpp src/tscc/ControlFlow.cpp src/tscc/Binder.cpp src/tscc/Type.cpp src/tscc/Checker.cpp src/tscc/CompilationUnit.cpp src/tscc/SourceEdit.cpp src/tscc/Transpiler.cpp
 
 $(MEMORY_LIFETIME):
 	mkdir -p .build
