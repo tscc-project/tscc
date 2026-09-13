@@ -375,96 +375,107 @@ useful and dependable supported contract—not one that silently accepts every
 spelling it can erase.
 
 
-## Post-CP75 resume campaign — provisional CP76+
+## Post-CP75 evidence campaign and selected next compiler sequence
 
-The numbering below is a **game plan, not a promise of feature order**. Each
-implementation checkpoint must be selected by evidence from the preceding one.
-A future agent should stop and reassess when a step reveals a different blocker.
+The post-CP75 evidence campaign is now complete in the standalone
+`tscc-regression-suite` through TRS11. The compiler itself remained unchanged
+during that campaign; the external suite now carries the detailed compatibility
+matrix and retained real-project decision evidence.
 
-### Phase A — reconcile what already exists
+### Phase A — completed external reconciliation
 
-76. **External semantic rebaseline.** Run the frozen 579-case suite on CP75,
-    classify the 24 skips again, and add a machine-readable report that separates
-    “still unsupported”, “now implemented but not promoted”, “syntax/reference
-    mismatch”, and “harness/config issue”. No compiler changes unless a genuine
-    regression is uncovered.
-77. **CP43-CP75 external evidence expansion.** Add representative black-box cases
-    for already-implemented generics/inference, overloads, classes, CFG narrowing,
-    collection/index behavior, advanced types, bounded JSX contracts and
-    cross-module declaration/type flow. Update `feature-matrix.json` and preserve
-    the 579-case result as a named historical baseline rather than overwriting its
-    meaning.
-78. **Compatibility-gap inventory.** Produce a versioned CP75 matrix against
-    pinned TypeScript 7.0.2 covering language syntax, semantic families, libs,
-    module resolution, tsconfig, declarations, source maps, JSX, diagnostics,
-    projects and incremental/watch. Each row must link to tests/evidence and say
-    supported/partial/planned/intentional divergence.
+76. **External semantic rebaseline — complete externally.** The frozen 579-case
+    preview result remains historical; CP75 reclassification promoted six old
+    semantic skips and left 18 explicit unsupported skips.
+77. **CP43-CP75 external evidence expansion — complete externally.** The current
+    single-file gate is 618 cases at 600 pass / 0 fail / 18 intentional skips,
+    plus a 12/12 multi-file/project gate and 7/7 JS++ runtime interop gate.
+78. **Compatibility-gap inventory — complete externally.** TRS9 owns a 33-area
+    CP75 matrix distinguishing unsupported, partial/bounded, external and
+    real-project evidence states.
 
-### Phase B — let real projects choose the next compiler slices
+### Phase B — completed real-project decision gate
 
-79. **TCP6B real-project expansion.** Grow beyond the three synthetic project
-    shapes to a small pinned set of licence-compatible real packages/apps. Record
-    acquisition/install rules, exact revisions, expected runtime/typecheck result,
-    and failure stage. Reduce the top blockers into fixtures.
-80. **Evidence decision gate.** Rank blockers by real projects unlocked,
-    architectural leverage, TypeScript commonality and regression risk. Select
-    the next 2-3 vertical slices only here.
+79. **TCP6B real-project expansion — complete externally for the first retained
+    corpus.** TRS10 pins read-only probes over MathJax 3.2.1, mhchemparser 4.2.1
+    and `@jridgewell/sourcemap-codec` 1.5.5 by package/version/licence plus source
+    hashes. Nine stage-classified probes reproduce successfully; some expected
+    results are blockers rather than project passes.
+80. **Evidence decision gate — complete.** TRS11 ranks the next compiler work by
+    projects unlocked and architectural leverage. The selected sequence below
+    supersedes the earlier provisional jump to semantic incremental/watch work.
 
-Likely high-leverage candidates, subject to CP79-80 evidence:
+### Phase C — selected compiler implementation checkpoints
 
-- broader declaration-file and standard-library semantics, including commonly
-  used generic/library shapes;
-- cross-module enum/namespace/runtime-bearing type facts and declaration/re-export
-  completeness;
-- practical package `exports`/conditions and tsconfig behavior needed by real
-  projects;
-- JSX cross-file namespace augmentation, spreads/component contracts and common
-  library-shaped JSX typing;
-- remaining class/function semantic diagnostics represented in the external
-  skips;
-- project references and multi-project graph ownership.
+81. **High-frequency standard-library member semantics.** Expand the hermetic
+    library/type model for the reduced member families already blocking retained
+    sources: array/tuple `push`/`pop`/`concat`, common string members such as
+    `length`, `charCodeAt`, `replace`, `match`, `trim`, and selected Object/Symbol
+    members. Derive the surface from library declarations and reduced fixtures;
+    do not special-case package names.
+82. **Definite-assignment/control-flow parity reductions.** Minimize and fix the
+    valid-source false positives exposed by MathJax and sourcemap-codec, including
+    ambient/`typeof` patterns and values assigned through loops/branches. Preserve
+    useful diagnostics where the pinned reference also rejects or where a
+    deliberately stricter TSCC contract is explicit.
+83. **Practical tsconfig option breadth.** Both config-driven retained projects
+    currently stop first at `downlevelIteration`. Classify and implement the
+    common next options (`noImplicitAny`, `noImplicitReturns`, `noUnused*`,
+    `resolveJsonModule`, `esModuleInterop`, `typeRoots`, and related target/lib
+    interactions) as required by retained projects. Never silently accept a
+    semantics-changing option merely to get farther into a build.
+84. **Reduced parser/type-grammar blockers.** Minimize the mhchemparser failures
+    around complex function/object forms and object return annotations, identify
+    lexer/parser/type-annotation ownership, add external regressions, then fix the
+    actual grammar boundary without package-specific exceptions.
+85. **Real-project rerun and next decision.** Rerun the exact package/version/hash
+    corpus after CP81-84, classify newly exposed blockers and choose the next
+    compiler slice from retained evidence. Likely candidates include deeper
+    declarations/libs, package resolution/exports, JSX ecosystem contracts or
+    project references, but none is preselected.
 
-### Phase C — compiler-service and compatibility closure
+### Phase D — compiler-service and compatibility closure
 
-81. **Semantic incremental reuse.** Reuse parsed/bound/typed units and add
+86. **Semantic incremental reuse.** Reuse parsed/bound/typed units and add
     dependency-directed invalidation; prove clean/incremental diagnostics and
     output are equivalent.
-82. **Watch/cancellation service.** Add a bounded long-running compiler service,
+87. **Watch/cancellation service.** Add a bounded long-running compiler service,
     cancellation and repeated edit/recovery tests without retained graph growth.
-83. **Declaration/source-map compatibility expansion.** Broaden declaration emit
+88. **Declaration/source-map compatibility expansion.** Broaden declaration emit
     toward the supported public semantic surface and move rewritten source maps
     from line-only toward edit-owned column fidelity where evidence requires it.
-84. **Diagnostic compatibility campaign.** Stabilize categories/codes/ordering and
+89. **Diagnostic compatibility campaign.** Stabilize categories/codes/ordering and
     improve attribution for promoted semantic families without chasing byte-for-
     byte `tsc` wording unnecessarily.
-85. **Project/config ecosystem closure.** Add the selected project-reference,
+90. **Project/config ecosystem closure.** Add the selected project-reference,
     config inheritance/options and package-resolution semantics required by the
     retained real-project corpus.
 
-### Phase D — broad conformance and release decision
+### Phase E — broad conformance and release decision
 
-86. **Language-version inventory refresh.** Reconcile the pinned TypeScript 7.0.2
+91. **Language-version inventory refresh.** Reconcile the pinned TypeScript 7.0.2
     syntax/type surface, including decorators and newer syntax explicitly rather
     than assuming parser acceptance equals support.
-87. **Large differential campaign.** Expand generated/minimized semantic
+92. **Large differential campaign.** Expand generated/minimized semantic
     comparisons and real-project builds, separating `tsc --noCheck` syntax/emit
     compatibility from full checked `tsc` semantics.
-88. **Cross-platform and package hardening.** Full compiler/regression/hardening
+93. **Cross-platform and package hardening.** Full compiler/regression/hardening
     gates on supported Linux/macOS/Windows packaging, plus reproducible archives
     and upgrade/install checks.
-89. **Production-transpiler decision.** Decide whether the fast emit/project
+94. **Production-transpiler decision.** Decide whether the fast emit/project
     subset independently earns a production label while the checker continues.
-90. **Production type-checking compiler decision.** Only after the documented
+95. **Production type-checking compiler decision.** Only after the documented
     compatibility matrix, real projects, diagnostics, incremental service,
     platforms and semantic corpus support the claim. This is not synonymous with
     “all known tests pass”; the promised TypeScript version/scope must be explicit.
 
 ### Resume checklist
 
-Before writing compiler code after a pause:
+Before writing compiler code after this evidence pause:
 
 ```text
-[ ] confirm HEAD is e4c45dc or document the newer baseline
+[ ] confirm compiler HEAD is 39a441e or document the newer baseline
+[ ] confirm tscc-regression-suite includes TRS9-TRS11 (3ecfac9 / 40d4f91 / 9177b0f or newer)
 [ ] read HANDOVER.md + docs/handover/{ROADMAP,TESTING,ARCHITECTURE}.md
 [ ] restore regression oracles with npm ci in tscc-regression-suite
 [ ] run make -j2 && make test
@@ -473,14 +484,15 @@ Before writing compiler code after a pause:
 [ ] run memory-safety-checkpoint-5 + RSS
 [ ] run valgrind-memory-safety-checkpoint-73 when on the Linux validation host
 [ ] run package-test and git diff --check
-[ ] run/reconcile the external suite before selecting a new feature
-[ ] update website/support claims only after the evidence is retained
+[ ] run the current 618-case + extended + real-project external evidence gates
+[ ] begin with CP81, not an arbitrary new TypeScript feature
+[ ] rerun retained real projects after every CP81-84 slice
+[ ] update website/support claims only after evidence is retained
 ```
 
-The trajectory to a broadly compliant TypeScript→JavaScript compiler is therefore
-**not short**, but the project has crossed the architectural middle. Future work
-should be measured in compatibility campaigns and ecosystem closure rather than
-foundational rewrites.
+The trajectory to a broadly compliant TypeScript→JavaScript compiler is still
+long, but the project is now past architectural foundation work and has an
+evidence-selected compatibility backlog rather than a speculative feature list.
 
 ## Reconciliation findings to resolve
 

@@ -745,12 +745,20 @@ clean architectural boundary rather than mid-feature:
 - CP75: explicit `unknown`/`any` object members no longer collapse JSX intrinsic
   contracts.
 
-This is a good place to stop active implementation temporarily. Do not begin the
-next campaign by adding an arbitrary TypeScript feature. Resume from
-`docs/handover/ROADMAP.md` with the post-CP75 evidence/reconciliation checklist:
-refresh the external semantic contract, expand real-project trials, build a
-machine-readable compliance-gap inventory against the pinned TypeScript oracle,
-and let those results choose the next vertical compiler slices.
+The post-CP75 evidence/reconciliation campaign is now complete in the standalone
+regression suite through TRS11. It expanded the current external contract to 618
+single-file cases (600/0/18), a 12/12 multi-file/project gate, a 33-area detailed
+compatibility matrix, and retained real-source probes over MathJax 3.2.1,
+mhchemparser 4.2.1 and `@jridgewell/sourcemap-codec` 1.5.5.
+
+Do not restart with an arbitrary TypeScript feature. TRS11 selected the next
+compiler sequence: **CP81 standard-library member semantics → CP82
+definite-assignment/control-flow parity → CP83 practical tsconfig breadth → CP84
+reduced parser/type grammar blockers → CP85 real-project rerun/decision**.
+Semantic incremental/watch work remains important but is deliberately deferred
+until these common real-project blockers are reduced. See
+`docs/handover/ROADMAP.md` and the standalone suite's
+`next-compiler-decision.json`.
 
 One parser debt is intentionally deferred: `TypeStore::unknown()` is still both
 a legitimate semantic type and a failure sentinel in parts of annotation parsing.
