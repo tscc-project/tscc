@@ -305,6 +305,12 @@ relevant, and handover/feature-matrix claims are reconciled.
 69. **Declaration emit and output integrity.** Emit `.d.ts` and declaration maps
     for the supported checked surface. Define collision, stale-output and
     project-wide commit/recovery behavior beyond best-effort sibling renames.
+    **Completed as a bounded declaration surface 2026-09-13:** `--declaration`
+    and `--declarationMap` emit interfaces, aliases, enums, annotated variables
+    and function signatures. JavaScript, declarations and maps are staged as one
+    project transaction; duplicate target paths fail before writes. Class and
+    inferred declaration emit plus stale-output manifests remain unclaimed. See
+    `docs/evidence/cp69-declaration-output.md`.
 70. **Incremental compiler service.** Add reusable programs, dependency-aware
     invalidation, cancellation and watch mode with clean/incremental equivalence
     gates for output and diagnostics.

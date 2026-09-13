@@ -11,7 +11,7 @@ ORACLE_BIN ?= $(TSCC_REGRESSION_SUITE_DIR)/tools
 export PATH := $(abspath $(ORACLE_BIN)):$(PATH)
 SAN_TARGET := .build/tscc-sanitize
 MEMORY_SMOKE := .build/tscc-parser-memory-san
-SOURCES := src/main.cpp src/tscc/Diagnostic.cpp src/tscc/Source.cpp src/tscc/Lexer.cpp src/tscc/Parser.cpp src/tscc/Semantic.cpp src/tscc/ControlFlow.cpp src/tscc/Binder.cpp src/tscc/Type.cpp src/tscc/Checker.cpp src/tscc/CompilationUnit.cpp src/tscc/SourceEdit.cpp src/tscc/Transpiler.cpp src/tscc/JSX.cpp src/tscc/SourceMap.cpp src/tscc/Project.cpp src/tscc/Config.cpp src/tscc/Compiler.cpp
+SOURCES := src/main.cpp src/tscc/Diagnostic.cpp src/tscc/Source.cpp src/tscc/Lexer.cpp src/tscc/Parser.cpp src/tscc/Semantic.cpp src/tscc/ControlFlow.cpp src/tscc/Binder.cpp src/tscc/Type.cpp src/tscc/Checker.cpp src/tscc/CompilationUnit.cpp src/tscc/SourceEdit.cpp src/tscc/Transpiler.cpp src/tscc/JSX.cpp src/tscc/SourceMap.cpp src/tscc/DeclarationEmit.cpp src/tscc/Project.cpp src/tscc/Config.cpp src/tscc/Compiler.cpp
 SAN_OBJECTS := $(patsubst %.cpp,.build/san/%.o,$(SOURCES))
 SAN_DEPS := $(SAN_OBJECTS:.o=.d)
 OBJECTS := $(SOURCES:.cpp=.o)
@@ -127,6 +127,8 @@ test-runtime-types: tscc
 	bash tests/runtime_types.sh
 test-source-maps: tscc
 	bash tests/source_maps.sh
+test-declaration-emit: tscc
+	bash tests/declaration_emit.sh
 test-project: tscc
 	bash tests/project_modules.sh
 
@@ -176,7 +178,7 @@ test-project-output-contract: tscc
 
 test-oracles:
 	python3 "$(TSCC_REGRESSION_SUITE_DIR)/check_oracles.py" --node "$(abspath $(ORACLE_BIN))/node" --tsc "$(abspath $(ORACLE_BIN))/tsc"
-test: test-oracles test-preview-contract test-diagnostics test-project-output-contract test-product-boundary test-feature-matrix test-trial-blockers test-config test-smoke test-parser test-parser-recovery test-syntax-identity test-expression-ownership test-control-flow test-flow-narrowing test-richer-collections test-advanced-types test-binder test-declaration-scope test-declaration-frontend test-standard-library test-generics test-generic-inference test-overloads test-classes test-class-relationships test-types test-edits test-checker test-compilation-unit test-program-graph test-runtime test-runtime-types test-source-maps test-project test-regression test-tsx test-commonjs
+test: test-oracles test-preview-contract test-diagnostics test-project-output-contract test-product-boundary test-feature-matrix test-trial-blockers test-config test-smoke test-parser test-parser-recovery test-syntax-identity test-expression-ownership test-control-flow test-flow-narrowing test-richer-collections test-advanced-types test-binder test-declaration-scope test-declaration-frontend test-standard-library test-generics test-generic-inference test-overloads test-classes test-class-relationships test-types test-edits test-checker test-compilation-unit test-program-graph test-runtime test-runtime-types test-source-maps test-declaration-emit test-project test-regression test-tsx test-commonjs
 
 # Compiler-core gates that do not require a native node/tsc round-trip. CI
 # runs this on Windows (msys2): the node/tsc differential gates (runtime,

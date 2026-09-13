@@ -27,6 +27,8 @@ static void help() {
         << "  --noLib                    Compile without the default library bundle\n"
         << "  --removeComments           Remove comments\n"
         << "  --sourceMap                Emit deterministic line source maps\n"
+        << "  --declaration              Emit declarations for the checked surface\n"
+        << "  --declarationMap           Emit declaration maps (implies declaration)\n"
         << "  --noEmit                   Parse/transpile without writing files\n"
         << "  --noEmitOnError            Commit no outputs when any input has errors\n"
         << "  --noResolve                Do not follow relative module dependencies\n"
@@ -60,6 +62,8 @@ int main(int argc, char** argv) {
         if (arg == "--noLib") { options.no_lib=true; options.lib.clear(); continue; }
         if (arg == "--removeComments") { options.remove_comments = true; continue; }
         if (arg == "--sourceMap") { options.source_map = true; continue; }
+        if (arg == "--declaration") { options.declaration = true; continue; }
+        if (arg == "--declarationMap") { options.declaration_map = options.declaration = true; continue; }
         if (arg == "--noEmit") { options.no_emit = true; continue; }
         if (arg == "--noEmitOnError") { options.no_emit_on_error = true; continue; }
         if (arg == "--noResolve") { options.follow_imports = false; continue; }
