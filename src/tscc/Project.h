@@ -12,7 +12,7 @@ bool discover_module_dependencies(const std::filesystem::path&,const SourceFile&
                                   std::vector<std::filesystem::path>&,Diagnostics&);
 
 struct ProgramFile {
-    struct ExportFact { std::string name; std::size_t symbol; bool type_only=false; };
+    struct ExportFact { std::string name; std::size_t file; std::size_t symbol; bool type_only=false; };
     std::unique_ptr<CompilationUnit> unit;
     std::vector<std::size_t> dependencies;
     std::vector<std::filesystem::path> dependency_paths;

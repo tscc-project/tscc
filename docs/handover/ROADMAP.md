@@ -127,11 +127,15 @@ the absence of TSCC project evidence.
 
 ## Post-PC0V compiler program: CP43-CP72
 
-Status: CP43-CP45 completed on 13 September 2026. TCP6A passed the typed CLI
-and default-import library trials and reduced one declaration-only relative
-module failure. The CP45 evidence decision therefore promotes declaration input
-acquisition/frontend work ahead of broad syntax expansion. See
-`docs/evidence/cp45-tcp7-decision.md` for the scored decision and exit gates.
+Status: CP43-CP50 completed on 13 September 2026. TCP6A now passes all three
+initial project shapes. Declaration inputs join the canonical graph without
+emitting JavaScript, their callable facts reach consumers, default/namespace
+imports carry types, and re-export aliases/cycles converge deterministically.
+The 579-case wall remains 555 pass, 0 fail and 24 explicit semantic skips. The
+first reassessment keeps practical resolution (CP51) next: package entry metadata
+is now the shallowest boundary between the proven relative/declaration graph and
+real installed packages. See `docs/evidence/cp45-tcp7-decision.md` for the
+original scoring and `docs/evidence/cp50-reassessment.md` for the retained update.
 
 These 30 checkpoints are the current route from the bounded compiler preview
 toward a proper TypeScript compiler. CP43-CP45 are ordered commitments. CP46-CP72

@@ -9,8 +9,9 @@ Baseline compiler: `aa73e48` (CP43). Results are retained in
 | Default-import library | pass | relative traversal, default import/export CommonJS lowering, callable use |
 | Declaration consumer | unsupported | relative resolution does not select `.d.ts`; declaration inputs are not part of the compilation graph |
 
-The highest-leverage observed blocker is declaration-file acquisition and its
-frontend contract. It blocks packages that ship JavaScript plus declarations
-before their exported type facts can reach the checker. The reduced case in
-`tests/trial_blockers.sh` freezes that result without pretending the unsupported
-project passes.
+The CP44 baseline identified declaration-file acquisition as the
+highest-leverage blocker. CP47-CP48 subsequently closed that initial slice: the
+declaration consumer now passes, its `.d.ts` produces no JavaScript, and the
+reduced negative case proves an imported declaration signature rejects a wrong
+argument. CP49-CP50 extend those canonical graph facts through default,
+namespace, aliased re-export and cyclic re-export paths.
