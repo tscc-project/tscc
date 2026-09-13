@@ -4,13 +4,14 @@
 #include "Source.h"
 #include "Transpiler.h"
 #include "JSX.h"
+#include "SourceMap.h"
 #include <filesystem>
 #include <fstream>
 #include <iostream>
 
 namespace fs=std::filesystem;
 namespace tscc {
-struct PreparedOutput { CompilationUnit* unit=nullptr; fs::path path; };
+struct PreparedOutput { CompilationUnit* unit=nullptr; fs::path path,map_path; std::string map_text; };
 static fs::path common_root(const std::vector<std::string>&roots){if(roots.empty())return fs::current_path();std::error_code ec;fs::path common=fs::absolute(fs::path(roots.front()).parent_path(),ec).lexically_normal();for(std::size_t i=1;i<roots.size();++i){fs::path p=fs::absolute(fs::path(roots[i]).parent_path(),ec).lexically_normal();auto a=common.begin(),b=p.begin();fs::path next;while(a!=common.end()&&b!=p.end()&&*a==*b){next/=*a;++a;++b;}common=next;}return common.empty()?fs::current_path():common;}
 static bool prepare(CompilationUnit&unit,const CompilerOptions&o,const fs::path&root,PreparedOutput&prepared){
  const auto&s=unit.source;auto&d=unit.diagnostics;const fs::path source_path(s.path);const bool tsx=source_path.extension()==".tsx";
@@ -20,13 +21,13 @@ static bool prepare(CompilationUnit&unit,const CompilerOptions&o,const fs::path&
  if(tsx&&s.text.find("namespace JSX")!=std::string::npos&&!check_jsx_semantics(unit))return false;
  TranspileOptions to;to.target=o.target;to.module=o.module;to.remove_comments=o.remove_comments;if(!transpile_unit(unit,to))return false;
  fs::path input=fs::absolute(s.path).lexically_normal(),output;if(o.out_dir.empty()){output=input;output.replace_extension(tsx?".jsx":".js");}else{fs::path rel=input.lexically_relative(fs::absolute(root).lexically_normal());if(rel.empty()||rel.string().rfind("..",0)==0)rel=input.filename();output=fs::path(o.out_dir)/rel;output.replace_extension(tsx?".jsx":".js");}
- unit.output_path=output.string();prepared={&unit,std::move(output)};return true;
+ unit.output_path=output.string();prepared.unit=&unit;prepared.path=output;if(o.source_map){prepared.map_path=output.string()+".map";prepared.map_text=make_line_source_map(output.filename().string(),input.filename().string(),unit.emitted_text);unit.emitted_text+="\n//# sourceMappingURL="+prepared.map_path.filename().string()+"\n";}return true;
 }
 static bool commit_outputs(const std::vector<PreparedOutput>&outputs,Diagnostics&d,int&count){
- struct Staged{fs::path target,temp;};std::vector<Staged>staged;staged.reserve(outputs.size());
- for(std::size_t i=0;i<outputs.size();++i){const auto&o=outputs[i];const auto&source=o.unit->source.path;std::error_code ec;fs::create_directories(o.path.parent_path(),ec);if(ec){d.error(source,1,1,"cannot create output directory '"+o.path.parent_path().string()+"'");break;}fs::path temp=o.path;temp += ".tscc-tmp-"+std::to_string(i);std::ofstream w(temp,std::ios::binary|std::ios::trunc);if(!w){d.error(source,1,1,"cannot stage output '"+o.path.string()+"'");break;}w<<o.unit->emitted_text;if(!w){d.error(source,1,1,"cannot stage output '"+o.path.string()+"'");break;}w.close();staged.push_back({o.path,temp});}
+ struct Staged{fs::path target,temp;};std::vector<Staged>staged;staged.reserve(outputs.size()*2);
+ for(std::size_t i=0;i<outputs.size();++i){const auto&o=outputs[i];const auto&source=o.unit->source.path;std::error_code ec;fs::create_directories(o.path.parent_path(),ec);if(ec){d.error(source,1,1,"cannot create output directory '"+o.path.parent_path().string()+"'");break;}fs::path temp=o.path;temp += ".tscc-tmp-"+std::to_string(i);std::ofstream w(temp,std::ios::binary|std::ios::trunc);if(!w){d.error(source,1,1,"cannot stage output '"+o.path.string()+"'");break;}w<<o.unit->emitted_text;if(!w){d.error(source,1,1,"cannot stage output '"+o.path.string()+"'");break;}w.close();staged.push_back({o.path,temp});if(!o.map_path.empty()){fs::path map_temp=o.map_path;map_temp += ".tscc-tmp-"+std::to_string(i)+"-map";std::ofstream map(map_temp,std::ios::binary|std::ios::trunc);if(!map){d.error(source,1,1,"cannot stage source map '"+o.map_path.string()+"'");break;}map<<o.map_text;map.close();staged.push_back({o.map_path,map_temp});}}
  if(d.has_errors()){for(const auto&s:staged){std::error_code ec;fs::remove(s.temp,ec);}return false;}
- for(const auto&s:staged){std::error_code ec;fs::rename(s.temp,s.target,ec);if(ec){fs::remove(s.target,ec);ec.clear();fs::rename(s.temp,s.target,ec);}if(ec){d.error(s.target.string(),1,1,"cannot commit output file");return false;}++count;}return true;
+ for(const auto&s:staged){std::error_code ec;fs::rename(s.temp,s.target,ec);if(ec){fs::remove(s.target,ec);ec.clear();fs::rename(s.temp,s.target,ec);}if(ec){d.error(s.target.string(),1,1,"cannot commit output file");return false;}if(s.target.extension()!=".map")++count;}return true;
 }
 int compile_files(const std::vector<std::string>&roots,const CompilerOptions&o){
  Diagnostics d;int emitted=0;std::vector<PreparedOutput>prepared;

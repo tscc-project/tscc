@@ -296,6 +296,12 @@ relevant, and handover/feature-matrix claims are reconciled.
 68. **Source maps and diagnostic polish.** Emit deterministic source maps with
     exact mappings through erasure and lowering; improve related locations,
     category/codes and recovery diagnostics against reduced real-project cases.
+    **Completed as a bounded line-map slice 2026-09-13:** `--sourceMap` emits a
+    deterministic v3 sidecar and trailer, staged with its JavaScript output.
+    Whitespace-preserving erasure and single-line lowerings retain exact source
+    lines; column segments inside rewritten enums/namespaces are intentionally
+    not yet claimed. Existing stable diagnostic codes and recovery gates remain
+    green. See `docs/evidence/cp68-source-maps.md`.
 69. **Declaration emit and output integrity.** Emit `.d.ts` and declaration maps
     for the supported checked surface. Define collision, stale-output and
     project-wide commit/recovery behavior beyond best-effort sibling renames.
