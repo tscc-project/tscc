@@ -7,6 +7,14 @@
 #include <vector>
 
 namespace tscc {
+enum class ResolutionStatus { NotApplicable, Resolved, Missing, Ambiguous };
+struct ResolutionResult {
+    ResolutionStatus status = ResolutionStatus::NotApplicable;
+    std::filesystem::path path;
+    std::vector<std::filesystem::path> candidates;
+};
+ResolutionResult resolve_relative_module(const std::filesystem::path& importer,
+                                         const std::string& specifier);
 bool discover_module_dependencies(const std::filesystem::path&,const SourceFile&,
                                   const std::vector<Token>&,
                                   std::vector<std::filesystem::path>&,Diagnostics&);
