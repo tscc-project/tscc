@@ -1025,31 +1025,41 @@
     "name": "semantic-generic-constraint",
     "kind": "semantic-only",
     "src": "function f<T extends string>(x:T){} f(1);",
-    "expect": ""
+    "expect": "",
+    "tscc_check": true,
+    "diagnostic_contains": "does not satisfy constraint"
   },
   {
     "name": "semantic-override-missing-base",
     "kind": "semantic-only",
     "src": "class A{} class B extends A{override f(){}}",
-    "expect": ""
+    "expect": "",
+    "tscc_check": true,
+    "diagnostic_contains": "override"
   },
   {
     "name": "semantic-enum-string-auto",
     "kind": "semantic-only",
     "src": "enum E{A=\"x\",B}",
-    "expect": ""
+    "expect": "",
+    "tscc_check": true,
+    "diagnostic_contains": "initializer"
   },
   {
     "name": "semantic-abstract-unimplemented",
     "kind": "semantic-only",
     "src": "abstract class A{abstract f():void} class B extends A{}",
-    "expect": ""
+    "expect": "",
+    "tscc_check": true,
+    "diagnostic_contains": "does not implement inherited abstract member"
   },
   {
     "name": "semantic-implements-missing",
     "kind": "semantic-only",
     "src": "interface I{x:number} class C implements I{}",
-    "expect": ""
+    "expect": "",
+    "tscc_check": true,
+    "diagnostic_contains": "incorrectly implements interface"
   },
   {
     "name": "type-predicate-return",
@@ -1391,7 +1401,9 @@
     "name": "semantic-abstract-field-concrete",
     "kind": "semantic-only",
     "src": "class C{abstract x:number}",
-    "expect": ""
+    "expect": "",
+    "tscc_check": true,
+    "diagnostic_contains": "Abstract members can only appear within an abstract class"
   },
   {
     "name": "semantic-const-enum-computed",
@@ -4254,58 +4266,711 @@
     "src": "export {x} from './m' with ;",
     "expect": ""
   },
-  {"name":"semantic-nested-object-missing","kind":"semantic-only","src":"const x:{meta:{answer:number}}={meta:{wrong:1}};","expect":null,"tscc_check":true,"diagnostic_contains":"Property 'meta.answer' is missing"},
-  {"name":"semantic-nested-object-property-type","kind":"semantic-only","src":"const x:{meta:{answer:number}}={meta:{answer:'no'}};","expect":null,"tscc_check":true,"diagnostic_contains":"property 'meta.answer' is not assignable"},
-  {"name":"nested-object-property-read","kind":"runtime","src":"const x:{meta:{answer:number}}={meta:{answer:42}};console.log(x.meta.answer);","expect":"42"},
-  {"name":"object-excess-property-compatible","kind":"runtime","src":"const x:{answer:number}={answer:42,label:'kept'};console.log(x.answer);","expect":"42"},
-  {"name":"named-object-alias-runtime","kind":"runtime","src":"type Box={value:{answer:number}};const x:Box={value:{answer:42}};console.log(x.value.answer);","expect":"42"},
-  {"name":"merged-interface-runtime","kind":"runtime","src":"interface User{readonly id:number} interface User{name?:string} const x:User={id:42};console.log(x.id);","expect":"42"},
-  {"name":"semantic-named-object-mismatch","kind":"semantic-only","src":"interface Address{city:string} type User={address:Address};const x:User={address:{city:42}};","expect":null,"tscc_check":true,"diagnostic_contains":"property 'address.city'"},
-  {"name":"semantic-merged-interface-readonly","kind":"semantic-only","src":"interface User{id:number} interface User{readonly name:string} const x:User={id:1,name:'a'};x.name='b';","expect":null,"tscc_check":true,"diagnostic_contains":"read-only property"},
-  {"name":"callable-variable-arrow-runtime","kind":"runtime","src":"type Mapper=(value:number)=>number;const double:Mapper=value=>value*2;console.log(double(21));","expect":"42"},
-  {"name":"contextual-function-expression-runtime","kind":"runtime","src":"type Mapper=(value:number)=>number;const increment:Mapper=function(value){return value+1;};console.log(increment(41));","expect":"42"},
-  {"name":"semantic-callable-variable-argument","kind":"semantic-only","src":"type F=(x:number)=>number;const f:F=x=>x;const y:number=f('bad');","expect":null,"tscc_check":true,"diagnostic_contains":"Argument of type 'string' is not assignable to parameter of type 'number'."},
-  {"name":"semantic-callable-variable-arity","kind":"semantic-only","src":"type F=(x:number)=>number;const f:F=x=>x;const y:number=f();","expect":null,"tscc_check":true,"diagnostic_contains":"Expected 1 arguments, but got 0."},
-  {"name":"semantic-contextual-arrow-return","kind":"semantic-only","src":"type F=(x:number)=>number;const f:F=x=>'bad';","expect":null,"tscc_check":true,"diagnostic_contains":"Type 'string' is not assignable to type 'number'."},
-  {"name":"semantic-contextual-function-return","kind":"semantic-only","src":"type F=(x:number)=>number;const f:F=function(x){return 'bad';};","expect":null,"tscc_check":true,"diagnostic_contains":"Type 'string' is not assignable to type 'number'."},
-  {"name":"semantic-callable-statement-argument","kind":"semantic-only","src":"type F=(x:number)=>number;const f:F=x=>x;f('bad');","expect":null,"tscc_check":true,"diagnostic_contains":"Argument of type 'string' is not assignable to parameter of type 'number'."},
-  {"name":"semantic-callable-statement-arity","kind":"semantic-only","src":"type F=(x:number)=>number;const f:F=x=>x;f();","expect":null,"tscc_check":true,"diagnostic_contains":"Expected 1 arguments, but got 0."},
-  {"name":"semantic-callable-branch-argument","kind":"semantic-only","src":"type F=(x:number)=>number;const f:F=x=>x;if(true){f('bad');}","expect":null,"tscc_check":true,"diagnostic_contains":"Argument of type 'string' is not assignable to parameter of type 'number'."},
-  {"name":"semantic-callable-throw-argument","kind":"semantic-only","src":"type F=(x:number)=>number;const f:F=x=>x;throw f('bad');","expect":null,"tscc_check":true,"diagnostic_contains":"Argument of type 'string' is not assignable to parameter of type 'number'."},
-  {"name":"inferred-arrow-callable-runtime","kind":"runtime","src":"const add=(left:number,right:number)=>left+right;console.log(add(20,22));","expect":"42"},
-  {"name":"inferred-function-callable-runtime","kind":"runtime","src":"const increment=function(value:number){return value+1;};console.log(increment(41));","expect":"42"},
-  {"name":"contextual-optional-callable-runtime","kind":"runtime","src":"type Visit=(value:number,index?:number)=>number;const visit:Visit=(value,index=0)=>value+index;console.log(visit(42));","expect":"42"},
-  {"name":"contextual-rest-callable-runtime","kind":"runtime","src":"type Sum=(head:number,...tail:number)=>number;const sum:Sum=(head,...tail)=>head;console.log(sum(42,1,2));","expect":"42"},
-  {"name":"semantic-inferred-callable-argument","kind":"semantic-only","src":"const add=(left:number,right:number)=>left+right;add('bad',2);","expect":null,"tscc_check":true,"diagnostic_contains":"Argument of type 'string' is not assignable to parameter of type 'number'."},
-  {"name":"semantic-inferred-callable-result","kind":"semantic-only","src":"const bad=(value:number)=>'wrong';const answer:number=bad(1);","expect":null,"tscc_check":true,"diagnostic_contains":"Type 'string' is not assignable to type 'number'."},
-  {"name":"contextual-inline-arrow-runtime","kind":"runtime","src":"type Callback=(value:number)=>number;function apply(value:number,callback:Callback):number{return callback(value);}console.log(apply(41,value=>value+1));","expect":"42"},
-  {"name":"contextual-inline-function-runtime","kind":"runtime","src":"type Callback=(value:number)=>number;function apply(value:number,callback:Callback):number{return callback(value);}console.log(apply(41,function(value){return value+1;}));","expect":"42"},
-  {"name":"semantic-contextual-callback-return","kind":"semantic-only","src":"type Callback=(value:number)=>number;function apply(value:number,callback:Callback):number{return callback(value);}const answer:number=apply(41,value=>'wrong');","expect":null,"tscc_check":true,"diagnostic_contains":"Type 'string' is not assignable to type 'number'."},
-  {"name":"semantic-contextual-callback-parameter","kind":"semantic-only","src":"type Callback=(value:number)=>number;function apply(value:number,callback:Callback):number{return callback(value);}const answer:number=apply(41,value=>value-'wrong');","expect":null,"tscc_check":true,"diagnostic_contains":"Operator '-' cannot be applied to types 'number' and 'string'."},
-  {"name":"callable-object-method-runtime","kind":"runtime","src":"interface Service{map(value:number):number}const service:Service={map(value){return value+1;}};console.log(service.map(41));","expect":"42"},
-  {"name":"callable-object-property-runtime","kind":"runtime","src":"type Service={map:(value:number)=>number};const service:Service={map:value=>value+1};console.log(service.map(41));","expect":"42"},
-  {"name":"interface-inheritance-runtime","kind":"runtime","src":"interface Base{value:number}interface Derived extends Base{label:string}const item:Derived={value:42,label:'answer'};console.log(item.label,item.value);","expect":"answer 42"},
-  {"name":"semantic-callable-member-argument","kind":"semantic-only","src":"interface Service{map(value:number):string}const service:Service={map(value){return ''+value;}};service.map('bad');","expect":null,"tscc_check":true,"diagnostic_contains":"Argument of type 'string' is not assignable to parameter of type 'number'."},
-  {"name":"semantic-callable-member-arity","kind":"semantic-only","src":"interface Service{map(value:number):string}const service:Service={map(value){return ''+value;}};service.map();","expect":null,"tscc_check":true,"diagnostic_contains":"Expected 1 arguments, but got 0."},
-  {"name":"semantic-interface-inherited-required","kind":"semantic-only","src":"interface Base{value:number}interface Derived extends Base{label:string}const bad:Derived={label:'x'};","expect":null,"tscc_check":true,"diagnostic_contains":"Property 'value' is missing"},
-  {"name":"parenthesized-contextual-callback-runtime","kind":"runtime","src":"type Callback=(value:number)=>number;function apply(value:number,callback:Callback):number{return callback(value);}console.log(apply(41,(value=>value+1)));","expect":"42"},
-  {"name":"object-contextual-callback-runtime","kind":"runtime","src":"type Callback=(value:number)=>number;type Options={callback:Callback};const options:Options={callback:value=>value+1};console.log(options.callback(41));","expect":"42"},
-  {"name":"semantic-parenthesized-contextual-callback","kind":"semantic-only","src":"type Callback=(value:number)=>number;function apply(value:number,callback:Callback):number{return callback(value);}apply(41,(value=>value-'bad'));","expect":null,"tscc_check":true,"diagnostic_contains":"Operator '-' cannot be applied to types 'number' and 'string'."},
-  {"name":"semantic-object-contextual-callback","kind":"semantic-only","src":"type Callback=(value:number)=>number;type Options={callback:Callback};const options:Options={callback:value=>'bad'};","expect":null,"tscc_check":true,"diagnostic_contains":"Type 'string' is not assignable to type 'number'."},
-  {"name":"string-index-signature-runtime","kind":"runtime","src":"type Dictionary={[key:string]:number};const values:Dictionary={answer:42};console.log(values.answer);","expect":"42"},
-  {"name":"callable-object-signature-runtime","kind":"runtime","src":"type Parser={(text:string):number};const parse:Parser=text=>42;console.log(parse('answer'));","expect":"42"},
-  {"name":"semantic-string-index-signature-value","kind":"semantic-only","src":"type Dictionary={[key:string]:number};const bad:Dictionary={answer:'wrong'};","expect":null,"tscc_check":true,"diagnostic_contains":"is not assignable to type 'object'"},
-  {"name":"semantic-callable-object-argument","kind":"semantic-only","src":"type Parser={(text:string):number};const parse:Parser=text=>42;parse(42);","expect":null,"tscc_check":true,"diagnostic_contains":"Argument of type 'number' is not assignable to parameter of type 'string'."},
-  {"name":"semantic-callable-object-arity","kind":"semantic-only","src":"type Parser={(text:string):number};const parse:Parser=text=>42;parse();","expect":null,"tscc_check":true,"diagnostic_contains":"Expected 1 arguments, but got 0."},
-  {"name":"semantic-callable-object-result","kind":"semantic-only","src":"type Parser={(text:string):number};const parse:Parser=text=>'wrong';","expect":null,"tscc_check":true,"diagnostic_contains":"Type 'string' is not assignable to type 'number'."},
-  {"name":"computed-string-index-runtime","kind":"runtime","src":"type Dictionary={[key:string]:number};const values:Dictionary={answer:42};const key:string='answer';console.log(values[key]);","expect":"42"},
-  {"name":"computed-exact-property-runtime","kind":"runtime","src":"type Box={answer:number};const box:Box={answer:42};console.log(box['answer']);","expect":"42"},
-  {"name":"computed-number-index-runtime","kind":"runtime","src":"type Row={[key:number]:number};const row:Row={0:42};const key:number=0;console.log(row[key]);","expect":"42"},
-  {"name":"semantic-computed-index-key","kind":"semantic-only","src":"type Dictionary={[key:string]:number};const values:Dictionary={answer:42};const key:boolean=true;const answer:number=values[key];","expect":null,"tscc_check":true,"diagnostic_contains":"has no matching index signature for 'boolean'."},
-  {"name":"typed-array-read-runtime","kind":"runtime","src":"const values:number[]=[40,2];console.log(values[0]+values[1]);","expect":"42"},
-  {"name":"typed-array-length-runtime","kind":"runtime","src":"const values:number[]=[40,2];const length:number=values.length;console.log(length);","expect":"2"},
-  {"name":"typed-tuple-read-runtime","kind":"runtime","src":"const pair:[number,string]=[42,'answer'];const answer:number=pair[0];console.log(pair[1],answer);","expect":"answer 42"},
-  {"name":"semantic-array-element-type","kind":"semantic-only","src":"const values:number[]=[1,'wrong'];","expect":null,"tscc_check":true,"diagnostic_contains":"is not assignable to type 'number[]'"},
-  {"name":"semantic-tuple-element-type","kind":"semantic-only","src":"const pair:[number,string]=['wrong','answer'];","expect":null,"tscc_check":true,"diagnostic_contains":"property '0' is not assignable to type 'number'"},
-  {"name":"semantic-tuple-access-type","kind":"semantic-only","src":"const pair:[number,string]=[42,'answer'];const wrong:number=pair[1];","expect":null,"tscc_check":true,"diagnostic_contains":"Type 'string' is not assignable to type 'number'."}
+  {
+    "name": "semantic-nested-object-missing",
+    "kind": "semantic-only",
+    "src": "const x:{meta:{answer:number}}={meta:{wrong:1}};",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "Property 'meta.answer' is missing"
+  },
+  {
+    "name": "semantic-nested-object-property-type",
+    "kind": "semantic-only",
+    "src": "const x:{meta:{answer:number}}={meta:{answer:'no'}};",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "property 'meta.answer' is not assignable"
+  },
+  {
+    "name": "nested-object-property-read",
+    "kind": "runtime",
+    "src": "const x:{meta:{answer:number}}={meta:{answer:42}};console.log(x.meta.answer);",
+    "expect": "42"
+  },
+  {
+    "name": "object-excess-property-compatible",
+    "kind": "runtime",
+    "src": "const x:{answer:number}={answer:42,label:'kept'};console.log(x.answer);",
+    "expect": "42"
+  },
+  {
+    "name": "named-object-alias-runtime",
+    "kind": "runtime",
+    "src": "type Box={value:{answer:number}};const x:Box={value:{answer:42}};console.log(x.value.answer);",
+    "expect": "42"
+  },
+  {
+    "name": "merged-interface-runtime",
+    "kind": "runtime",
+    "src": "interface User{readonly id:number} interface User{name?:string} const x:User={id:42};console.log(x.id);",
+    "expect": "42"
+  },
+  {
+    "name": "semantic-named-object-mismatch",
+    "kind": "semantic-only",
+    "src": "interface Address{city:string} type User={address:Address};const x:User={address:{city:42}};",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "property 'address.city'"
+  },
+  {
+    "name": "semantic-merged-interface-readonly",
+    "kind": "semantic-only",
+    "src": "interface User{id:number} interface User{readonly name:string} const x:User={id:1,name:'a'};x.name='b';",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "read-only property"
+  },
+  {
+    "name": "callable-variable-arrow-runtime",
+    "kind": "runtime",
+    "src": "type Mapper=(value:number)=>number;const double:Mapper=value=>value*2;console.log(double(21));",
+    "expect": "42"
+  },
+  {
+    "name": "contextual-function-expression-runtime",
+    "kind": "runtime",
+    "src": "type Mapper=(value:number)=>number;const increment:Mapper=function(value){return value+1;};console.log(increment(41));",
+    "expect": "42"
+  },
+  {
+    "name": "semantic-callable-variable-argument",
+    "kind": "semantic-only",
+    "src": "type F=(x:number)=>number;const f:F=x=>x;const y:number=f('bad');",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "Argument of type 'string' is not assignable to parameter of type 'number'."
+  },
+  {
+    "name": "semantic-callable-variable-arity",
+    "kind": "semantic-only",
+    "src": "type F=(x:number)=>number;const f:F=x=>x;const y:number=f();",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "Expected 1 arguments, but got 0."
+  },
+  {
+    "name": "semantic-contextual-arrow-return",
+    "kind": "semantic-only",
+    "src": "type F=(x:number)=>number;const f:F=x=>'bad';",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "Type 'string' is not assignable to type 'number'."
+  },
+  {
+    "name": "semantic-contextual-function-return",
+    "kind": "semantic-only",
+    "src": "type F=(x:number)=>number;const f:F=function(x){return 'bad';};",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "Type 'string' is not assignable to type 'number'."
+  },
+  {
+    "name": "semantic-callable-statement-argument",
+    "kind": "semantic-only",
+    "src": "type F=(x:number)=>number;const f:F=x=>x;f('bad');",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "Argument of type 'string' is not assignable to parameter of type 'number'."
+  },
+  {
+    "name": "semantic-callable-statement-arity",
+    "kind": "semantic-only",
+    "src": "type F=(x:number)=>number;const f:F=x=>x;f();",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "Expected 1 arguments, but got 0."
+  },
+  {
+    "name": "semantic-callable-branch-argument",
+    "kind": "semantic-only",
+    "src": "type F=(x:number)=>number;const f:F=x=>x;if(true){f('bad');}",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "Argument of type 'string' is not assignable to parameter of type 'number'."
+  },
+  {
+    "name": "semantic-callable-throw-argument",
+    "kind": "semantic-only",
+    "src": "type F=(x:number)=>number;const f:F=x=>x;throw f('bad');",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "Argument of type 'string' is not assignable to parameter of type 'number'."
+  },
+  {
+    "name": "inferred-arrow-callable-runtime",
+    "kind": "runtime",
+    "src": "const add=(left:number,right:number)=>left+right;console.log(add(20,22));",
+    "expect": "42"
+  },
+  {
+    "name": "inferred-function-callable-runtime",
+    "kind": "runtime",
+    "src": "const increment=function(value:number){return value+1;};console.log(increment(41));",
+    "expect": "42"
+  },
+  {
+    "name": "contextual-optional-callable-runtime",
+    "kind": "runtime",
+    "src": "type Visit=(value:number,index?:number)=>number;const visit:Visit=(value,index=0)=>value+index;console.log(visit(42));",
+    "expect": "42"
+  },
+  {
+    "name": "contextual-rest-callable-runtime",
+    "kind": "runtime",
+    "src": "type Sum=(head:number,...tail:number)=>number;const sum:Sum=(head,...tail)=>head;console.log(sum(42,1,2));",
+    "expect": "42"
+  },
+  {
+    "name": "semantic-inferred-callable-argument",
+    "kind": "semantic-only",
+    "src": "const add=(left:number,right:number)=>left+right;add('bad',2);",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "Argument of type 'string' is not assignable to parameter of type 'number'."
+  },
+  {
+    "name": "semantic-inferred-callable-result",
+    "kind": "semantic-only",
+    "src": "const bad=(value:number)=>'wrong';const answer:number=bad(1);",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "Type 'string' is not assignable to type 'number'."
+  },
+  {
+    "name": "contextual-inline-arrow-runtime",
+    "kind": "runtime",
+    "src": "type Callback=(value:number)=>number;function apply(value:number,callback:Callback):number{return callback(value);}console.log(apply(41,value=>value+1));",
+    "expect": "42"
+  },
+  {
+    "name": "contextual-inline-function-runtime",
+    "kind": "runtime",
+    "src": "type Callback=(value:number)=>number;function apply(value:number,callback:Callback):number{return callback(value);}console.log(apply(41,function(value){return value+1;}));",
+    "expect": "42"
+  },
+  {
+    "name": "semantic-contextual-callback-return",
+    "kind": "semantic-only",
+    "src": "type Callback=(value:number)=>number;function apply(value:number,callback:Callback):number{return callback(value);}const answer:number=apply(41,value=>'wrong');",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "Type 'string' is not assignable to type 'number'."
+  },
+  {
+    "name": "semantic-contextual-callback-parameter",
+    "kind": "semantic-only",
+    "src": "type Callback=(value:number)=>number;function apply(value:number,callback:Callback):number{return callback(value);}const answer:number=apply(41,value=>value-'wrong');",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "Operator '-' cannot be applied to types 'number' and 'string'."
+  },
+  {
+    "name": "callable-object-method-runtime",
+    "kind": "runtime",
+    "src": "interface Service{map(value:number):number}const service:Service={map(value){return value+1;}};console.log(service.map(41));",
+    "expect": "42"
+  },
+  {
+    "name": "callable-object-property-runtime",
+    "kind": "runtime",
+    "src": "type Service={map:(value:number)=>number};const service:Service={map:value=>value+1};console.log(service.map(41));",
+    "expect": "42"
+  },
+  {
+    "name": "interface-inheritance-runtime",
+    "kind": "runtime",
+    "src": "interface Base{value:number}interface Derived extends Base{label:string}const item:Derived={value:42,label:'answer'};console.log(item.label,item.value);",
+    "expect": "answer 42"
+  },
+  {
+    "name": "semantic-callable-member-argument",
+    "kind": "semantic-only",
+    "src": "interface Service{map(value:number):string}const service:Service={map(value){return ''+value;}};service.map('bad');",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "Argument of type 'string' is not assignable to parameter of type 'number'."
+  },
+  {
+    "name": "semantic-callable-member-arity",
+    "kind": "semantic-only",
+    "src": "interface Service{map(value:number):string}const service:Service={map(value){return ''+value;}};service.map();",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "Expected 1 arguments, but got 0."
+  },
+  {
+    "name": "semantic-interface-inherited-required",
+    "kind": "semantic-only",
+    "src": "interface Base{value:number}interface Derived extends Base{label:string}const bad:Derived={label:'x'};",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "Property 'value' is missing"
+  },
+  {
+    "name": "parenthesized-contextual-callback-runtime",
+    "kind": "runtime",
+    "src": "type Callback=(value:number)=>number;function apply(value:number,callback:Callback):number{return callback(value);}console.log(apply(41,(value=>value+1)));",
+    "expect": "42"
+  },
+  {
+    "name": "object-contextual-callback-runtime",
+    "kind": "runtime",
+    "src": "type Callback=(value:number)=>number;type Options={callback:Callback};const options:Options={callback:value=>value+1};console.log(options.callback(41));",
+    "expect": "42"
+  },
+  {
+    "name": "semantic-parenthesized-contextual-callback",
+    "kind": "semantic-only",
+    "src": "type Callback=(value:number)=>number;function apply(value:number,callback:Callback):number{return callback(value);}apply(41,(value=>value-'bad'));",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "Operator '-' cannot be applied to types 'number' and 'string'."
+  },
+  {
+    "name": "semantic-object-contextual-callback",
+    "kind": "semantic-only",
+    "src": "type Callback=(value:number)=>number;type Options={callback:Callback};const options:Options={callback:value=>'bad'};",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "Type 'string' is not assignable to type 'number'."
+  },
+  {
+    "name": "string-index-signature-runtime",
+    "kind": "runtime",
+    "src": "type Dictionary={[key:string]:number};const values:Dictionary={answer:42};console.log(values.answer);",
+    "expect": "42"
+  },
+  {
+    "name": "callable-object-signature-runtime",
+    "kind": "runtime",
+    "src": "type Parser={(text:string):number};const parse:Parser=text=>42;console.log(parse('answer'));",
+    "expect": "42"
+  },
+  {
+    "name": "semantic-string-index-signature-value",
+    "kind": "semantic-only",
+    "src": "type Dictionary={[key:string]:number};const bad:Dictionary={answer:'wrong'};",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "is not assignable to type 'object'"
+  },
+  {
+    "name": "semantic-callable-object-argument",
+    "kind": "semantic-only",
+    "src": "type Parser={(text:string):number};const parse:Parser=text=>42;parse(42);",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "Argument of type 'number' is not assignable to parameter of type 'string'."
+  },
+  {
+    "name": "semantic-callable-object-arity",
+    "kind": "semantic-only",
+    "src": "type Parser={(text:string):number};const parse:Parser=text=>42;parse();",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "Expected 1 arguments, but got 0."
+  },
+  {
+    "name": "semantic-callable-object-result",
+    "kind": "semantic-only",
+    "src": "type Parser={(text:string):number};const parse:Parser=text=>'wrong';",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "Type 'string' is not assignable to type 'number'."
+  },
+  {
+    "name": "computed-string-index-runtime",
+    "kind": "runtime",
+    "src": "type Dictionary={[key:string]:number};const values:Dictionary={answer:42};const key:string='answer';console.log(values[key]);",
+    "expect": "42"
+  },
+  {
+    "name": "computed-exact-property-runtime",
+    "kind": "runtime",
+    "src": "type Box={answer:number};const box:Box={answer:42};console.log(box['answer']);",
+    "expect": "42"
+  },
+  {
+    "name": "computed-number-index-runtime",
+    "kind": "runtime",
+    "src": "type Row={[key:number]:number};const row:Row={0:42};const key:number=0;console.log(row[key]);",
+    "expect": "42"
+  },
+  {
+    "name": "semantic-computed-index-key",
+    "kind": "semantic-only",
+    "src": "type Dictionary={[key:string]:number};const values:Dictionary={answer:42};const key:boolean=true;const answer:number=values[key];",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "has no matching index signature for 'boolean'."
+  },
+  {
+    "name": "typed-array-read-runtime",
+    "kind": "runtime",
+    "src": "const values:number[]=[40,2];console.log(values[0]+values[1]);",
+    "expect": "42"
+  },
+  {
+    "name": "typed-array-length-runtime",
+    "kind": "runtime",
+    "src": "const values:number[]=[40,2];const length:number=values.length;console.log(length);",
+    "expect": "2"
+  },
+  {
+    "name": "typed-tuple-read-runtime",
+    "kind": "runtime",
+    "src": "const pair:[number,string]=[42,'answer'];const answer:number=pair[0];console.log(pair[1],answer);",
+    "expect": "answer 42"
+  },
+  {
+    "name": "semantic-array-element-type",
+    "kind": "semantic-only",
+    "src": "const values:number[]=[1,'wrong'];",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "is not assignable to type 'number[]'"
+  },
+  {
+    "name": "semantic-tuple-element-type",
+    "kind": "semantic-only",
+    "src": "const pair:[number,string]=['wrong','answer'];",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "property '0' is not assignable to type 'number'"
+  },
+  {
+    "name": "semantic-tuple-access-type",
+    "kind": "semantic-only",
+    "src": "const pair:[number,string]=[42,'answer'];const wrong:number=pair[1];",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "Type 'string' is not assignable to type 'number'."
+  },
+  {
+    "name": "cp75-generic-identity-runtime",
+    "kind": "runtime",
+    "src": "function identity<T>(value:T):T{return value;} const a:number=identity(42); const b:string=identity('ok'); console.log(a,b);",
+    "expect": "42 ok"
+  },
+  {
+    "name": "cp75-generic-nested-inference-runtime",
+    "kind": "runtime",
+    "src": "function read<T>(box:{value:T}):T{return box.value;} const n:number=read({value:42}); console.log(n);",
+    "expect": "42"
+  },
+  {
+    "name": "cp75-generic-inference-conflict",
+    "kind": "semantic-only",
+    "src": "function same<T>(left:T,right:T):T{return left;} same(1,'wrong');",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "Conflicting inferences for type parameter 'T'"
+  },
+  {
+    "name": "cp75-generic-inferred-constraint",
+    "kind": "semantic-only",
+    "src": "function text<T extends string>(value:T):T{return value;} text(42);",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "does not satisfy constraint 'string'"
+  },
+  {
+    "name": "cp75-overload-runtime",
+    "kind": "runtime",
+    "src": "function convert(value:string):string;function convert(value:number):number;function convert(value:string|number):string|number{return value;} const a:string=convert('x'); const b:number=convert(7); console.log(a,b);",
+    "expect": "x 7"
+  },
+  {
+    "name": "cp75-overload-no-match",
+    "kind": "semantic-only",
+    "src": "function convert(value:string):string;function convert(value:number):number;function convert(value:string|number|boolean):string|number|boolean{return value;} convert(true);",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "No overload matches this call."
+  },
+  {
+    "name": "cp75-overload-arity",
+    "kind": "semantic-only",
+    "src": "function join(left:string,right:string):string;function join(value:number):number;function join(left:string|number,right?:string):string|number{return left;} join();",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "No overload matches this call."
+  },
+  {
+    "name": "cp75-class-inheritance-runtime",
+    "kind": "runtime",
+    "src": "abstract class Base{protected code:number;constructor(code:number){this.code=code;}getCode():number{return this.code;}} class Item extends Base{constructor(public readonly name:string,code:number){super(code);} describe():string{return this.name;}} const item:Item=new Item('answer',42); console.log(item.describe(),item.getCode());",
+    "expect": "answer 42"
+  },
+  {
+    "name": "cp75-class-implements-missing",
+    "kind": "semantic-only",
+    "src": "interface Named{name:string} class Missing implements Named{}",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "incorrectly implements interface 'Named'"
+  },
+  {
+    "name": "cp75-class-override-type",
+    "kind": "semantic-only",
+    "src": "class Base{value():number{return 1;}} class Child extends Base{override value():string{return 'x';}}",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "is not assignable to the same property in base class 'Base'"
+  },
+  {
+    "name": "cp75-class-abstract-instantiate",
+    "kind": "semantic-only",
+    "src": "abstract class Base{abstract value():number;} const base:Base=new Base();",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "Cannot create an instance of an abstract class."
+  },
+  {
+    "name": "cp75-class-abstract-unimplemented",
+    "kind": "semantic-only",
+    "src": "abstract class Base{abstract value():number;} class Child extends Base{}",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "does not implement inherited abstract member 'value'"
+  },
+  {
+    "name": "cp75-class-private-access",
+    "kind": "semantic-only",
+    "src": "class Base{private secret:number=1;} const child:Base=new Base(); const secret:number=child.secret;",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "Property 'secret' is private"
+  },
+  {
+    "name": "cp75-class-readonly-param-property",
+    "kind": "semantic-only",
+    "src": "class Item{constructor(public readonly name:string){}} const item:Item=new Item('x'); item.name='y';",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "read-only property"
+  },
+  {
+    "name": "cp75-class-constructor-overload",
+    "kind": "semantic-only",
+    "src": "class Box{constructor(value:number);constructor(value:string);constructor(value:number|string){}} const box:Box=new Box(true);",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "No overload matches this call."
+  },
+  {
+    "name": "cp75-flow-discriminant-runtime",
+    "kind": "runtime",
+    "src": "type Shape={kind:'circle';radius:number}|{kind:'square';side:number}; function area(s:Shape):number{if(s.kind==='circle'){return s.radius;}else{return s.side;}} console.log(area({kind:'circle',radius:7}));",
+    "expect": "7"
+  },
+  {
+    "name": "cp75-flow-in-runtime",
+    "kind": "runtime",
+    "src": "type Content={text:string}|{count:number}; function read(v:Content):string{if('text' in v){return v.text;}return String(v.count);} console.log(read({text:'ok'}));",
+    "expect": "ok"
+  },
+  {
+    "name": "cp75-flow-assignment-narrowing",
+    "kind": "runtime",
+    "src": "let value:string|number; value='ready'; const text:string=value; console.log(text);",
+    "expect": "ready"
+  },
+  {
+    "name": "cp75-flow-invalid-discriminant-access",
+    "kind": "semantic-only",
+    "src": "type Shape={kind:'circle';radius:number}|{kind:'square';side:number}; function inspect(shape:Shape):void{if(shape.kind==='circle'){const wrong:number=shape.side;}}",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "does not exist on type"
+  },
+  {
+    "name": "cp75-flow-branch-restoration",
+    "kind": "semantic-only",
+    "src": "function check(value:string|number){if(typeof value==='string'){const ok:string=value;}const bad:string=value;}",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "is not assignable to type 'string'"
+  },
+  {
+    "name": "cp75-readonly-tuple-runtime",
+    "kind": "runtime",
+    "src": "type Pair=readonly [string,number?,...boolean[]];const pair:Pair=['ok',1,true];console.log(pair[0],pair[1]);",
+    "expect": "ok 1"
+  },
+  {
+    "name": "cp75-array-index-write-mismatch",
+    "kind": "semantic-only",
+    "src": "let values:number[]=[1,2];values[0]='bad';",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "not assignable"
+  },
+  {
+    "name": "cp75-satisfies-excess-property",
+    "kind": "semantic-only",
+    "src": "const point={x:1,y:2} satisfies {x:number};",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "Object literal may only specify known properties"
+  },
+  {
+    "name": "cp75-intersection-runtime",
+    "kind": "runtime",
+    "src": "type Both={answer:number}&{label:string};const both:Both={answer:42,label:'ok'};console.log(both.answer,both.label);",
+    "expect": "42 ok"
+  },
+  {
+    "name": "cp75-intersection-missing",
+    "kind": "semantic-only",
+    "src": "type X={a:number}&{b:string};const x:X={a:1};",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "Property 'b' is missing"
+  },
+  {
+    "name": "cp75-mapped-type-runtime",
+    "kind": "runtime",
+    "src": "type Flags<T>={[K in keyof T]?:boolean};const flags:Flags<{answer:number;label:string}>={answer:true};console.log(flags.answer);",
+    "expect": "true"
+  },
+  {
+    "name": "cp75-mapped-type-mismatch",
+    "kind": "semantic-only",
+    "src": "type F<T>={[K in keyof T]:boolean};const x:F<{a:number}>={a:1};",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "not assignable to type 'boolean'"
+  },
+  {
+    "name": "cp75-conditional-infer-runtime",
+    "kind": "runtime",
+    "src": "type Element<T>=T extends Array<infer U>?U:never;const element:Element<number[]>=7;console.log(element);",
+    "expect": "7"
+  },
+  {
+    "name": "cp75-conditional-infer-mismatch",
+    "kind": "semantic-only",
+    "src": "type E<T>=T extends Array<infer U>?U:never;const x:E<number[]>='bad';",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "not assignable to type 'number'"
+  },
+  {
+    "name": "cp75-template-literal-type-runtime",
+    "kind": "runtime",
+    "src": "type Event='save'|'load';type Handler=`on${Event}`;const handler:Handler='onsave';console.log(handler);",
+    "expect": "onsave"
+  },
+  {
+    "name": "cp75-template-literal-type-mismatch",
+    "kind": "semantic-only",
+    "src": "type Event='save'|'load';type Handler=`on${Event}`;const handler:Handler='other';",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "not assignable"
+  },
+  {
+    "name": "cp75-required-utility-missing",
+    "kind": "semantic-only",
+    "src": "const x:Required<{a?:number}>={};",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "Property 'a' is missing"
+  },
+  {
+    "name": "cp75-jsx-intrinsic-valid",
+    "kind": "emit",
+    "ext": ".tsx",
+    "args": [
+      "--jsx",
+      "preserve"
+    ],
+    "src": "namespace JSX{export interface IntrinsicElements{panel:{title:string;count?:number;children?:unknown}}} const count:number=2;const good=<panel title='hello' count={count}/>;",
+    "contains": [
+      "<panel title='hello' count={count}"
+    ],
+    "not_contains": []
+  },
+  {
+    "name": "cp75-jsx-intrinsic-wrong-literal",
+    "kind": "semantic-only",
+    "ext": ".tsx",
+    "args": [
+      "--jsx",
+      "preserve"
+    ],
+    "src": "namespace JSX{export interface IntrinsicElements{panel:{title:string;count?:number;children?:unknown}}} const bad=<panel title='t' count='wrong'/>;",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "not assignable to JSX property 'count'"
+  },
+  {
+    "name": "cp75-jsx-intrinsic-wrong-identifier",
+    "kind": "semantic-only",
+    "ext": ".tsx",
+    "args": [
+      "--jsx",
+      "preserve"
+    ],
+    "src": "namespace JSX{export interface IntrinsicElements{panel:{title:string;children?:unknown}}} const n:number=1;const bad=<panel title={n}/>;",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "not assignable to JSX property 'title'"
+  },
+  {
+    "name": "cp75-jsx-intrinsic-missing-required",
+    "kind": "semantic-only",
+    "ext": ".tsx",
+    "args": [
+      "--jsx",
+      "preserve"
+    ],
+    "src": "namespace JSX{export interface IntrinsicElements{panel:{title:string;children?:unknown}}} const bad=<panel/>;",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "JSX property 'title' is required"
+  },
+  {
+    "name": "cp75-jsx-intrinsic-unknown-prop",
+    "kind": "semantic-only",
+    "ext": ".tsx",
+    "args": [
+      "--jsx",
+      "preserve"
+    ],
+    "src": "namespace JSX{export interface IntrinsicElements{panel:{title:string}}} const bad=<panel title='t' extra='x'/>;",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "Property 'extra' does not exist"
+  },
+  {
+    "name": "cp75-jsx-const-collision-valid",
+    "kind": "emit",
+    "ext": ".tsx",
+    "args": [
+      "--jsx",
+      "preserve"
+    ],
+    "src": "namespace JSX{export interface IntrinsicElements{panel:{count?:number;children?:unknown}}} const count:number=2;const ok=<panel count={count}/>;",
+    "contains": [
+      "<panel count={count}"
+    ],
+    "not_contains": []
+  },
+  {
+    "name": "cp75-jsx-container-real-assignment",
+    "kind": "semantic-only",
+    "ext": ".tsx",
+    "args": [
+      "--jsx",
+      "preserve"
+    ],
+    "src": "namespace JSX{export interface IntrinsicElements{panel:{children?:unknown}}} const count:number=2;const bad=<panel>{count=3}</panel>;",
+    "expect": null,
+    "tscc_check": true,
+    "diagnostic_contains": "Cannot assign to 'count' because it is a constant"
+  }
 ]
