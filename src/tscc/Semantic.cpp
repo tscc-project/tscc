@@ -43,6 +43,8 @@ std::size_t statement_end(const std::vector<Token>& tokens, std::size_t begin) {
 
 SemanticModel build_semantic_model(const std::vector<Token>& tokens, const Program& program) {
     SemanticModel model;
+    for(const auto&syntax:program.root.children)if(syntax.kind==SyntaxKind::Statement)
+        model.nodes.push_back({SemanticNodeKind::Statement,syntax.begin_token,syntax.end_token+1});
     for (std::size_t i = 0; i < program.variables.size(); ++i) {
         const auto& variable = program.variables[i];
         std::size_t end = variable.initializer_end_token > variable.initializer_begin_token
@@ -192,32 +194,26 @@ SemanticModel build_semantic_model(const std::vector<Token>& tokens, const Progr
         }
     }
 
-    // Retain callable expression roots in the semantic graph. The checker can
-    // now consume these owned ranges instead of rediscovering calls from the
-    // binding-reference table. Nested calls remain children of the outer range.
-    for (std::size_t begin = 0; begin < tokens.size(); ++begin) {
-        if (tokens[begin].kind != TokenKind::Identifier) continue;
-        std::size_t open = begin + 1;
-        while (open < tokens.size() && tokens[open].kind == TokenKind::Comment) ++open;
-        while (open + 1 < tokens.size() && tokens[open].text == ".") {
-            ++open;
-            while (open < tokens.size() && tokens[open].kind == TokenKind::Comment) ++open;
-            if (open >= tokens.size() || tokens[open].kind != TokenKind::Identifier) break;
-            ++open;
-            while (open < tokens.size() && tokens[open].kind == TokenKind::Comment) ++open;
-        }
-        if(open<tokens.size()&&tokens[open].text=="<"){const auto close=matching(tokens,open,"<",">");if(close>=tokens.size())continue;open=close+1;while(open<tokens.size()&&tokens[open].kind==TokenKind::Comment)++open;}
-        if (open >= tokens.size() || tokens[open].text != "(") continue;
-        const auto close = matching(tokens, open, "(", ")");
-        if (close >= tokens.size()) continue;
-        bool contained = false;
-        for (const auto& node : model.nodes)
-            if (node.kind == SemanticNodeKind::ExpressionRoot && begin > node.begin_token && close < node.end_token)
-                { contained = true; break; }
-        if (!contained)
-            model.nodes.push_back({SemanticNodeKind::ExpressionRoot, begin, close + 1});
-    }
+    // Materialize semicolon-terminated statements in nested brace regions.
+    // Top-level statements already come from Program; these nodes provide the
+    // same durable ownership for function, class-member and control bodies.
+    struct BraceFrame{std::size_t begin;int paren=0,square=0;};std::vector<BraceFrame>frames;
+    for(std::size_t p=0;p<tokens.size();++p){const auto&t=tokens[p].text;if(t=="{"){frames.push_back({p+1});continue;}if(frames.empty())continue;if(t=="(")++frames.back().paren;else if(t==")"&&frames.back().paren)--frames.back().paren;else if(t=="[")++frames.back().square;else if(t=="]"&&frames.back().square)--frames.back().square;else if(t==";"&&!frames.back().paren&&!frames.back().square){if(frames.back().begin<p)model.nodes.push_back({SemanticNodeKind::Statement,frames.back().begin,p+1});frames.back().begin=p+1;}else if(t=="}"){frames.pop_back();if(!frames.empty())frames.back().begin=p+1;}}
+
+    auto add_root=[&](std::size_t begin,std::size_t end,SemanticNodeKind kind=SemanticNodeKind::ExpressionRoot){while(begin<end&&tokens[begin].kind==TokenKind::Comment)++begin;while(end>begin&&(tokens[end-1].kind==TokenKind::Comment||tokens[end-1].text==";"))--end;if(begin>=end)return;for(const auto&node:model.nodes)if(node.kind==kind&&node.begin_token==begin&&node.end_token==end)return;model.nodes.push_back({kind,begin,end});};
+    for(const auto&variable:program.variables)if(variable.initializer_end_token>variable.initializer_begin_token)add_root(variable.initializer_begin_token,variable.initializer_end_token);
+    const auto before_return_roots=model.nodes.size();for(std::size_t n=0;n<before_return_roots;++n){const auto node=model.nodes[n];if(node.kind==SemanticNodeKind::ReturnStatement&&node.begin_token+1<node.end_token)add_root(node.begin_token+1,node.end_token);}
+    // Statement-owned expression children replace the former identifier/call
+    // discovery scan. Control headers and throw operands are durable roots;
+    // simple syntax statements own their complete expression.
+    for(std::size_t i=0;i<tokens.size();++i){const auto&word=tokens[i].text;if((word=="if"||word=="while"||word=="switch"||word=="with"||word=="catch")&&i+1<tokens.size()){std::size_t open=i+1;while(open<tokens.size()&&tokens[open].kind==TokenKind::Comment)++open;if(open<tokens.size()&&tokens[open].text=="("){const auto close=matching(tokens,open,"(",")");if(close<tokens.size()&&word!="catch")add_root(open+1,close,SemanticNodeKind::Condition);}}else if(word=="for"&&i+1<tokens.size()){std::size_t open=i+1;while(open<tokens.size()&&tokens[open].kind==TokenKind::Comment)++open;if(open<tokens.size()&&tokens[open].text=="("){const auto close=matching(tokens,open,"(",")");if(close<tokens.size()){std::size_t part=open+1;int nested=0;for(std::size_t p=part;p<=close;++p){const auto&t=tokens[p].text;if(t=="("||t=="["||t=="{")++nested;else if((t==")"||t=="]"||t=="}")&&nested)--nested;if(p==close||(!nested&&t==";")){add_root(part,p,SemanticNodeKind::Condition);part=p+1;}}}}}else if(word=="throw"){const auto end=statement_end(tokens,i+1);add_root(i+1,end);}}
+    const auto before_statement_roots=model.nodes.size();for(std::size_t n=0;n<before_statement_roots;++n){const auto statement=model.nodes[n];if(statement.kind!=SemanticNodeKind::Statement||statement.begin_token>=statement.end_token)continue;auto begin=statement.begin_token;while(begin<statement.end_token&&(tokens[begin].kind==TokenKind::Comment||tokens[begin].text=="export"||tokens[begin].text=="default"))++begin;if(begin>=statement.end_token)continue;const auto&first=tokens[begin].text;if(first!="if"&&first!="while"&&first!="for"&&first!="switch"&&first!="try"&&first!="catch"&&first!="finally"&&first!="throw"&&first!="return"&&first!="break"&&first!="continue"&&first!="class"&&first!="function"&&first!="import"&&first!="export"&&first!="{")add_root(begin,statement.end_token);}
     return model;
+}
+
+void own_semantic_expressions(const std::vector<Token>&tokens,SemanticModel&model,ExpressionModel&expressions){
+    for(std::size_t i=0;i<model.nodes.size();++i)model.nodes[i].id=i;
+    for(auto&node:model.nodes){std::size_t best=tokens.size()+1;for(const auto&candidate:model.nodes){if(candidate.id==node.id||candidate.begin_token>node.begin_token||candidate.end_token<node.end_token)continue;const auto span=candidate.end_token-candidate.begin_token;if(span>node.end_token-node.begin_token&&span<best){best=span;node.parent_id=candidate.id;}}if(node.kind==SemanticNodeKind::ExpressionRoot||node.kind==SemanticNodeKind::Condition)node.expression_id=expressions.intern(tokens,node.begin_token,node.end_token).id;}
 }
 
 } // namespace tscc

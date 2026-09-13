@@ -79,6 +79,8 @@ const typedObject: {name: string; x: number} = {name: "Grace", x: 2};
             case SemanticNodeKind::ExpressionRoot: break;
             case SemanticNodeKind::LexicalRegion: break;
             case SemanticNodeKind::CatchDeclaration: break;
+            case SemanticNodeKind::Statement: break;
+            case SemanticNodeKind::Condition: break;
         }
     }
     if (declarations != program.variables.size() || functions_semantic != 1 ||

@@ -646,5 +646,14 @@ interfaces, visibility, readonly, abstract obligations, override compatibility,
 method/constructor overload surfaces and deterministic base cycles are checked.
 See `docs/evidence/cp60-class-relationships.md` and
 `tests/class_relationships.sh`. The full pinned aggregate remains 555/0/24 and
-ASan/UBSan passes. CP61 is next and should replace remaining range-discovered
-expression roots rather than expanding this class scanner sideways.
+ASan/UBSan passes.
+
+## CP61 complete expression ownership (2026-09-13)
+
+Statement, condition and expression-root semantic nodes now have stable IDs,
+parent links and canonical `ExpressionId` children. The old identifier/call
+discovery scan is gone. The existing expression typer now receives selected
+logical, comparison, conditional, update, optional-chain, non-null,
+assertion/satisfies and `new` nodes. See
+`docs/evidence/cp61-expression-ownership.md` and
+`tests/expression_ownership.cpp`. CP62 is next.

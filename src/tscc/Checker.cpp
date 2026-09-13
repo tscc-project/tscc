@@ -73,12 +73,14 @@ private:
         const auto&node=expressions_.node(id);
         if(node.kind==ExpressionKind::Unknown)return types_.store.unknown();
         if(node.kind==ExpressionKind::Parenthesized)return node.children.size()==1?type(node.children[0],contextual):types_.store.unknown();
+        if(node.kind==ExpressionKind::NonNull)return node.children.size()==1?types_.store.non_nullable(type(node.children[0],contextual)):types_.store.unknown();
+        if(node.kind==ExpressionKind::Assertion||node.kind==ExpressionKind::Satisfies){if(node.children.size()!=1||node.type_argument_ranges.size()!=1)return types_.store.unknown();auto at=node.type_argument_ranges[0].first;const auto asserted=parse_type_annotation(tokens_,at,node.type_argument_ranges[0].second,types_.store,&types_.named_types);const auto actual=type(node.children[0],asserted);if(node.kind==ExpressionKind::Satisfies&&actual!=types_.store.unknown()&&asserted!=types_.store.unknown()&&!types_.store.assignable(actual,asserted)&&error_.empty()){error_token_=node.operator_token;error_="Type '"+types_.store.name(types_.store.widen(actual))+"' does not satisfy the expected type '"+types_.store.name(asserted)+"'.";}return node.kind==ExpressionKind::Assertion?asserted:actual;}
         if(node.kind==ExpressionKind::Literal){const auto&token=tokens_[node.operator_token];if(token.kind==TokenKind::Number)return types_.store.literal(!token.text.empty()&&token.text.back()=='n'?types_.store.bigint():types_.store.number(),token.text);if(token.kind==TokenKind::String||token.kind==TokenKind::Template)return types_.store.literal(types_.store.string(),literal_value(token.text));if(token.text=="true"||token.text=="false")return types_.store.literal(types_.store.boolean(),token.text);if(token.text=="null")return types_.store.null();return types_.store.unknown();}
         if(node.kind==ExpressionKind::Identifier){if(node.text=="undefined")return types_.store.undefined();if(node.text=="this"||node.text=="super"){const auto owner=containing_class(node.operator_token);if(owner>=types_.classes.size())return types_.store.unknown();if(node.text=="super"){const auto base=types_.classes[owner].base_class;return base<types_.classes.size()?types_.classes[base].instance_type:types_.store.unknown();}return types_.classes[owner].instance_type;}const auto symbol=binding_.symbol_for_reference(node.operator_token);auto contextual=contextual_facts_.find(symbol);if(contextual!=contextual_facts_.end())return contextual->second;if(facts_){auto fact=facts_->find(symbol);if(fact!=facts_->end())return fact->second;}return symbol<types_.symbol_types.size()?types_.symbol_types[symbol]:types_.store.unknown();}
         if(node.kind==ExpressionKind::New){if(node.children.size()!=1)return types_.store.unknown();return type_new(node.children[0]);}
         if(node.kind==ExpressionKind::ObjectLiteral){if(!allow_object_)return types_.store.unknown();std::vector<TypeProperty>properties;for(auto property_id:node.children){const auto&property=expressions_.node(property_id);if(property.kind!=ExpressionKind::Property||property.children.size()!=1)return types_.store.unknown();const auto*expected_property=types_.store.property(contextual,property.text);properties.push_back({property.text,type(property.children[0],expected_property?expected_property->type:types_.store.unknown()),false,false});}return types_.store.object_of(std::move(properties));}
         if(node.kind==ExpressionKind::ArrayLiteral){std::vector<TypeId>elements;const auto&tuple=types_.store.tuple_elements(contextual);const auto array_element=types_.store.array_element(contextual);for(std::size_t i=0;i<node.children.size();++i){const auto expected=i<tuple.size()?tuple[i]:array_element;elements.push_back(types_.store.widen(type(node.children[i],expected)));}if(!tuple.empty())return types_.store.tuple_of(std::move(elements));if(array_element!=types_.store.unknown())return types_.store.array_of(types_.store.union_of(std::move(elements)));return types_.store.tuple_of(std::move(elements));}
-        if(node.kind==ExpressionKind::Property){
+        if(node.kind==ExpressionKind::Property||node.kind==ExpressionKind::OptionalProperty){
             if(node.computed){
                 if(node.children.size()!=2)return types_.store.unknown();
                 const auto value=type(node.children[0]),key=type(node.children[1]);
@@ -98,7 +100,7 @@ private:
             const auto value=type(node.children[0]);
             const auto*property=types_.store.property(value,node.text);check_access(value,node.text,node.operator_token);
             if(!property){if(value!=types_.store.unknown()&&error_.empty()){error_token_=node.operator_token;error_="Property '"+node.text+"' does not exist on type '"+types_.store.name(value)+"'.";}return types_.store.unknown();}
-            return property->type;
+            return node.kind==ExpressionKind::OptionalProperty?types_.store.union_of({property->type,types_.store.undefined()}):property->type;
         }
         if(node.kind==ExpressionKind::Call){
             if(node.children.empty())return types_.store.unknown();
@@ -127,7 +129,7 @@ private:
             auto best=std::max_element(applicable.begin(),applicable.end(),[](const auto&a,const auto&b){return a.score<b.score;});
             auto signature=best->signature;
             for(std::size_t i=1;i<node.children.size();++i){const auto parameter=i-1<signature.parameters.size()?i-1:signature.parameters.empty()?0:signature.parameters.size()-1;const auto expected_argument=signature.parameters.empty()?types_.store.unknown():signature.parameters[parameter];auto actual=pre_arguments[i-1];if(actual==types_.store.unknown())actual=type(node.children[i],expected_argument);if(expected_argument!=types_.store.unknown()&&actual!=types_.store.unknown()&&!types_.store.assignable(actual,expected_argument)&&error_.empty()){error_token_=callee.operator_token;error_="Argument of type '"+types_.store.name(types_.store.widen(actual))+"' is not assignable to parameter of type '"+types_.store.name(expected_argument)+"'.";}}
-            return signature.result;
+            return node.text=="optional"?types_.store.union_of({signature.result,types_.store.undefined()}):signature.result;
         }
         if(node.kind==ExpressionKind::Function){const auto*expected=types_.store.callable(contextual);std::vector<TypeId>parameters;std::size_t required=0;bool rest=false;if(expected){if(node.parameter_tokens.size()>expected->parameters.size()){if(error_.empty()){error_token_=node.operator_token;error_="Function provides "+std::to_string(node.parameter_tokens.size())+" parameters but the target accepts "+std::to_string(expected->parameters.size())+".";}return types_.store.unknown();}parameters=expected->parameters;}else{for(std::size_t parameter_index=0;parameter_index<node.parameter_tokens.size();++parameter_index){const auto token=node.parameter_tokens[parameter_index];const auto annotation=parameter_annotation(token);parameters.push_back(annotation);const auto end=parameter_index+1<node.parameter_tokens.size()?node.parameter_tokens[parameter_index+1]:node.operator_token;bool optional=false;for(auto p=token+1;p<end;++p)optional=optional||tokens_[p].text=="?"||tokens_[p].text=="=";bool parameter_rest=false;for(auto q=token;q>node.begin_token&&q+3>token;){--q;if(tokens_[q].kind==TokenKind::Comment)continue;parameter_rest=tokens_[q].text=="...";break;}rest=rest||parameter_rest;if(!optional&&!parameter_rest)++required;}}
             std::vector<std::size_t>symbols;for(std::size_t i=0;i<node.parameter_tokens.size();++i){std::size_t symbol=binding_.symbols.size();for(std::size_t s=0;s<binding_.symbols.size();++s)if(binding_.symbols[s].declaration_token==node.parameter_tokens[i]){symbol=s;break;}if(symbol<binding_.symbols.size()){contextual_facts_[symbol]=i<parameters.size()?parameters[i]:types_.store.unknown();symbols.push_back(symbol);}}
@@ -142,7 +144,9 @@ private:
         fail_unary(node.operator_token, op, value);
         return types_.store.unknown();
         }
-        if(node.kind==ExpressionKind::Binary){if(node.children.size()!=2)return types_.store.unknown();auto left=type(node.children[0]),right=type(node.children[1]);if(node.text=="+"&&left!=types_.store.unknown()&&right!=types_.store.unknown()&&
+        if(node.kind==ExpressionKind::Conditional){if(node.children.size()!=3)return types_.store.unknown();type(node.children[0]);return types_.store.union_of({types_.store.widen(type(node.children[1],contextual)),types_.store.widen(type(node.children[2],contextual))});}
+        if(node.kind==ExpressionKind::Update){if(node.children.size()!=1)return types_.store.unknown();const auto value=types_.store.widen(type(node.children[0]));if(value==types_.store.unknown())return value;const auto kind=types_.store.kind(value);if(kind==TypeKind::Number||kind==TypeKind::BigInt)return value;fail_unary(node.operator_token,node.text,value);return types_.store.unknown();}
+        if(node.kind==ExpressionKind::Binary){if(node.children.size()!=2)return types_.store.unknown();auto left=type(node.children[0]),right=type(node.children[1]);if(node.text=="&&"||node.text=="||"||node.text=="??")return types_.store.union_of({types_.store.widen(left),types_.store.widen(right)});if(node.text=="=="||node.text=="!="||node.text=="==="||node.text=="!=="||node.text=="<"||node.text==">"||node.text=="<="||node.text==">="||node.text=="in"||node.text=="instanceof")return types_.store.boolean();if(node.text=="+"&&left!=types_.store.unknown()&&right!=types_.store.unknown()&&
                 (types_.store.kind(types_.store.widen(left)) == TypeKind::String ||
                  types_.store.kind(types_.store.widen(right)) == TypeKind::String))
                 return types_.store.string();
@@ -305,9 +309,9 @@ bool check_program(const SourceFile& source, const std::vector<Token>& tokens,
     // Standalone, branch/loop-header and throw calls are retained semantic
     // roots. Initializers and returns already own their complete expressions.
     for (const auto& node : model.nodes) {
-        if (node.kind != SemanticNodeKind::ExpressionRoot) continue;
+        if (node.kind != SemanticNodeKind::ExpressionRoot&&node.kind!=SemanticNodeKind::Condition) continue;
         bool already_owned=false;for(const auto&range:owned_expression_ranges)if(node.begin_token>=range.first&&node.end_token<=range.second){already_owned=true;break;}if(already_owned)continue;
-        const auto expression=expression_type(tokens,expressions,node.begin_token,node.end_token,binding,types);
+        const auto expression=node.expression_id<expressions.nodes().size()?NodeExpressionTyper(tokens,expressions,expressions.node(node.expression_id),binding,types).run():expression_type(tokens,expressions,node.begin_token,node.end_token,binding,types);
         report_expression_error(source,tokens,expression,diagnostics);
     }
 

@@ -29,6 +29,7 @@ public:
     TypeId undefined() const { return 7; }
     TypeId literal(TypeId,const std::string&) const;
     TypeId union_of(std::vector<TypeId>) const;
+    TypeId non_nullable(TypeId) const;
     bool assignable(TypeId actual,TypeId expected) const;
     TypeId object_of(std::vector<TypeProperty>,TypeId string_index=0,TypeId number_index=0,TypeId call_signature=0)const;
     TypeId array_of(TypeId)const;

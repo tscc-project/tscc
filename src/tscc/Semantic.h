@@ -1,5 +1,6 @@
 #pragma once
 #include "Lexer.h"
+#include "Expression.h"
 #include "Syntax.h"
 #include <cstddef>
 #include <vector>
@@ -18,7 +19,12 @@ enum class SemanticNodeKind {
     ExpressionRoot,
     LexicalRegion,
     CatchDeclaration,
+    Statement,
+    Condition,
 };
+
+using SemanticNodeId = std::size_t;
+inline constexpr SemanticNodeId InvalidSemanticNodeId = static_cast<SemanticNodeId>(-1);
 
 struct SemanticNode {
     SemanticNodeKind kind = SemanticNodeKind::BraceRegion;
@@ -28,6 +34,9 @@ struct SemanticNode {
     std::size_t variable_index = static_cast<std::size_t>(-1);
     std::size_t scope_token = static_cast<std::size_t>(-1);
     std::size_t scope_end_token = static_cast<std::size_t>(-1);
+    SemanticNodeId id = InvalidSemanticNodeId;
+    SemanticNodeId parent_id = InvalidSemanticNodeId;
+    ExpressionId expression_id = InvalidExpressionId;
 };
 
 struct SemanticModel {
@@ -35,5 +44,6 @@ struct SemanticModel {
 };
 
 SemanticModel build_semantic_model(const std::vector<Token>&, const Program&);
+void own_semantic_expressions(const std::vector<Token>&, SemanticModel&, ExpressionModel&);
 
 } // namespace tscc
