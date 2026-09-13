@@ -14,10 +14,12 @@ assessed from current evidence rather than the old label.
 
 ## Compatibility contract
 
-The current compiler has a deliberately bounded primitive semantic checker, not
-a general TypeScript type system. Its strongest current contract remains a fast native
-transpilation/compiler subset with selected runtime-bearing TypeScript transforms,
-project handling, TSX preservation, and CommonJS module behavior.
+The current compiler has a substantial but deliberately bounded semantic checker,
+not a complete TypeScript type system. It now owns real compiler foundations for
+scopes/symbols, cross-file program graphs, generics/inference, overloads, classes,
+CFG-based narrowing, richer collections, advanced type operators, selected JSX
+contracts and runtime-bearing TypeScript facts, while retaining the fast native
+emitter and project/module pipeline.
 
 Do not infer complete TypeScript/`tsc` replacement compatibility. Before
 production positioning, define target TypeScript version/range, ECMAScript
@@ -56,16 +58,29 @@ new parser productions.
 
 ## Current evidence
 
-The project has focused C++/shell integration tests, runtime comparisons, project
-and CommonJS differential fixtures, and a 519-case independent corpus classified
-against TypeScript. The retained baseline is 492 pass, zero fail, and 27
-intentional semantic-only skips under TypeScript 7.0.2. Historical performance JSON tracks many checkpoints and
-workloads. Current website/README ratios are local transpile-oriented comparisons,
-not equivalent-work claims because `tsc` performs a much broader job.
+The current pause baseline is CP75 (`e4c45dc`, 14 September 2026). The external
+compatibility corpus remains the frozen 579-case preview wall at **555 pass, 0
+fail, 24 explicit semantic skips** against pinned TypeScript 7.0.2 and Node
+22.22.1. It is still an important regression gate, but it now under-represents
+post-preview semantic breadth because CP43-CP75 added many capabilities through
+focused compiler tests without growing the external corpus.
 
-CP3/TC1 adds a durable per-file compilation unit retaining source, tokens, syntax,
-semantic/binding/type state, diagnostics and emitted text for one compiler
-invocation. This is an ownership foundation, not a broadened language claim.
+Compiler-owned evidence now also covers canonical module/export/declaration
+facts, package/declaration resolution, selected JSONC configuration, hermetic
+libraries, generic substitution/inference, overload resolution, class semantics,
+complete selected expression ownership, CFG/narrowing/definite assignment,
+richer collection/advanced types, bounded JSX semantics, local runtime-bearing
+TypeScript facts, line source maps, declaration maps and incremental output
+retention. CP71-73 add deterministic mutation/generated-project hardening,
+ASan/UBSan, RSS/lifetime workloads and strict real-binary Valgrind runs across the
+newer compiler paths. CP74-75 close the correctness defects uncovered by that
+validation.
+
+This means tscc is no longer accurately described as “a transpiler with a small
+checker.” It is a real compiler preview with incomplete compatibility. The next
+risk is not whether the architecture can support a checker; it is whether the
+long TypeScript compatibility tail can be expanded without losing correctness,
+speed or truthful support boundaries.
 
 ## Performance philosophy
 

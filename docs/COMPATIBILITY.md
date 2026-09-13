@@ -1,7 +1,7 @@
-# tscc compatibility matrix — CP72
+# tscc compatibility matrix — CP75 pause baseline
 
-This document is the public contract for the 2026-09-13 compiler-preview
-snapshot. “Partial” means accepted behavior is useful and tested but must not be
+This document retains the CP72 public compiler-preview contract and records the
+CP75 pause baseline reached on 14 September 2026. “Partial” means accepted behavior is useful and tested but must not be
 read as complete TypeScript compatibility.
 
 | Area | Supported | Partial / explicit limit |
@@ -22,6 +22,20 @@ The executable regression contract is 579 cases: **555 pass, 0 fail, 24
 intentional semantic skips**, against Node 22.22.1 and TypeScript 7.0.2. Linux
 and macOS run the full suite in CI; Windows runs the native compiler-core gate.
 No browser, Node, TypeScript, or JS++ runtime is required by the compiler itself.
+
+
+## Post-CP72 validation closure
+
+CP73-CP75 do not broaden the advertised compatibility matrix. They strengthen its
+confidence: CP73 runs strict Valgrind coverage over the real compiler paths added
+in CP66-72; CP74 fixes JSX attribute separators being misclassified as ordinary
+assignments; CP75 fixes explicit `unknown`/`any` object members collapsing bounded
+JSX intrinsic contracts. The retained product label remains **Compiler Preview**.
+
+The external 579-case wall is still 555/0/24, but it predates much of CP43-CP75's
+focused semantic expansion. Before the next release decision, the independent
+suite must be reconciled with those implemented families and expanded real-project
+trials must be retained alongside it.
 
 ## Release decision
 

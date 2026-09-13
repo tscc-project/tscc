@@ -19,12 +19,14 @@ emit cases assert required/forbidden structure; syntax negatives require
 controlled rejection; semantic cases become candidate contracts one slice at a
 time and otherwise remain explicit skips.
 
-The assignment/mutability checkpoint contains 518 cases: 491 pass, zero fail, and 27
-semantic-only skips with Node v22.22.1 and TypeScript 7.0.2. TypeScript 7 changed
-its implicit module default, which initially reclassified
-`semantic-import-meta-commonjs`; the runner now explicitly uses CommonJS for its
-semantic oracle. The smoke differential uses the supported `preserve` mode in
-place of TypeScript 7's removed `none` mode.
+The canonical frozen preview corpus contains **579 cases: 555 pass, 0 fail
+and 24 explicit semantic skips** with pinned Node 22.22.1 and TypeScript 7.0.2.
+Those counts remain a regression contract, not a completeness score. Since CP43,
+the compiler has gained substantial semantic/project capability without expanding
+this corpus proportionally, so the suite is **current as a frozen preview wall but
+not current as a complete map of CP75 capability**. The first task of the next
+campaign is to add independent cases for already-shipped post-preview semantic
+families before using case counts to guide new language work.
 
 `make test` is the complete local correctness entry point and runs smoke, parser,
 primitive-checker, durable-compilation-unit, runtime/generics, project/module,
@@ -123,10 +125,11 @@ ambient `PATH`.
 
 ## Suite synchronization
 
-The local and standalone corpora currently match byte-for-byte for README, cases,
-and runner; only repository-specific notes differ. Establish canonical ownership
-and an automated comparison.
-Do not keep two manually diverging “canonical” suites.
+The compiler mirror and standalone corpus must remain synchronized through the
+existing parity gate; the standalone `tscc-regression-suite` remains the canonical
+external evidence source. Do not manually grow only one copy. The next corpus
+expansion should preserve the frozen 579-case preview result as a named baseline
+while adding CP43-CP75 semantic contracts in a separately attributable campaign.
 
 ## Environment and determinism
 

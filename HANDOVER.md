@@ -14,10 +14,12 @@ This is the entry point for developers and coding agents working on tscc. Read
   written in C++17.
 - Current default target: `es2022`; default module mode: `preserve`.
 - Build: Make.
-- A deliberately bounded semantic checker slice is active: durable primitive facts
-  flow through expressions, assignment and ordinary-function signatures/calls,
-  with const, argument, arity and annotated-return checks. This is not yet a
-  general TypeScript type checker.
+- The bounded checker has grown into a real multi-stage compiler core: canonical
+  symbols and types cover primitives, literals/unions, callables, structural
+  objects, arrays/tuples, generics and inference, overloads, classes, advanced
+  type operators, CFG-owned narrowing/assignment facts, selected runtime-bearing
+  TypeScript semantics and bounded JSX contracts. It is still not a complete
+  TypeScript type checker or drop-in `tsc` replacement.
 
 Source and tests define current behavior. The internal and standalone regression
 corpora define executable compatibility evidence. README/website claims must stay
@@ -62,16 +64,26 @@ a full traditional typed compiler pipeline.
 
 ## Current capability shape
 
-The README records checkpoints through 0.15.0, including broad type-syntax
-erasure, generics, enums, namespaces, parameter properties, project/relative
-module discovery, TSX preserve mode, CommonJS lowering with live imported reads,
-module grammar hardening, scope/shadowing work, and import attributes.
+The implementation is now at **CP75** (`e4c45dc`, 14 September 2026).
+CP43-CP72 moved the project well beyond the original bounded preview: canonical
+exports and declaration inputs, practical relative/Node-style resolution,
+selected tsconfig mapping, hermetic standard-library bundles, generics and
+inference, overloads, two-sided class types and relationships, durable expression
+ownership, CFG-based narrowing/definite assignment, richer collections and
+bounded advanced operators are all on the production compilation path. CP66-70
+then added bounded JSX semantics, runtime-bearing TypeScript type facts,
+deterministic line source maps, bounded declaration/declaration-map emit and an
+incremental-output foundation. CP71-73 hardened those paths with fuzz, generated
+projects, sanitizers/RSS and strict Valgrind integration; CP74-75 fixed the two
+JSX correctness defects exposed by that campaign.
 
-The independent corpus currently contains 579 cases: 555 pass, zero fail, and 24
-semantic-checker-only skips at the retained checkpoint. Counts are evidence, not
-the product definition. The checked subset now includes bounded callable,
-structural object, index/call signature, array, tuple and cross-module named-import
-families; the project is not implicitly a drop-in replacement for `tsc`.
+The independent corpus still contains **579 cases: 555 pass, 0 fail, 24 explicit
+semantic skips**. That remains a valuable frozen preview regression wall, but it
+is no longer a complete description of the compiler's semantic breadth: many
+CP43-CP75 capabilities are protected primarily by focused compiler tests rather
+than new external corpus cases. The next evidence campaign must reconcile that
+without discarding the frozen baseline. Counts are evidence, not a completeness
+percentage, and tscc is not implicitly a drop-in replacement for `tsc`.
 
 CP14/TC7A adds canonical literal, union, `null` and `undefined` identities,
 normalized union ownership and bounded assignability. Narrowing and flow joins
@@ -711,4 +723,36 @@ utility catalogue remain explicit future work.
 
 Focused evidence is `tests/advanced_types.sh` plus canonical-store assertions in
 `tests/type_model_smoke.cpp`; see `docs/evidence/cp65-advanced-types.md`. The
-pinned wall remains 555/0/24. CP66 JSX/TSX semantics is next.
+pinned wall remains 555/0/24. CP66-CP75 are summarized in the pause-baseline
+section below.
+
+
+## CP66-CP75 compiler expansion and pause baseline (2026-09-14)
+
+CP75 is the current recommended **pause/resume baseline**. The repository is at a
+clean architectural boundary rather than mid-feature:
+
+- CP66: bounded same-unit `JSX.IntrinsicElements` and component-props checking;
+- CP67: enum/runtime-bearing TypeScript type facts and parameter-property checks;
+- CP68: deterministic line source maps;
+- CP69: bounded declaration and declaration-map emit with collision preflight;
+- CP70: deterministic incremental build identity and unchanged-output retention;
+- CP71: repeatable fuzz/generated-project/sanitizer/RSS hardening wall;
+- CP72: explicit compatibility matrix and retained **Compiler Preview** decision;
+- CP73: real-binary Valgrind coverage across CP66-72 paths, zero retained heap or
+  measured fd findings;
+- CP74: JSX attribute separators no longer masquerade as assignments;
+- CP75: explicit `unknown`/`any` object members no longer collapse JSX intrinsic
+  contracts.
+
+This is a good place to stop active implementation temporarily. Do not begin the
+next campaign by adding an arbitrary TypeScript feature. Resume from
+`docs/handover/ROADMAP.md` with the post-CP75 evidence/reconciliation checklist:
+refresh the external semantic contract, expand real-project trials, build a
+machine-readable compliance-gap inventory against the pinned TypeScript oracle,
+and let those results choose the next vertical compiler slices.
+
+One parser debt is intentionally deferred: `TypeStore::unknown()` is still both
+a legitimate semantic type and a failure sentinel in parts of annotation parsing.
+CP75 safely distinguishes the concrete object-member case; a broader result-type
+refactor should wait until another measured parser expansion needs it.

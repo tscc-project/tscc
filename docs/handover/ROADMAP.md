@@ -103,31 +103,47 @@ runtime semantics, compile performance, and memory changed. Regressions are not
 automatically forbidden, but they must be measured, explained, and accepted as
 deliberate trade-offs rather than hidden inside semantic progress.
 
-## Current priorities
+## Current priorities — CP75 pause baseline
 
-TCP0-TCP5 completed the first bounded compiler-preview contract. Current work is
-therefore evidence-led expansion rather than redefining that already-qualified
-finish line. PC0V is complete at TSCC `1bc3047` and JS++ `d35999f`; native
-lifetime uncertainty is no longer the next compiler blocker:
+CP75 (`e4c45dc`, 14 September 2026) is the recommended pause/resume baseline.
+The compiler foundations needed for a genuine type checker are now demonstrably
+present, and the CP66-72 expansion has been through fuzz and sanitizer/RSS
+hardening plus CP73 strict Valgrind validation. CP74-75 closed the two correctness defects found while
+hardening JSX paths. The next risk is therefore **compatibility completeness and
+evidence coverage**, not proving that the architecture can host semantic work.
 
-1. Keep the 579-case external contract, 7/7 runtime intersection, machine-readable
-   preview contract and repository mirrors synchronized.
-2. Keep the pinned TypeScript 7.0.2/Node 22.22.1 oracle environment and complete
-   PC0V evidence as retained regression gates.
-3. Build TCP6A around pinned, licence-compatible real small projects and classify
-   failures by compiler stage before implementing fixes.
-4. Choose TCP7 from measured blockers. Broader import-type propagation and
-   practical package resolution are candidates, not predetermined commitments.
-5. Continue using complete semantic slices, sanitizer coverage and performance/RSS
-   comparison for every architecture or compatibility expansion.
+Priorities when development resumes:
 
-PC0P remains a parallel JS++ packaging gate and EP6A remains a parallel JS++
-conformance campaign. Neither should keep TSCC idle or select TSCC features in
-the absence of TSCC project evidence.
+1. **Reconcile evidence before adding breadth.** Preserve the 579-case 555/0/24
+   preview wall, then add independent cases for already-implemented CP43-CP75
+   semantic families. Reclassify every remaining skip on the current compiler.
+2. **Create a CP75 compliance-gap inventory against pinned TypeScript 7.0.2.**
+   Track syntax acceptance, binding, type semantics, standard-library behavior,
+   module/resolution, configuration, JSX, emit, declarations/maps, diagnostics,
+   project behavior and incremental/watch separately. This must be executable or
+   machine-readable enough to survive future handovers.
+3. **Expand real-project evidence.** TCP6A's three initial project shapes now
+   pass; add a small curated set of pinned, licence-compatible real projects and
+   reduce failures before choosing compiler work.
+4. **Use the remaining 24 external skips as candidates, not the whole backlog.**
+   Some may already be fixed by CP43-CP75; others cover real semantic/grammar
+   gaps. Classify first, then promote or retain each deliberately.
+5. **Prioritize ecosystem completeness over novelty.** Cross-module runtime-TS
+   facts, declaration surface, standard-library depth, package/config behavior,
+   project references, JSX ecosystem contracts, diagnostics and semantic
+   incremental/watch are higher leverage than adding isolated exotic syntax.
+6. **Retain the hardening wall.** Every new semantic campaign keeps full tests,
+   pinned oracles, generated-project/fuzz gates, ASan/UBSan, RSS/lifetime and the
+   CP73 Valgrind aggregate green.
+7. **Keep the product label honest.** Continue as **Compiler Preview** until a
+   later evidence checkpoint explicitly earns a stronger production claim.
 
-## Post-PC0V compiler program: CP43-CP72
+This is intentionally a good place to pause development. Resume with the
+checklist below rather than opening CP76 as an arbitrary language feature.
 
-Status: CP43-CP65 completed on 13 September 2026. TCP6A now passes all three
+## Post-preview compiler program: CP43-CP75
+
+Status: CP43-CP75 completed by 14 September 2026. TCP6A now passes all three
 initial project shapes. Declaration inputs join the canonical graph without
 emitting JavaScript, their callable facts reach consumers, default/namespace
 imports carry types, and re-export aliases/cycles converge deterministically.
@@ -154,14 +170,22 @@ discriminant, `typeof`, `instanceof`, property-presence, assignment and
 definite-assignment facts onto that foundation. CP64 adds canonical optional and
 rest tuple metadata, readonly collection identity, indexed writes, key operators,
 numeric/symbol index domains and an explicit excess-property policy. CP65 adds
-bounded advanced operators and their utility-type foundation. CP66 is next.
+bounded advanced operators and their utility-type foundation. CP66 adds bounded
+same-unit JSX contracts; CP67 types selected runtime-bearing TypeScript values;
+CP68 adds deterministic line source maps; CP69 adds bounded declaration/maps;
+CP70 adds incremental build identity and unchanged-output retention; CP71 adds
+the first repeatable production-hardening campaign; CP72 freezes the explicit
+compatibility/release decision. CP73 then validates the expanded real compiler
+under strict Valgrind, and CP74-75 close the JSX correctness defects discovered
+by that validation.
 See `docs/evidence/cp45-tcp7-decision.md` and
 `docs/evidence/cp50-reassessment.md` for the retained decisions.
 
-These 30 checkpoints are the current route from the bounded compiler preview
-toward a proper TypeScript compiler. CP43-CP45 are ordered commitments. CP46-CP72
-are a dependency-aware backlog whose order must be revised at each decision gate
-using real-project evidence. A checkpoint is complete only when its stated
+These checkpoints record the completed route from the bounded compiler preview
+to the CP75 pause baseline. CP43-CP45 were ordered commitments; CP46-CP72 were a
+dependency-aware backlog repeatedly revised at decision gates, and CP73-CP75 close
+the validation defects discovered at the end of that campaign.
+Future ordering returns to evidence from the external suite and real projects. A checkpoint is complete only when its stated
 behavior is on the production compilation path, focused and independent tests
 pass, the 579-case wall remains classified, performance/RSS are measured where
 relevant, and handover/feature-matrix claims are reconciled.
@@ -349,6 +373,114 @@ mode, plugins/transformers and newly added TypeScript syntax enter through the
 same evidence and compatibility process. A proper compiler is one with a truthful,
 useful and dependable supported contract—not one that silently accepts every
 spelling it can erase.
+
+
+## Post-CP75 resume campaign — provisional CP76+
+
+The numbering below is a **game plan, not a promise of feature order**. Each
+implementation checkpoint must be selected by evidence from the preceding one.
+A future agent should stop and reassess when a step reveals a different blocker.
+
+### Phase A — reconcile what already exists
+
+76. **External semantic rebaseline.** Run the frozen 579-case suite on CP75,
+    classify the 24 skips again, and add a machine-readable report that separates
+    “still unsupported”, “now implemented but not promoted”, “syntax/reference
+    mismatch”, and “harness/config issue”. No compiler changes unless a genuine
+    regression is uncovered.
+77. **CP43-CP75 external evidence expansion.** Add representative black-box cases
+    for already-implemented generics/inference, overloads, classes, CFG narrowing,
+    collection/index behavior, advanced types, bounded JSX contracts and
+    cross-module declaration/type flow. Update `feature-matrix.json` and preserve
+    the 579-case result as a named historical baseline rather than overwriting its
+    meaning.
+78. **Compatibility-gap inventory.** Produce a versioned CP75 matrix against
+    pinned TypeScript 7.0.2 covering language syntax, semantic families, libs,
+    module resolution, tsconfig, declarations, source maps, JSX, diagnostics,
+    projects and incremental/watch. Each row must link to tests/evidence and say
+    supported/partial/planned/intentional divergence.
+
+### Phase B — let real projects choose the next compiler slices
+
+79. **TCP6B real-project expansion.** Grow beyond the three synthetic project
+    shapes to a small pinned set of licence-compatible real packages/apps. Record
+    acquisition/install rules, exact revisions, expected runtime/typecheck result,
+    and failure stage. Reduce the top blockers into fixtures.
+80. **Evidence decision gate.** Rank blockers by real projects unlocked,
+    architectural leverage, TypeScript commonality and regression risk. Select
+    the next 2-3 vertical slices only here.
+
+Likely high-leverage candidates, subject to CP79-80 evidence:
+
+- broader declaration-file and standard-library semantics, including commonly
+  used generic/library shapes;
+- cross-module enum/namespace/runtime-bearing type facts and declaration/re-export
+  completeness;
+- practical package `exports`/conditions and tsconfig behavior needed by real
+  projects;
+- JSX cross-file namespace augmentation, spreads/component contracts and common
+  library-shaped JSX typing;
+- remaining class/function semantic diagnostics represented in the external
+  skips;
+- project references and multi-project graph ownership.
+
+### Phase C — compiler-service and compatibility closure
+
+81. **Semantic incremental reuse.** Reuse parsed/bound/typed units and add
+    dependency-directed invalidation; prove clean/incremental diagnostics and
+    output are equivalent.
+82. **Watch/cancellation service.** Add a bounded long-running compiler service,
+    cancellation and repeated edit/recovery tests without retained graph growth.
+83. **Declaration/source-map compatibility expansion.** Broaden declaration emit
+    toward the supported public semantic surface and move rewritten source maps
+    from line-only toward edit-owned column fidelity where evidence requires it.
+84. **Diagnostic compatibility campaign.** Stabilize categories/codes/ordering and
+    improve attribution for promoted semantic families without chasing byte-for-
+    byte `tsc` wording unnecessarily.
+85. **Project/config ecosystem closure.** Add the selected project-reference,
+    config inheritance/options and package-resolution semantics required by the
+    retained real-project corpus.
+
+### Phase D — broad conformance and release decision
+
+86. **Language-version inventory refresh.** Reconcile the pinned TypeScript 7.0.2
+    syntax/type surface, including decorators and newer syntax explicitly rather
+    than assuming parser acceptance equals support.
+87. **Large differential campaign.** Expand generated/minimized semantic
+    comparisons and real-project builds, separating `tsc --noCheck` syntax/emit
+    compatibility from full checked `tsc` semantics.
+88. **Cross-platform and package hardening.** Full compiler/regression/hardening
+    gates on supported Linux/macOS/Windows packaging, plus reproducible archives
+    and upgrade/install checks.
+89. **Production-transpiler decision.** Decide whether the fast emit/project
+    subset independently earns a production label while the checker continues.
+90. **Production type-checking compiler decision.** Only after the documented
+    compatibility matrix, real projects, diagnostics, incremental service,
+    platforms and semantic corpus support the claim. This is not synonymous with
+    “all known tests pass”; the promised TypeScript version/scope must be explicit.
+
+### Resume checklist
+
+Before writing compiler code after a pause:
+
+```text
+[ ] confirm HEAD is e4c45dc or document the newer baseline
+[ ] read HANDOVER.md + docs/handover/{ROADMAP,TESTING,ARCHITECTURE}.md
+[ ] restore regression oracles with npm ci in tscc-regression-suite
+[ ] run make -j2 && make test
+[ ] run focused CP74/CP75 JSX/type-parser tests
+[ ] run test-hardening + test-sanitize
+[ ] run memory-safety-checkpoint-5 + RSS
+[ ] run valgrind-memory-safety-checkpoint-73 when on the Linux validation host
+[ ] run package-test and git diff --check
+[ ] run/reconcile the external suite before selecting a new feature
+[ ] update website/support claims only after the evidence is retained
+```
+
+The trajectory to a broadly compliant TypeScript→JavaScript compiler is therefore
+**not short**, but the project has crossed the architectural middle. Future work
+should be measured in compatibility campaigns and ecosystem closure rather than
+foundational rewrites.
 
 ## Reconciliation findings to resolve
 
