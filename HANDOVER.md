@@ -8,6 +8,8 @@ This is the entry point for developers and coding agents working on tscc. Read
 
 - Product/executable: `tscc`.
 - Current CLI version: `0.15.0`.
+- CP53 uses vendored Jsonic++ commit `88e4736` for typed JSONC configuration;
+  regex extraction must not return.
 - Current positioning: experimental standalone TypeScript-to-JavaScript compiler
   written in C++17.
 - Current default target: `es2022`; default module mode: `preserve`.

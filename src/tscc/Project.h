@@ -17,11 +17,17 @@ ResolutionResult resolve_relative_module(const std::filesystem::path& importer,
                                          const std::string& specifier);
 ResolutionResult resolve_module(const std::filesystem::path& importer,
                                 const std::string& specifier,
-                                const std::string& mode);
+                                const std::string& mode,
+                                const std::string& base_url="",
+                                const std::vector<std::pair<std::string,std::vector<std::string>>>& paths={},
+                                const std::vector<std::string>& root_dirs={});
 bool discover_module_dependencies(const std::filesystem::path&,const SourceFile&,
                                   const std::vector<Token>&,
                                   std::vector<std::filesystem::path>&,Diagnostics&,
-                                  const std::string& module_resolution="relative");
+                                  const std::string& module_resolution="relative",
+                                  const std::string& base_url="",
+                                  const std::vector<std::pair<std::string,std::vector<std::string>>>& paths={},
+                                  const std::vector<std::string>& root_dirs={});
 
 struct ProgramFile {
     struct ExportFact { std::string name; std::size_t file; std::size_t symbol; bool type_only=false; };
@@ -34,7 +40,10 @@ struct ProgramFile {
 class ProgramGraph {
 public:
     bool build(const std::vector<std::string>& roots,bool follow_imports,
-               const std::string& module_resolution="relative");
+               const std::string& module_resolution="relative",
+               const std::string& base_url="",
+               const std::vector<std::pair<std::string,std::vector<std::string>>>& paths={},
+               const std::vector<std::string>& root_dirs={});
     std::vector<ProgramFile>& files(){return files_;}
     const std::vector<ProgramFile>& files()const{return files_;}
     const std::vector<std::size_t>& roots()const{return roots_;}
