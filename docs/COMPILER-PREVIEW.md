@@ -29,13 +29,19 @@ primitive/literal/union expressions, assignments and bounded narrowing;
 canonical callable variables and contextual callbacks; structural object types,
 methods, inheritance, index and call signatures; and bounded arrays and tuples.
 Every promoted family needs positive runtime output and negative diagnostic
-cases. Generics, overloads, class semantics, declaration libraries, broad
-control-flow analysis and cross-module type propagation remain excluded until
-separately earned.
+cases. Generic substitution/inference, overloads, class relationships, CFG-owned
+flow, declaration libraries and bounded cross-module propagation have since
+entered the checked surface. Their remaining limits are enumerated in
+`docs/COMPATIBILITY.md`; none implies full TypeScript parity.
 
 Runtime-bearing enum, namespace and parameter-property transforms, TS erasure,
 TSX preserve and current ESM/CommonJS behavior belong to a separate emitted-code
 matrix. A syntax feature being emitted does not imply it is semantically checked.
+
+CP68–70 add CLI-only line source maps, bounded declaration/declaration-map emit,
+and incremental output retention. Column-exact replacement maps, complete public
+declaration synthesis, semantic graph reuse and watch mode remain outside the
+preview contract.
 
 ### Diagnostics, output and operation
 

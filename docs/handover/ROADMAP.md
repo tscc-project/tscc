@@ -336,6 +336,12 @@ relevant, and handover/feature-matrix claims are reconciled.
     separately with checked `tsc` and `tsc --noCheck`; decide from retained
     evidence whether production-transpiler and production-checker milestones are
     earned, and release only under a separately authorized release process.
+    **Completed 2026-09-13:** `docs/COMPATIBILITY.md` freezes the CP72 syntax,
+    semantic, configuration, resolution, output and platform matrix. The retained
+    decision is to continue under the **Compiler Preview** designation: neither a
+    production-transpiler nor production-checker claim is yet earned, and no
+    release/publish action is authorized by this checkpoint. See
+    `docs/evidence/cp72-release-decision.md`.
 
 This program intentionally does not promise that CP70 equals complete `tsc`
 compatibility. Decorators, project references, every historical module-resolution

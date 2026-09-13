@@ -1,6 +1,10 @@
 # tscc
 
-`tscc` is an experimental standalone TypeScript-to-JavaScript compiler written in C++17. The goal is a small native compiler with a `tsc`-familiar command line, precise diagnostics, and no JavaScript runtime dependency in the compiler itself.
+`tscc` is a compiler-preview TypeScript-to-JavaScript compiler written in C++17.
+It is a small native compiler with a `tsc`-familiar command line, precise
+diagnostics, and no JavaScript runtime dependency in the compiler itself. Its
+exact supported and partial surfaces are frozen in
+[`docs/COMPATIBILITY.md`](docs/COMPATIBILITY.md); it is not a drop-in `tsc`.
 
 ## Checkpoint 0.1
 
@@ -25,10 +29,11 @@ This is meaningful type checking, not a general TypeScript type system. The
 checker owns primitive/literal/union/nullish facts, bounded expressions and
 assignments, ordinary and variable callables, contextual callbacks, strict
 equality/`typeof` branch facts, structural objects, aliases/interfaces, methods,
-inheritance, index/call signatures, arrays and tuples. Overloads, generic
-semantics, class semantics, broad control-flow joins and definite assignment
-remain unchecked. The independent 579-case corpus records 555 passes, no
-failures, and 24 explicit semantic skips.
+inheritance, index/call signatures, arrays and tuples. Later bounded checkpoints
+add generic substitution/inference, overload resolution, two-sided class types,
+CFG-owned narrowing, richer collections and advanced type operators. The
+independent 579-case corpus records 555 passes, no failures, and 24 explicit
+semantic skips; the skips remain product limits, not hidden successes.
 
 Static default, namespace, and named value imports now have binder-owned root
 symbols. This identity protects ordinary CommonJS live reads from supported local
@@ -52,6 +57,8 @@ claims.
 tscc app.ts
 tscc --outDir dist src/a.ts src/b.ts
 tscc --target es2022 --removeComments app.ts
+tscc --sourceMap --declaration --outDir dist app.ts
+tscc --incremental --outDir dist app.ts
 tscc --noEmit app.ts
 tscc --pretty false app.ts
 tscc --version
