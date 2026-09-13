@@ -39,6 +39,13 @@ lowering, module behavior, emission, runtime semantics, error behavior, and
 diagnostics. Implement narrow complete semantic slices rather than accumulating
 grammar productions without end-to-end meaning.
 
+
+## Known-issue status
+
+At this handover point there are **zero known open correctness defects within the currently claimed and certified surface**. This is deliberately narrower than saying there are zero known issues.
+
+Known unsupported or incomplete behavior remains tracked separately and must not be described as a bug-free or fully compliant implementation. Unknown defects may still exist and broader external evidence can expose new correctness bugs; when that happens, reduce and fix them before expanding the affected claim.
+
 ## Current architecture map
 
 - `Source`: source text and offset→line/column ownership.
