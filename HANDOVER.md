@@ -627,3 +627,13 @@ The focused evidence is `docs/evidence/cp58-overload-resolution.md` and
 `tests/overload_resolution.sh`. The full pinned aggregate remains 555/0/24.
 Method and constructor overloads intentionally remain for CP59-CP60 because they
 require canonical class symbols and instance/static type ownership first.
+
+## CP59 canonical class types (2026-09-13)
+
+Classes now have canonical semantic records and genuinely separate value/static
+and instance types. Fields, methods, constructors, constructor overloads,
+parameter properties and modifiers are retained; construction checks arguments,
+and `this` resolves to the owning instance shape. See
+`docs/evidence/cp59-class-types.md` and `tests/class_types.sh`. The full pinned
+aggregate remains 555/0/24 and ASan/UBSan passes. Inheritance and enforcement of
+the retained relationship/modifier facts begin only in CP60.

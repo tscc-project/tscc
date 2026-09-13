@@ -75,6 +75,37 @@ struct TypeModel {
     // the same ordered public overload surface. When overload declarations are
     // present, the implementation signature is deliberately excluded.
     std::vector<std::vector<FunctionSignature>> overload_sets;
+    enum class Accessibility { Public, Protected, Private };
+    struct ClassMember {
+        std::string name;
+        TypeId type = 0;
+        std::size_t begin_token = 0;
+        std::size_t end_token = 0;
+        Accessibility accessibility = Accessibility::Public;
+        bool is_static = false;
+        bool readonly = false;
+        bool abstract_member = false;
+        bool override_member = false;
+        bool method = false;
+    };
+    struct ClassInfo {
+        std::string name;
+        std::size_t symbol = static_cast<std::size_t>(-1);
+        std::size_t declaration_token = 0;
+        std::size_t body_begin_token = 0;
+        std::size_t body_end_token = 0;
+        TypeId instance_type = 0;
+        TypeId static_type = 0;
+        FunctionSignature constructor;
+        std::vector<FunctionSignature> constructor_overloads;
+        std::vector<ClassMember> members;
+        std::vector<FunctionSignature::TypeParameter> type_parameters;
+        std::string base_name;
+        std::vector<std::string> implements_names;
+        bool abstract_class = false;
+    };
+    std::vector<ClassInfo> classes;
+    std::vector<std::size_t> symbol_classes;
 };
 
 TypeModel build_type_model(const std::vector<Token>&, const Program&,
