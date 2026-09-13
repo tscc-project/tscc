@@ -30,7 +30,7 @@ public:
     ExpressionResult run() {
         ExpressionResult result;
         result.type = type(root_, expected_);
-        result.complete = expressions_.node(root_).kind != ExpressionKind::Unknown;
+        result.complete = expressions_.supported(root_);
         result.error_token = error_token_;
         result.error = error_;
         if (!result.complete) result.type = types_.store.unknown();
