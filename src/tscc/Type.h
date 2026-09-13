@@ -6,6 +6,7 @@
 #include <cstddef>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace tscc {
@@ -77,6 +78,20 @@ struct TypeModel {
     std::vector<std::vector<FunctionSignature>> overload_sets;
     enum class Accessibility { Public, Protected, Private };
     struct ClassMember {
+        ClassMember() = default;
+        ClassMember(std::string member_name, TypeId member_type,
+                    std::size_t begin, std::size_t end,
+                    Accessibility member_accessibility, bool member_static,
+                    bool member_readonly, bool member_abstract,
+                    bool member_override, bool member_method,
+                    bool member_declaration_only = false,
+                    std::vector<FunctionSignature> member_overloads = {})
+            : name(std::move(member_name)), type(member_type), begin_token(begin),
+              end_token(end), accessibility(member_accessibility),
+              is_static(member_static), readonly(member_readonly),
+              abstract_member(member_abstract), override_member(member_override),
+              method(member_method), declaration_only(member_declaration_only),
+              overloads(std::move(member_overloads)) {}
         std::string name;
         TypeId type = 0;
         std::size_t begin_token = 0;
@@ -87,6 +102,8 @@ struct TypeModel {
         bool abstract_member = false;
         bool override_member = false;
         bool method = false;
+        bool declaration_only = false;
+        std::vector<FunctionSignature> overloads;
     };
     struct ClassInfo {
         std::string name;
@@ -101,11 +118,16 @@ struct TypeModel {
         std::vector<ClassMember> members;
         std::vector<FunctionSignature::TypeParameter> type_parameters;
         std::string base_name;
+        TypeId declared_base_type = 0;
         std::vector<std::string> implements_names;
+        std::vector<TypeId> implements_types;
+        std::size_t base_class = static_cast<std::size_t>(-1);
         bool abstract_class = false;
     };
+    struct SemanticIssue { std::size_t token = 0; std::string message; };
     std::vector<ClassInfo> classes;
     std::vector<std::size_t> symbol_classes;
+    std::vector<SemanticIssue> class_issues;
 };
 
 TypeModel build_type_model(const std::vector<Token>&, const Program&,

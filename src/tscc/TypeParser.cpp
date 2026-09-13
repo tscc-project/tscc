@@ -133,7 +133,8 @@ private:
             }
             const bool readonly = take("readonly");
             noise();
-            if (cursor >= end || tokens[cursor].kind != TokenKind::Identifier) return store.unknown();
+            if (cursor >= end || (tokens[cursor].kind != TokenKind::Identifier &&
+                                  tokens[cursor].kind != TokenKind::Keyword)) return store.unknown();
             auto name = tokens[cursor++].text;
             const bool optional = take("?");
             noise();

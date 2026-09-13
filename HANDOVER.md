@@ -637,3 +637,14 @@ and `this` resolves to the owning instance shape. See
 `docs/evidence/cp59-class-types.md` and `tests/class_types.sh`. The full pinned
 aggregate remains 555/0/24 and ASan/UBSan passes. Inheritance and enforcement of
 the retained relationship/modifier facts begin only in CP60.
+
+## CP60 class relationships (2026-09-13)
+
+The class graph now resolves inheritance and generic base applications before
+final annotation typing. Inherited instance/static members, `super`, implemented
+interfaces, visibility, readonly, abstract obligations, override compatibility,
+method/constructor overload surfaces and deterministic base cycles are checked.
+See `docs/evidence/cp60-class-relationships.md` and
+`tests/class_relationships.sh`. The full pinned aggregate remains 555/0/24 and
+ASan/UBSan passes. CP61 is next and should replace remaining range-discovered
+expression roots rather than expanding this class scanner sideways.

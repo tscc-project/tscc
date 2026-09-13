@@ -929,9 +929,12 @@ SyntaxNode Parser::parse_class() {
     std::size_t open = i_;
     std::size_t implements_index = tokens_.size();
     bool derived = false;
+    int header_angle_depth = 0;
     while (open < tokens_.size() && tokens_[open].text != "{") {
-        if (tokens_[open].text == "implements") implements_index = open;
-        if (tokens_[open].text == "extends") derived = true;
+        if (tokens_[open].text == "<") ++header_angle_depth;
+        else if (tokens_[open].text == ">" && header_angle_depth) --header_angle_depth;
+        else if (!header_angle_depth && tokens_[open].text == "implements") implements_index = open;
+        else if (!header_angle_depth && tokens_[open].text == "extends") derived = true;
         ++open;
     }
     if (open >= tokens_.size()) {

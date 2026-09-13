@@ -6,7 +6,7 @@ static bool id0(unsigned char c){return std::isalpha(c)||c=='_'||c=='$'||c>=128;
 static bool idc(unsigned char c){return id0(c)||std::isdigit(c);}
 Lexer::Lexer(const SourceFile&s,Diagnostics&d):s_(s),d_(d){}
 void Lexer::fail(std::size_t p,const std::string&m){auto [l,c]=s_.line_col(p);d_.error(s_.path,l,c,m,s_.line_text(l));}
-std::vector<Token> Lexer::lex(){std::vector<Token> v; static const std::unordered_set<std::string> kws={"interface","type","enum","namespace","declare","abstract","implements","public","private","protected","readonly","as","satisfies","keyof","typeof","infer","extends","function","class","const","let","var","return","export","import","from","async","await","new","this","static","get","set"};
+std::vector<Token> Lexer::lex(){std::vector<Token> v; static const std::unordered_set<std::string> kws={"interface","type","enum","namespace","declare","abstract","implements","public","private","protected","readonly","as","satisfies","keyof","typeof","infer","extends","function","class","const","let","var","return","export","import","from","async","await","new","this","static"};
  while(i_<s_.text.size()){unsigned char c=s_.text[i_];if(std::isspace(c)){++i_;continue;}std::size_t b=i_;
   if(id0(c)){++i_;while(i_<s_.text.size()&&idc((unsigned char)s_.text[i_]))++i_;auto x=s_.text.substr(b,i_-b);v.push_back({kws.count(x)?TokenKind::Keyword:TokenKind::Identifier,x,b,i_});continue;}
   if(std::isdigit(c)){++i_;while(i_<s_.text.size()&&(std::isalnum((unsigned char)s_.text[i_])||s_.text[i_]=='.'||s_.text[i_]=='_'))++i_;v.push_back({TokenKind::Number,s_.text.substr(b,i_-b),b,i_});continue;}
