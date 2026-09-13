@@ -240,4 +240,15 @@ valgrind-memory-safety-checkpoint-5: $(MEMORY_LIFETIME)
 	mkdir -p .build/memory-safety
 	python3 scripts/memory_safety.py --project tscc --mode valgrind --output .build/memory-safety/checkpoint-5-valgrind.json --iterations 1 --command './$(MEMORY_LIFETIME) 40'
 
-.PHONY: memory-safety-checkpoint-5 memory-safety-checkpoint-5-rss valgrind-memory-safety-checkpoint-5
+# CP73: bounded Valgrind workload over the real tscc binary on temporary
+# fixtures, covering the compiler-facing paths added in CP66-CP72 (JSX
+# semantic contracts, enums/namespaces/parameter properties, source maps,
+# declaration and declaration-map emit, incremental output handling,
+# project graph construction and repeated compiler lifetimes).
+checkpoint73-valgrind-integration: tscc
+	mkdir -p .build/memory-safety
+	python3 scripts/checkpoint73_valgrind_integration.py --tscc "$(CURDIR)/tscc" --rounds 3 --output .build/memory-safety/checkpoint-73-valgrind-integration.json
+
+valgrind-memory-safety-checkpoint-73: valgrind-memory-safety-checkpoint-5 checkpoint73-valgrind-integration
+
+.PHONY: memory-safety-checkpoint-5 memory-safety-checkpoint-5-rss valgrind-memory-safety-checkpoint-5 checkpoint73-valgrind-integration valgrind-memory-safety-checkpoint-73
